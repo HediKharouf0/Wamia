@@ -1,0 +1,1592 @@
+[
+  {
+    "user": "0x743d7b30661d65b41960bf6b5d1bb93cf7972a73",
+    "collateral": "248007038780",
+    "borrowShares": "205946313530635619",
+    "borrowAssets": "209361338537",
+    "maxBorrow": "220343525253",
+    "liquidatable": false,
+    "healthFactor": 1.0524556577290851,
+    "borderline": false
+  },
+  {
+    "user": "0x5388a7f24e86c9c9d855a98c2f5a339afa6a3acc",
+    "collateral": "85336091069",
+    "borrowShares": "35350787902233",
+    "borrowAssets": "35936979",
+    "maxBorrow": "75817425303",
+    "liquidatable": false,
+    "healthFactor": 2109.732854923615,
+    "borderline": false
+  },
+  {
+    "user": "0xd8dd2706ef4ef9cd0fb7f54a1c5413aedd93121f",
+    "collateral": "4174761",
+    "borrowShares": "910000000000",
+    "borrowAssets": "925090",
+    "maxBorrow": "3709094",
+    "liquidatable": false,
+    "healthFactor": 4.009441243554681,
+    "borderline": false
+  },
+  {
+    "user": "0x448f9a22ef1db0beed84ef53ad08d320dc66fa61",
+    "collateral": "598890951228",
+    "borrowShares": "497127321570078385",
+    "borrowAssets": "505370742902",
+    "maxBorrow": "532088702340",
+    "liquidatable": false,
+    "healthFactor": 1.0528680376006274,
+    "borderline": false
+  },
+  {
+    "user": "0x08780ea469c28d137bb5fa8ddf894677dd6e200b",
+    "collateral": "190589747",
+    "borrowShares": "134062374384421",
+    "borrowAssets": "136285412",
+    "maxBorrow": "169330744",
+    "liquidatable": false,
+    "healthFactor": 1.242471527326784,
+    "borderline": false
+  },
+  {
+    "user": "0x0ba3d908c6cc8f90b5d142d68e6c18dc988334c7",
+    "collateral": "312118",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "277302",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x0c81fe3949c82177124839d43860d8418eea82da",
+    "collateral": "4424309904",
+    "borrowShares": "3742903725864206",
+    "borrowAssets": "3804968978",
+    "maxBorrow": "3930807954",
+    "liquidatable": false,
+    "healthFactor": 1.0330722738418079,
+    "borderline": false
+  },
+  {
+    "user": "0x0ca6cadb6a8ca4199788b9a060c3285fe7b897fd",
+    "collateral": "635532495763",
+    "borrowShares": "547027645443967073",
+    "borrowAssets": "556098519577",
+    "maxBorrow": "564643129558",
+    "liquidatable": false,
+    "healthFactor": 1.0153652809352909,
+    "borderline": false
+  },
+  {
+    "user": "0x0fb0a99f84e1c552f88a14af35c35512baf9cbc0",
+    "collateral": "39538678665",
+    "borrowShares": "32789341350422033",
+    "borrowAssets": "33333057908",
+    "maxBorrow": "35128405563",
+    "liquidatable": false,
+    "healthFactor": 1.0538608746894809,
+    "borderline": false
+  },
+  {
+    "user": "0x10525dac7bd08248fc1b2feddde291423f1d5a1a",
+    "collateral": "138693043181",
+    "borrowShares": "117088221538665337",
+    "borrowAssets": "119029791639",
+    "maxBorrow": "123222769050",
+    "liquidatable": false,
+    "healthFactor": 1.0352262853968248,
+    "borderline": false
+  },
+  {
+    "user": "0x11a4e3c8ce7effc73f9a3c46586b6b30064fdc8a",
+    "collateral": "153298011",
+    "borrowShares": "96512723589942",
+    "borrowAssets": "98113109",
+    "maxBorrow": "136198650",
+    "liquidatable": false,
+    "healthFactor": 1.3881799423968921,
+    "borderline": false
+  },
+  {
+    "user": "0x15ec5c169e10749ed99774fadea87668c7fe189b",
+    "collateral": "76332179576",
+    "borrowShares": "51292662000424949",
+    "borrowAssets": "52143202709",
+    "maxBorrow": "67817839447",
+    "liquidatable": false,
+    "healthFactor": 1.3006074794729579,
+    "borderline": false
+  },
+  {
+    "user": "0x160f2f8d3bf76014b96fbc9b521db4535057d5f4",
+    "collateral": "5081122704",
+    "borrowShares": "3862355132708756",
+    "borrowAssets": "3926401142",
+    "maxBorrow": "4514357714",
+    "liquidatable": false,
+    "healthFactor": 1.1497443971556383,
+    "borderline": false
+  },
+  {
+    "user": "0x172e2d9b8409de2c148d74f1de79154666b827d2",
+    "collateral": "2374444",
+    "borrowShares": "1120051717987",
+    "borrowAssets": "1138625",
+    "maxBorrow": "2109590",
+    "liquidatable": false,
+    "healthFactor": 1.8527522230760787,
+    "borderline": false
+  },
+  {
+    "user": "0x186b12ceaf08fde22e32647fcc800e45876f5bd0",
+    "collateral": "712262467",
+    "borrowShares": "582047702468650",
+    "borrowAssets": "591699284",
+    "maxBorrow": "632814388",
+    "liquidatable": false,
+    "healthFactor": 1.069486485976549,
+    "borderline": false
+  },
+  {
+    "user": "0x19066ed8b2b652d13fffa223437ff9ed89e32290",
+    "collateral": "13799838239",
+    "borrowShares": "9753012311556256",
+    "borrowAssets": "9914737863",
+    "maxBorrow": "12260559298",
+    "liquidatable": false,
+    "healthFactor": 1.236599440894366,
+    "borderline": false
+  },
+  {
+    "user": "0x1929d726442305465f7d0996be32c71ba2b5f45a",
+    "collateral": "228823716340",
+    "borrowShares": "198919941537424875",
+    "borrowAssets": "202218454451",
+    "maxBorrow": "203299973129",
+    "liquidatable": false,
+    "healthFactor": 1.0053482689348814,
+    "borderline": false
+  },
+  {
+    "user": "0x19a65a5f90eb10357031dabd2ae6110a9009f323",
+    "collateral": "9359",
+    "borrowShares": "7665252348",
+    "borrowAssets": "7793",
+    "maxBorrow": "8314",
+    "liquidatable": false,
+    "healthFactor": 1.0668548697549083,
+    "borderline": false
+  },
+  {
+    "user": "0x19c7fa90d7cca8f659a6be93abfd1a3f547f6737",
+    "collateral": "632992523558",
+    "borrowShares": "526927748852935236",
+    "borrowAssets": "535665324233",
+    "maxBorrow": "562386474132",
+    "liquidatable": false,
+    "healthFactor": 1.0498840389514872,
+    "borderline": false
+  },
+  {
+    "user": "0x19e01184e507ef1e9d200c6974a9fbda550ea9d4",
+    "collateral": "48722366219",
+    "borrowShares": "42121687688905831",
+    "borrowAssets": "42820154267",
+    "maxBorrow": "43287714671",
+    "liquidatable": false,
+    "healthFactor": 1.0109191667336035,
+    "borderline": false
+  },
+  {
+    "user": "0x1d0bd166aedf7bfe09d78576f0067239566de537",
+    "collateral": "7252620331",
+    "borrowShares": "5703240862442880",
+    "borrowAssets": "5797812646",
+    "maxBorrow": "6443639417",
+    "liquidatable": false,
+    "healthFactor": 1.111391452334281,
+    "borderline": false
+  },
+  {
+    "user": "0x1f667cd456e69acd4421f869fd5c61bf0b0cc3af",
+    "collateral": "7403544250",
+    "borrowShares": "6207364234722835",
+    "borrowAssets": "6310295449",
+    "maxBorrow": "6577728791",
+    "liquidatable": false,
+    "healthFactor": 1.0423804787210684,
+    "borderline": false
+  },
+  {
+    "user": "0x1fa07980b500b22fa326f772a7ed7b0493eba057",
+    "collateral": "38655484386",
+    "borrowShares": "31193886665672138",
+    "borrowAssets": "31711147214",
+    "maxBorrow": "34343725653",
+    "liquidatable": false,
+    "healthFactor": 1.0830174456078256,
+    "borderline": false
+  },
+  {
+    "user": "0x1dc1c3886b99f30e1b4dc827b8cac5e48379f00b",
+    "collateral": "140190563578",
+    "borrowShares": "114277196096404170",
+    "borrowAssets": "116172153455",
+    "maxBorrow": "124553251141",
+    "liquidatable": false,
+    "healthFactor": 1.0721437748784304,
+    "borderline": false
+  },
+  {
+    "user": "0x2156f29d64f81701b58877129006e8b1964149b6",
+    "collateral": "909792404617",
+    "borrowShares": "764014673494968015",
+    "borrowAssets": "776683651007",
+    "maxBorrow": "808311194182",
+    "liquidatable": false,
+    "healthFactor": 1.0407212680915758,
+    "borderline": false
+  },
+  {
+    "user": "0x22dd352e2a8ff6b908264f2d1bdb93ebaeba695d",
+    "collateral": "334917243899",
+    "borrowShares": "279441165328273404",
+    "borrowAssets": "284074890259",
+    "maxBorrow": "297559482794",
+    "liquidatable": false,
+    "healthFactor": 1.0474684422924732,
+    "borderline": false
+  },
+  {
+    "user": "0x240d6ce8edf36fdc534c920238512b9c0ca96606",
+    "collateral": "61111167517",
+    "borrowShares": "51499984533665814",
+    "borrowAssets": "52353963088",
+    "maxBorrow": "54294628689",
+    "liquidatable": false,
+    "healthFactor": 1.0370681699442315,
+    "borderline": false
+  },
+  {
+    "user": "0x2424618d727e17a38cad7d531dfc90540dcdb566",
+    "collateral": "1400000000000",
+    "borrowShares": "662962298391338542",
+    "borrowAssets": "673955614019",
+    "maxBorrow": "1243839436460",
+    "liquidatable": false,
+    "healthFactor": 1.8455806444620462,
+    "borderline": false
+  },
+  {
+    "user": "0x28b82dd1f1858135e92882fd0ae2a6935f37354b",
+    "collateral": "10000000",
+    "borrowShares": "5004831734882",
+    "borrowAssets": "5087823",
+    "maxBorrow": "8884566",
+    "liquidatable": false,
+    "healthFactor": 1.7462411723049327,
+    "borderline": false
+  },
+  {
+    "user": "0x2a691723fa94b2e38c1cda37dc64c7298f73378d",
+    "collateral": "2892077550157",
+    "borrowShares": "2317879207491789153",
+    "borrowAssets": "2356314542013",
+    "maxBorrow": "2569485792991",
+    "liquidatable": false,
+    "healthFactor": 1.090468079357473,
+    "borderline": false
+  },
+  {
+    "user": "0x2e26f6b308a91b9c1cd7cfead4bbef40bba42bf8",
+    "collateral": "369589",
+    "borrowShares": "306645699221",
+    "borrowAssets": "311731",
+    "maxBorrow": "328363",
+    "liquidatable": false,
+    "healthFactor": 1.0533536927671614,
+    "borderline": false
+  },
+  {
+    "user": "0x304856144a8cc390cd59c76f7df2dcd8174ba549",
+    "collateral": "404889034215",
+    "borrowShares": "326546260639764227",
+    "borrowAssets": "331961087575",
+    "maxBorrow": "359726391533",
+    "liquidatable": false,
+    "healthFactor": 1.0836402367543363,
+    "borderline": false
+  },
+  {
+    "user": "0x32d082ac5868f43e0849ffe5b69a969db138136b",
+    "collateral": "538477879",
+    "borrowShares": "366902327178566",
+    "borrowAssets": "372986343",
+    "maxBorrow": "478414300",
+    "liquidatable": false,
+    "healthFactor": 1.2826590275451453,
+    "borderline": false
+  },
+  {
+    "user": "0x330244b68dc9e6e26ba01c679167d336b41fb658",
+    "collateral": "24282865158",
+    "borrowShares": "20040486785677406",
+    "borrowAssets": "20372800399",
+    "maxBorrow": "21574275223",
+    "liquidatable": false,
+    "healthFactor": 1.0589744561606256,
+    "borderline": false
+  },
+  {
+    "user": "0x333ce40167da1db3809e8b229aa3f139ba8af943",
+    "collateral": "63503488337",
+    "borrowShares": "52830269624818206",
+    "borrowAssets": "53706307117",
+    "maxBorrow": "56420102246",
+    "liquidatable": false,
+    "healthFactor": 1.0505302873103517,
+    "borderline": false
+  },
+  {
+    "user": "0x35a59349adcf1b3dd3b38696f3c92573c767c9c5",
+    "collateral": "3117772184277",
+    "borrowShares": "2396257013903845665",
+    "borrowAssets": "2435992018053",
+    "maxBorrow": "2770005711930",
+    "liquidatable": false,
+    "healthFactor": 1.1371160871635224,
+    "borderline": false
+  },
+  {
+    "user": "0x3976747b82316020a15662761c82860b9785e7f3",
+    "collateral": "1644885640545",
+    "borrowShares": "1329165407303611678",
+    "borrowAssets": "1351205778044",
+    "maxBorrow": "1461409734412",
+    "liquidatable": false,
+    "healthFactor": 1.0815597136710966,
+    "borderline": false
+  },
+  {
+    "user": "0x3ae35c3e3eb8611076e9c58cb1858d3dda966321",
+    "collateral": "38966208082",
+    "borrowShares": "17593900448367688",
+    "borrowAssets": "17885644491",
+    "maxBorrow": "34619790215",
+    "liquidatable": false,
+    "healthFactor": 1.9356188272902646,
+    "borderline": false
+  },
+  {
+    "user": "0x3c60b1a4abb27492e076a7d78604f1880262e10e",
+    "collateral": "248056139899",
+    "borrowShares": "205636213037067442",
+    "borrowAssets": "209046095922",
+    "maxBorrow": "220387149472",
+    "liquidatable": false,
+    "healthFactor": 1.0542514487055124,
+    "borderline": false
+  },
+  {
+    "user": "0x3d571578cb2a539f4dfeae518ff018827a943000",
+    "collateral": "1855770893",
+    "borrowShares": "1539953177246971",
+    "borrowAssets": "1565488855",
+    "maxBorrow": "1648772158",
+    "liquidatable": false,
+    "healthFactor": 1.0531995502452811,
+    "borderline": false
+  },
+  {
+    "user": "0x46ef4e0c99af23ae475b9e2da926d4def32d2b18",
+    "collateral": "359217566825",
+    "borrowShares": "299136496206680328",
+    "borrowAssets": "304096811336",
+    "maxBorrow": "319149268489",
+    "liquidatable": false,
+    "healthFactor": 1.0494988983503952,
+    "borderline": false
+  },
+  {
+    "user": "0x484280e12f97905d2883a71f1596e1bc650e4809",
+    "collateral": "81556469744",
+    "borrowShares": "70434825061996850",
+    "borrowAssets": "71602783278",
+    "maxBorrow": "72459395261",
+    "liquidatable": false,
+    "healthFactor": 1.0119633894631466,
+    "borderline": false
+  },
+  {
+    "user": "0x4fccedc858998a44a39e8bedd6acb527d650df66",
+    "collateral": "631672",
+    "borrowShares": "486693356302",
+    "borrowAssets": "494764",
+    "maxBorrow": "561212",
+    "liquidatable": false,
+    "healthFactor": 1.1343024148887146,
+    "borderline": false
+  },
+  {
+    "user": "0x51cd245699780ad2be18fdf254d6c519adf971a6",
+    "collateral": "49968306926",
+    "borrowShares": "41474872656271262",
+    "borrowAssets": "42162613674",
+    "maxBorrow": "44394679091",
+    "liquidatable": false,
+    "healthFactor": 1.052939446170445,
+    "borderline": false
+  },
+  {
+    "user": "0x52ba6aa7aab685ec8cc98ebe547cc43f3e15353d",
+    "collateral": "443784",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "394282",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x548b3100036f4772efdabb455a15f196adcfbc57",
+    "collateral": "753914213091",
+    "borrowShares": "424030459092785594",
+    "borrowAssets": "431061780005",
+    "maxBorrow": "669820164249",
+    "liquidatable": false,
+    "healthFactor": 1.5538843741637929,
+    "borderline": false
+  },
+  {
+    "user": "0x57bb84bfc9e8be9ba7e0bc33d7fae85254e447e8",
+    "collateral": "82854207009",
+    "borrowShares": "43090989272692893",
+    "borrowAssets": "43805528919",
+    "maxBorrow": "73612378680",
+    "liquidatable": false,
+    "healthFactor": 1.6804357919320025,
+    "borderline": false
+  },
+  {
+    "user": "0x581bef12967f06f2ebfcabb7504fa61f0326cd9a",
+    "collateral": "16477826",
+    "borrowShares": "5912498445195",
+    "borrowAssets": "6010541",
+    "maxBorrow": "14639835",
+    "liquidatable": false,
+    "healthFactor": 2.4356933926579987,
+    "borderline": false
+  },
+  {
+    "user": "0x5938a148185b7e4f269a8fc9de6cacedd35875f7",
+    "collateral": "82678294683",
+    "borrowShares": "69197276714605854",
+    "borrowAssets": "70344713764",
+    "maxBorrow": "73456088189",
+    "liquidatable": false,
+    "healthFactor": 1.0442303942757998,
+    "borderline": false
+  },
+  {
+    "user": "0x5ad696000e0a85f65a5ab530c5975838aac16d25",
+    "collateral": "40819239691",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "36266128638",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x5bb6aa1002466242b0bc0c63ece2cc1f747680f9",
+    "collateral": "2629639",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "2336319",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x5d09098fb0b897ee15d1e94be01988ea05ca4c17",
+    "collateral": "3990530188733",
+    "borrowShares": "3165598392978942019",
+    "borrowAssets": "3218090702673",
+    "maxBorrow": "3545413443666",
+    "liquidatable": false,
+    "healthFactor": 1.1017133360228537,
+    "borderline": false
+  },
+  {
+    "user": "0x5e204cf45560a495988b5bccfd7347682c473131",
+    "collateral": "350041906533",
+    "borrowShares": "255854204806544853",
+    "borrowAssets": "260096808096",
+    "maxBorrow": "310997091256",
+    "liquidatable": false,
+    "healthFactor": 1.1956974540849155,
+    "borderline": false
+  },
+  {
+    "user": "0x5ee5782f665c3a7277d0d8b59b264ec2afe699b0",
+    "collateral": "4798515",
+    "borrowShares": "3387455821",
+    "borrowAssets": "3444",
+    "maxBorrow": "4263272",
+    "liquidatable": false,
+    "healthFactor": 1237.883855981417,
+    "borderline": false
+  },
+  {
+    "user": "0x5b6da20793743f2fb4f8ac37bf63a20510ab1722",
+    "collateral": "340332965",
+    "borrowShares": "249378861954004",
+    "borrowAssets": "253514091",
+    "maxBorrow": "302371115",
+    "liquidatable": false,
+    "healthFactor": 1.1927191652632831,
+    "borderline": false
+  },
+  {
+    "user": "0x5bb45fd793045d2dcc9ce917985f57fa8ed61a36",
+    "collateral": "2243002",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "1992809",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x5d8604fcbda7ef027d79eab8300aa8c85d247c84",
+    "collateral": "435980975991",
+    "borrowShares": "377753735815735153",
+    "borrowAssets": "384017690881",
+    "maxBorrow": "387350236774",
+    "liquidatable": false,
+    "healthFactor": 1.0086781051293616,
+    "borderline": false
+  },
+  {
+    "user": "0x614d98a57a5d879d717152de0690ed2b04562ade",
+    "collateral": "14790000792967",
+    "borrowShares": "12797918865868782276",
+    "borrowAssets": "13010135400357",
+    "maxBorrow": "13140275893985",
+    "liquidatable": false,
+    "healthFactor": 1.0100030083948572,
+    "borderline": false
+  },
+  {
+    "user": "0x6554874f13f5e953aee06ff38b501cf233e8f438",
+    "collateral": "909821386530",
+    "borrowShares": "780197507621259457",
+    "borrowAssets": "793134830715",
+    "maxBorrow": "808336943357",
+    "liquidatable": false,
+    "healthFactor": 1.0191671227303125,
+    "borderline": false
+  },
+  {
+    "user": "0x66424fccd3cc06ad7623d838be5e235b85d0636d",
+    "collateral": "3098220060178",
+    "borrowShares": "2506751785191132908",
+    "borrowAssets": "2548319026104",
+    "maxBorrow": "2752634495488",
+    "liquidatable": false,
+    "healthFactor": 1.0801765663133505,
+    "borderline": false
+  },
+  {
+    "user": "0x66661127b1134a519b19fea615beac89adc26666",
+    "collateral": "5191933168",
+    "borrowShares": "4310718446395762",
+    "borrowAssets": "4382199267",
+    "maxBorrow": "4612808017",
+    "liquidatable": false,
+    "healthFactor": 1.052623976215913,
+    "borderline": false
+  },
+  {
+    "user": "0x67bae74fcaad3a08e590c855127dfa842235fb35",
+    "collateral": "566349485",
+    "borrowShares": "26165987312",
+    "borrowAssets": "26600",
+    "maxBorrow": "503177016",
+    "liquidatable": false,
+    "healthFactor": 18916.42917293233,
+    "borderline": false
+  },
+  {
+    "user": "0x68f4c229bf058141032bb4c7a796155701acf2c7",
+    "collateral": "1478430374",
+    "borrowShares": "1116790899065445",
+    "borrowAssets": "1135309652",
+    "maxBorrow": "1313521430",
+    "liquidatable": false,
+    "healthFactor": 1.1569719571097243,
+    "borderline": false
+  },
+  {
+    "user": "0x6ff00fb7b4eec164fa511e29e8ca1338aa5941c7",
+    "collateral": "164901132863",
+    "borrowShares": "120991868897518076",
+    "borrowAssets": "122998169718",
+    "maxBorrow": "146507522979",
+    "liquidatable": false,
+    "healthFactor": 1.1911357975073962,
+    "borderline": false
+  },
+  {
+    "user": "0x6b28fb12ee41baa9d1df16971de53adde6d1be5b",
+    "collateral": "3251337096687",
+    "borrowShares": "2707366642004197282",
+    "borrowAssets": "2752260501106",
+    "maxBorrow": "2888672358633",
+    "liquidatable": false,
+    "healthFactor": 1.0495635705530717,
+    "borderline": false
+  },
+  {
+    "user": "0x6b673fae290e3ab7ce114d040b51c88a17d054f3",
+    "collateral": "81459596700",
+    "borrowShares": "19681861661602292",
+    "borrowAssets": "20008228513",
+    "maxBorrow": "72373327751",
+    "liquidatable": false,
+    "healthFactor": 3.617178187662975,
+    "borderline": false
+  },
+  {
+    "user": "0x6d6f128afaad6c7df831ee4e35b7af1a2b047d60",
+    "collateral": "68765189073",
+    "borrowShares": "49531780777331032",
+    "borrowAssets": "50353122355",
+    "maxBorrow": "61094895731",
+    "liquidatable": false,
+    "healthFactor": 1.2133288438454375,
+    "borderline": false
+  },
+  {
+    "user": "0x6fd772caa97a3b22f8231755e6f60202b9f2d342",
+    "collateral": "24435250659",
+    "borrowShares": "18426797613848382",
+    "borrowAssets": "18732352851",
+    "maxBorrow": "21709663148",
+    "liquidatable": false,
+    "healthFactor": 1.1589394733636496,
+    "borderline": false
+  },
+  {
+    "user": "0x769cc002d504032bd18be5fc2b379e8dace9d56d",
+    "collateral": "3102242",
+    "borrowShares": "1982472037167",
+    "borrowAssets": "2015346",
+    "maxBorrow": "2756206",
+    "liquidatable": false,
+    "healthFactor": 1.3676093335834145,
+    "borderline": false
+  },
+  {
+    "user": "0x775305ca70a7ccf792241a9ad9afe42ec6f59569",
+    "collateral": "15898382613",
+    "borrowShares": "11736538905871321",
+    "borrowAssets": "11931155519",
+    "maxBorrow": "14125025192",
+    "liquidatable": false,
+    "healthFactor": 1.1838773846763064,
+    "borderline": false
+  },
+  {
+    "user": "0x78cc562d740f44cca18aa74126c6dd23f8cfcd38",
+    "collateral": "30321083",
+    "borrowShares": "9869625506124",
+    "borrowAssets": "10033285",
+    "maxBorrow": "26938969",
+    "liquidatable": false,
+    "healthFactor": 2.6849600106047022,
+    "borderline": false
+  },
+  {
+    "user": "0x79de5c3d4962d192a4b570f21f562573ce959215",
+    "collateral": "500000",
+    "borrowShares": "295841847157",
+    "borrowAssets": "300748",
+    "maxBorrow": "444227",
+    "liquidatable": false,
+    "healthFactor": 1.4770738292523973,
+    "borderline": false
+  },
+  {
+    "user": "0x7e92c848924c07a9218f0e7ea66fd743064bf10a",
+    "collateral": "147544826241",
+    "borrowShares": "111337711424932595",
+    "borrowAssets": "113183925917",
+    "maxBorrow": "131087195374",
+    "liquidatable": false,
+    "healthFactor": 1.1581785515209007,
+    "borderline": false
+  },
+  {
+    "user": "0x82fcfffe80d80365a5f2f42a6ea87d1e815bec4c",
+    "collateral": "706204875836",
+    "borrowShares": "608502734896179586",
+    "borrowAssets": "618592995898",
+    "maxBorrow": "627432481989",
+    "liquidatable": false,
+    "healthFactor": 1.014289664043428,
+    "borderline": false
+  },
+  {
+    "user": "0x8346be295553e22b86d6e7b8deddeee70011c261",
+    "collateral": "559255",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "496873",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0x83e5e5be3243aaad557fc1898cdb4d034071f69a",
+    "collateral": "8105850297",
+    "borrowShares": "6400619630894118",
+    "borrowAssets": "6506755428",
+    "maxBorrow": "7201697332",
+    "liquidatable": false,
+    "healthFactor": 1.1068031389361144,
+    "borderline": false
+  },
+  {
+    "user": "0x85593464c9dd38ec4625ef44e60cd6e8045aa067",
+    "collateral": "108243958234",
+    "borrowShares": "52865796008831742",
+    "borrowAssets": "53742422603",
+    "maxBorrow": "96170074292",
+    "liquidatable": false,
+    "healthFactor": 1.789462953734274,
+    "borderline": false
+  },
+  {
+    "user": "0x85741362792f94ed2b04562ef8188d72281cf379",
+    "collateral": "28991784692",
+    "borrowShares": "21873388760676219",
+    "borrowAssets": "22236095761",
+    "maxBorrow": "25757946523",
+    "liquidatable": false,
+    "healthFactor": 1.158384403442667,
+    "borderline": false
+  },
+  {
+    "user": "0x85c220d2ddb6578571a56da980971f2c8b91897a",
+    "collateral": "50452309308",
+    "borrowShares": "43137644872003941",
+    "borrowAssets": "43852958167",
+    "maxBorrow": "44824694268",
+    "liquidatable": false,
+    "healthFactor": 1.0221589635367232,
+    "borderline": false
+  },
+  {
+    "user": "0x875b981bee0e5059ddf72b2b418434b7009f0167",
+    "collateral": "268047730365",
+    "borrowShares": "206915671069306155",
+    "borrowAssets": "210346770072",
+    "maxBorrow": "238148812772",
+    "liquidatable": false,
+    "healthFactor": 1.1321724250412002,
+    "borderline": false
+  },
+  {
+    "user": "0x8b9aacc893c40457596e6c1d381196acfd3c318b",
+    "collateral": "706054",
+    "borrowShares": "238906971195",
+    "borrowAssets": "242869",
+    "maxBorrow": "627298",
+    "liquidatable": false,
+    "healthFactor": 2.5828656600883604,
+    "borderline": false
+  },
+  {
+    "user": "0x8e0ad9293c99025a87d101dbad4a846610303fc2",
+    "collateral": "803388866",
+    "borrowShares": "572435029176272",
+    "borrowAssets": "581927212",
+    "maxBorrow": "713776252",
+    "liquidatable": false,
+    "healthFactor": 1.2265730786963096,
+    "borderline": false
+  },
+  {
+    "user": "0x8b5d23413856df2eb337df31094d6bc75a4ec550",
+    "collateral": "149937959",
+    "borrowShares": "94676807146588",
+    "borrowAssets": "96246749",
+    "maxBorrow": "133213389",
+    "liquidatable": false,
+    "healthFactor": 1.3840819600046959,
+    "borderline": false
+  },
+  {
+    "user": "0x8e6ed79c48944265fe5d004010c11cb28aa105b4",
+    "collateral": "708844959320",
+    "borrowShares": "539430814201722925",
+    "borrowAssets": "548375716822",
+    "maxBorrow": "629778081955",
+    "liquidatable": false,
+    "healthFactor": 1.1484426874420166,
+    "borderline": false
+  },
+  {
+    "user": "0x92c9b0f425704a01e6833a5537e3f78f40b30cf7",
+    "collateral": "2172443514",
+    "borrowShares": "1782821247722519",
+    "borrowAssets": "1812384191",
+    "maxBorrow": "1930122082",
+    "liquidatable": false,
+    "healthFactor": 1.064962987199219,
+    "borderline": false
+  },
+  {
+    "user": "0x93e22ecd5b8a4da8c0e97d7158c060612e7115a3",
+    "collateral": "6628256696052",
+    "borrowShares": "5599780882934950784",
+    "borrowAssets": "5692637081300",
+    "maxBorrow": "5888919338239",
+    "liquidatable": false,
+    "healthFactor": 1.0344800229025273,
+    "borderline": false
+  },
+  {
+    "user": "0x9591dd1e7e106f0689c9af5bfb62a017bc2330b6",
+    "collateral": "828135",
+    "borrowShares": "433846446890",
+    "borrowAssets": "441041",
+    "maxBorrow": "735761",
+    "liquidatable": false,
+    "healthFactor": 1.66823719336751,
+    "borderline": false
+  },
+  {
+    "user": "0x97b73b8eaa8662381383a67e0dbcab67f78337dd",
+    "collateral": "335665903306",
+    "borrowShares": "280639772210456652",
+    "borrowAssets": "285293372575",
+    "maxBorrow": "298224634290",
+    "liquidatable": false,
+    "healthFactor": 1.0453261903642732,
+    "borderline": false
+  },
+  {
+    "user": "0x9805baf75c001b0697af2a19722084690f076dff",
+    "collateral": "753034",
+    "borrowShares": "21534864271",
+    "borrowAssets": "21892",
+    "maxBorrow": "669037",
+    "liquidatable": false,
+    "healthFactor": 30.560798465192764,
+    "borderline": false
+  },
+  {
+    "user": "0x98727799952e3eb323787ae7002b58e14516d899",
+    "collateral": "141981877",
+    "borrowShares": "87373881577908",
+    "borrowAssets": "88822726",
+    "maxBorrow": "126144754",
+    "liquidatable": false,
+    "healthFactor": 1.4201855727778496,
+    "borderline": false
+  },
+  {
+    "user": "0x9e66591cb495aa0b96f4d0d1062ddba4173b2c36",
+    "collateral": "27666644501",
+    "borrowShares": "22833192067253290",
+    "borrowAssets": "23211814635",
+    "maxBorrow": "24580616788",
+    "liquidatable": false,
+    "healthFactor": 1.058970062208581,
+    "borderline": false
+  },
+  {
+    "user": "0x9fd7300a6580e10bca57636cc0483fdb2d8dd9fe",
+    "collateral": "77314181624",
+    "borrowShares": "24629609246702232",
+    "borrowAssets": "25038020206",
+    "maxBorrow": "68690305786",
+    "liquidatable": false,
+    "healthFactor": 2.743439985304404,
+    "borderline": false
+  },
+  {
+    "user": "0x9ab02ef948d35fcdad668ca7cd540d197ebe738b",
+    "collateral": "340891604",
+    "borrowShares": "278262868422144",
+    "borrowAssets": "282877055",
+    "maxBorrow": "302867443",
+    "liquidatable": false,
+    "healthFactor": 1.0706681141034928,
+    "borderline": false
+  },
+  {
+    "user": "0x9b9b3655adfd8e1bef3b80848b0e7054ac0a0003",
+    "collateral": "415637",
+    "borrowShares": "103913560758",
+    "borrowAssets": "105637",
+    "maxBorrow": "369274",
+    "liquidatable": false,
+    "healthFactor": 3.4956880638412677,
+    "borderline": false
+  },
+  {
+    "user": "0x9f09502a0b68edbccdff5e6c59270ad150def363",
+    "collateral": "1352140836821",
+    "borrowShares": "1161918705274083973",
+    "borrowAssets": "1181185772332",
+    "maxBorrow": "1201318640347",
+    "liquidatable": false,
+    "healthFactor": 1.0170446245515232,
+    "borderline": false
+  },
+  {
+    "user": "0xa15ebcb0db4be44b98d5c3143ffe66e0f359bb19",
+    "collateral": "376716",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "334695",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0xa212fbeee277a6cf1fde900a8dee508dbd0d423e",
+    "collateral": "2994189404",
+    "borrowShares": "1877858700850913",
+    "borrowAssets": "1908997566",
+    "maxBorrow": "2660207757",
+    "liquidatable": false,
+    "healthFactor": 1.3935102927208238,
+    "borderline": false
+  },
+  {
+    "user": "0xa41380c27a3e707424cd68a05ecce79a7cb0f72a",
+    "collateral": "562197765358",
+    "borrowShares": "442204504238071623",
+    "borrowAssets": "449537189217",
+    "maxBorrow": "499488394029",
+    "liquidatable": false,
+    "healthFactor": 1.111116957640378,
+    "borderline": false
+  },
+  {
+    "user": "0xaa34d20be3f9623ccf5bff53ef4dfa765c3f5dd5",
+    "collateral": "12470069319297",
+    "borrowShares": "10830469631551108756",
+    "borrowAssets": "11010061700869",
+    "maxBorrow": "11079117139101",
+    "liquidatable": false,
+    "healthFactor": 1.0062720300855852,
+    "borderline": false
+  },
+  {
+    "user": "0xafab849fe0d58c8c6b540af9debe3de6e5f91bf3",
+    "collateral": "145299518",
+    "borrowShares": "91154229425445",
+    "borrowAssets": "92665760",
+    "maxBorrow": "129092335",
+    "liquidatable": false,
+    "healthFactor": 1.3930963820940983,
+    "borderline": false
+  },
+  {
+    "user": "0xb1c9f2643f55a564baf02945c37af1a1e307506a",
+    "collateral": "5",
+    "borrowShares": "2403557",
+    "borrowAssets": "3",
+    "maxBorrow": "3",
+    "liquidatable": false,
+    "healthFactor": 1,
+    "borderline": true
+  },
+  {
+    "user": "0xb27010bbabb7902a0f6c0fd5b8ec55e14bf31f9b",
+    "collateral": "2477035542",
+    "borrowShares": "1877691834525100",
+    "borrowAssets": "1908827933",
+    "maxBorrow": "2200738923",
+    "liquidatable": false,
+    "healthFactor": 1.1529268222417615,
+    "borderline": false
+  },
+  {
+    "user": "0xb2e540947f0b946e6a2f590ddafca900a1bc65b6",
+    "collateral": "11940212191",
+    "borrowShares": "9882671822860178",
+    "borrowAssets": "10046547402",
+    "maxBorrow": "10608362001",
+    "liquidatable": false,
+    "healthFactor": 1.0559211614218988,
+    "borderline": false
+  },
+  {
+    "user": "0xb4f2ca4ff42f2f058638e49d156621e4162ec94d",
+    "collateral": "7320503798",
+    "borrowShares": "6008352921656315",
+    "borrowAssets": "6107984108",
+    "maxBorrow": "6503950941",
+    "liquidatable": false,
+    "healthFactor": 1.0648277444732344,
+    "borderline": false
+  },
+  {
+    "user": "0xb572b56d4d2e110354ae94b5bed1f518019bf5d7",
+    "collateral": "196041877567",
+    "borrowShares": "163739573868776405",
+    "borrowAssets": "166454721956",
+    "maxBorrow": "174174727510",
+    "liquidatable": false,
+    "healthFactor": 1.0463790120417291,
+    "borderline": false
+  },
+  {
+    "user": "0xb64037d051727b0b596dabee2a858ae9282951c1",
+    "collateral": "552746863709",
+    "borrowShares": "390902538882012525",
+    "borrowAssets": "397384528884",
+    "maxBorrow": "491091676757",
+    "liquidatable": false,
+    "healthFactor": 1.235809753681563,
+    "borderline": false
+  },
+  {
+    "user": "0xb7f15fa70d9c72743cd91a7e42cd20f6de899023",
+    "collateral": "633679",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "562995",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0xbc2aa17bd790fed49e59668ef51538460d408733",
+    "collateral": "26392809834",
+    "borrowShares": "21349354963528441",
+    "borrowAssets": "21703372377",
+    "maxBorrow": "23448869792",
+    "liquidatable": false,
+    "healthFactor": 1.0804251700924496,
+    "borderline": false
+  },
+  {
+    "user": "0xbf67add12b5fbce5437f43c85b4d1d4a6a1d09ad",
+    "collateral": "2281579340",
+    "borrowShares": "1613538952008561",
+    "borrowAssets": "1640294837",
+    "maxBorrow": "2027084542",
+    "liquidatable": false,
+    "healthFactor": 1.2358049883930715,
+    "borderline": false
+  },
+  {
+    "user": "0xc225df5d608bc221096c9fc154dc31e72c6e441c",
+    "collateral": "27722399042",
+    "borrowShares": "22009932357337904",
+    "borrowAssets": "22374903539",
+    "maxBorrow": "24630152286",
+    "liquidatable": false,
+    "healthFactor": 1.1007936746216156,
+    "borderline": false
+  },
+  {
+    "user": "0xc287ae93fa1fdd10179b38829796cbac570e6245",
+    "collateral": "7846356389",
+    "borrowShares": "6510259860562636",
+    "borrowAssets": "6618213725",
+    "maxBorrow": "6971148219",
+    "liquidatable": false,
+    "healthFactor": 1.053327757105638,
+    "borderline": false
+  },
+  {
+    "user": "0xc765f9c82902f71c4fb97d42a0b58c7457aaab0a",
+    "collateral": "10339865529",
+    "borrowShares": "8198201041207200",
+    "borrowAssets": "8334144536",
+    "maxBorrow": "9186523223",
+    "liquidatable": false,
+    "healthFactor": 1.1022754865023137,
+    "borderline": false
+  },
+  {
+    "user": "0xcb6967aaafbcc1e91616fcb3e7d7b262e08e580a",
+    "collateral": "63178025298",
+    "borrowShares": "50518568381957552",
+    "borrowAssets": "51356272983",
+    "maxBorrow": "56130942416",
+    "liquidatable": false,
+    "healthFactor": 1.0929714941460125,
+    "borderline": false
+  },
+  {
+    "user": "0xd115b816a6a40de1fca0cfc48287c0a2072bf27a",
+    "collateral": "312593",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "277724",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0xd2fd02920941e13c6803d164598e06605840ee00",
+    "collateral": "693438",
+    "borrowShares": "168763887830",
+    "borrowAssets": "171563",
+    "maxBorrow": "616089",
+    "liquidatable": false,
+    "healthFactor": 3.5910365288552892,
+    "borderline": false
+  },
+  {
+    "user": "0xd38dc26240a4f0a2ab9f4a52e156e149fcd27abf",
+    "collateral": "5362585452",
+    "borrowShares": "4175444458627975",
+    "borrowAssets": "4244682150",
+    "maxBorrow": "4764425190",
+    "liquidatable": false,
+    "healthFactor": 1.1224456912515817,
+    "borderline": false
+  },
+  {
+    "user": "0xd5efcd1bcb9336f4e02598e10554c696dae4ae2b",
+    "collateral": "2396358380025",
+    "borrowShares": "1988073115777449349",
+    "borrowAssets": "2021039568477",
+    "maxBorrow": "2129060754976",
+    "liquidatable": false,
+    "healthFactor": 1.053448328367169,
+    "borderline": false
+  },
+  {
+    "user": "0xdcf40e472777516d4a9e2d0b09171c0edb870b23",
+    "collateral": "10",
+    "borrowShares": "1743518",
+    "borrowAssets": "2",
+    "maxBorrow": "8",
+    "liquidatable": false,
+    "healthFactor": 4,
+    "borderline": false
+  },
+  {
+    "user": "0xe5f9a10234b938e058cf7c8d1f1062b7d471c417",
+    "collateral": "647922",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "575650",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0xe619f71960885a2b46132b4ff127954864f2e7e2",
+    "collateral": "39744111143",
+    "borrowShares": "28479152602739906",
+    "borrowAssets": "28951397125",
+    "maxBorrow": "35310923433",
+    "liquidatable": false,
+    "healthFactor": 1.2196621558725553,
+    "borderline": false
+  },
+  {
+    "user": "0xe7e2b1d0cdb8a8a73a5ab582da756b4db460ab5a",
+    "collateral": "580844617643",
+    "borrowShares": "456898152923625273",
+    "borrowAssets": "464474489643",
+    "maxBorrow": "516055315628",
+    "liquidatable": false,
+    "healthFactor": 1.1110520106812445,
+    "borderline": false
+  },
+  {
+    "user": "0xea10235745949aedeb4642298d54a15af6eaeed0",
+    "collateral": "134048866171",
+    "borrowShares": "78748465542416839",
+    "borrowAssets": "80054281483",
+    "maxBorrow": "119096618682",
+    "liquidatable": false,
+    "healthFactor": 1.4876983026484458,
+    "borderline": false
+  },
+  {
+    "user": "0xeae43e21a658b41d741139854cafde9ef7a580ab",
+    "collateral": "812337635277",
+    "borrowShares": "703063035428155476",
+    "borrowAssets": "714721306001",
+    "maxBorrow": "721726847484",
+    "liquidatable": false,
+    "healthFactor": 1.009801780671962,
+    "borderline": false
+  },
+  {
+    "user": "0xf3887cd60d8ccabb4c096addb5912ff531fefef3",
+    "collateral": "469714810984",
+    "borrowShares": "350345212602902668",
+    "borrowAssets": "356154676445",
+    "maxBorrow": "417321289850",
+    "liquidatable": false,
+    "healthFactor": 1.1717417106958745,
+    "borderline": false
+  },
+  {
+    "user": "0xf91d1dfd587700b9cb888fa203a1157dd44b3095",
+    "collateral": "1283152608",
+    "borrowShares": "840419322673989",
+    "borrowAssets": "854355251",
+    "maxBorrow": "1140025583",
+    "liquidatable": false,
+    "healthFactor": 1.3343694928609973,
+    "borderline": false
+  },
+  {
+    "user": "0xfe7d4810141e052a0c538b8a973355fed2233fc3",
+    "collateral": "184951178",
+    "borrowShares": "153912721691425",
+    "borrowAssets": "156464920",
+    "maxBorrow": "164321120",
+    "liquidatable": false,
+    "healthFactor": 1.0502106159003564,
+    "borderline": false
+  },
+  {
+    "user": "0xa1d9769c9aa6e76651a9514e6e998767009e930e",
+    "collateral": "148800789423",
+    "borrowShares": "123507209167817290",
+    "borrowAssets": "125555219645",
+    "maxBorrow": "132203064328",
+    "liquidatable": false,
+    "healthFactor": 1.0529475771839385,
+    "borderline": false
+  },
+  {
+    "user": "0xa6509ac4efd0dea91d82c935d73cb93def068aeb",
+    "collateral": "39487714342",
+    "borrowShares": "27917259271477232",
+    "borrowAssets": "28380186415",
+    "maxBorrow": "35083125966",
+    "liquidatable": false,
+    "healthFactor": 1.2361837745877964,
+    "borderline": false
+  },
+  {
+    "user": "0xa81366d43ca9d191dd6dd3e7fa29c3932505ceb6",
+    "collateral": "46244462210",
+    "borrowShares": "38364530874402114",
+    "borrowAssets": "39000695854",
+    "maxBorrow": "41086204152",
+    "liquidatable": false,
+    "healthFactor": 1.0534736176453658,
+    "borderline": false
+  },
+  {
+    "user": "0xaed11b115004b131660c9498e206be9830dc075d",
+    "collateral": "99556246",
+    "borrowShares": "46351226922481",
+    "borrowAssets": "47119829",
+    "maxBorrow": "88451417",
+    "liquidatable": false,
+    "healthFactor": 1.8771591255138045,
+    "borderline": false
+  },
+  {
+    "user": "0xae6e63e83b22b16254c9a7e102da7b1d5d397cbe",
+    "collateral": "226294031688",
+    "borrowShares": "184537286560215129",
+    "borrowAssets": "187597304666",
+    "maxBorrow": "201052457749",
+    "liquidatable": false,
+    "healthFactor": 1.0717235948936243,
+    "borderline": false
+  },
+  {
+    "user": "0xae6c0b005137278123c360e1cfafef3e9aeaba33",
+    "collateral": "2699",
+    "borrowShares": "2235656809",
+    "borrowAssets": "2273",
+    "maxBorrow": "2397",
+    "liquidatable": false,
+    "healthFactor": 1.0545534535855696,
+    "borderline": false
+  },
+  {
+    "user": "0xb40ed256089c75e668af759007937b34b18da3ea",
+    "collateral": "1208400",
+    "borrowShares": "121851270544",
+    "borrowAssets": "123872",
+    "maxBorrow": "1073610",
+    "liquidatable": false,
+    "healthFactor": 8.667091836734693,
+    "borderline": false
+  },
+  {
+    "user": "0xb7637b89e4cd1fd280d519c2727d25afa4a73c8d",
+    "collateral": "175674461253",
+    "borrowShares": "128591083948166213",
+    "borrowAssets": "130723395810",
+    "maxBorrow": "156079159203",
+    "liquidatable": false,
+    "healthFactor": 1.1939649994240766,
+    "borderline": false
+  },
+  {
+    "user": "0xb7e3a19dc8102774424ace4e196e014e0d8e64d7",
+    "collateral": "6608755886",
+    "borrowShares": "4239033475858809",
+    "borrowAssets": "4309325608",
+    "maxBorrow": "5871593711",
+    "liquidatable": false,
+    "healthFactor": 1.362531923811871,
+    "borderline": false
+  },
+  {
+    "user": "0xb91e4243e4dd43216d84786b3897fe1f0755d59d",
+    "collateral": "782763455461",
+    "borrowShares": "664442233989748866",
+    "borrowAssets": "675460090076",
+    "maxBorrow": "695451468087",
+    "liquidatable": false,
+    "healthFactor": 1.0295966827718135,
+    "borderline": false
+  },
+  {
+    "user": "0xbc84fe283f93e76857d6b2313d23a1eb7d37e0d1",
+    "collateral": "803181",
+    "borrowShares": "256858276814",
+    "borrowAssets": "261118",
+    "maxBorrow": "713591",
+    "liquidatable": false,
+    "healthFactor": 2.732829601942417,
+    "borderline": false
+  },
+  {
+    "user": "0xbe5c56d2201ad65cc7d2181e9d80cf8e61f0b5d5",
+    "collateral": "662230793",
+    "borrowShares": "518263988806795",
+    "borrowAssets": "526857901",
+    "maxBorrow": "588363411",
+    "liquidatable": false,
+    "healthFactor": 1.1167402251788572,
+    "borderline": false
+  },
+  {
+    "user": "0xbed03239b3180534e374729c889aee3b0d08c2ca",
+    "collateral": "762396355728",
+    "borrowShares": "631793342867765835",
+    "borrowAssets": "642269811358",
+    "maxBorrow": "677356181048",
+    "liquidatable": false,
+    "healthFactor": 1.0546287075455316,
+    "borderline": false
+  },
+  {
+    "user": "0xc264e9d897bfd41ddbc366f8c64aa8474f369858",
+    "collateral": "39743713714",
+    "borrowShares": "30977010612900111",
+    "borrowAssets": "31490674898",
+    "maxBorrow": "35310570334",
+    "liquidatable": false,
+    "healthFactor": 1.1213024315411737,
+    "borderline": false
+  },
+  {
+    "user": "0xc7086b92297ceba56f486c1e4636e89961ce55b8",
+    "collateral": "67902957238",
+    "borrowShares": "57068141647463559",
+    "borrowAssets": "58014452011",
+    "maxBorrow": "60328840045",
+    "liquidatable": false,
+    "healthFactor": 1.0398933016476855,
+    "borderline": false
+  },
+  {
+    "user": "0xc71d1bbceff9e7884b2eb93d08537c69e7f03f83",
+    "collateral": "275286688750",
+    "borrowShares": "223568112330687453",
+    "borrowAssets": "227275343993",
+    "maxBorrow": "244580314142",
+    "liquidatable": false,
+    "healthFactor": 1.0761409920010196,
+    "borderline": false
+  },
+  {
+    "user": "0xc7f2f226c5ea58705484b60921f8ab238f885b0d",
+    "collateral": "34514646156",
+    "borrowShares": "26053703690782620",
+    "borrowAssets": "26485729145",
+    "maxBorrow": "30664770017",
+    "liquidatable": false,
+    "healthFactor": 1.1577846261706155,
+    "borderline": false
+  },
+  {
+    "user": "0xcf5d882d02fc6d93cfe0f7607ae648b8ada18032",
+    "collateral": "5233653836",
+    "borrowShares": "4127825913225688",
+    "borrowAssets": "4196273989",
+    "maxBorrow": "4649875026",
+    "liquidatable": false,
+    "healthFactor": 1.1080961439098251,
+    "borderline": false
+  },
+  {
+    "user": "0xcb7c2315896aaff5ff8ca301fc190977dda4b65b",
+    "collateral": "41385551191",
+    "borrowShares": "34669155260845565",
+    "borrowAssets": "35244043105",
+    "maxBorrow": "36769271907",
+    "liquidatable": false,
+    "healthFactor": 1.0432762154289732,
+    "borderline": false
+  },
+  {
+    "user": "0xcf67f96aab5e722a9e738c3b22a60e5e14d56431",
+    "collateral": "425429",
+    "borrowShares": "0",
+    "borrowAssets": "0",
+    "maxBorrow": "377974",
+    "liquidatable": false,
+    "healthFactor": null,
+    "borderline": false
+  },
+  {
+    "user": "0xd1ef620883eebc8b5571e3d86c69efc85377bb60",
+    "collateral": "757786844594",
+    "borrowShares": "625824927998037731",
+    "borrowAssets": "636202427560",
+    "maxBorrow": "673260829812",
+    "liquidatable": false,
+    "healthFactor": 1.0582493883183195,
+    "borderline": false
+  },
+  {
+    "user": "0xdb74ba9624690c23158794a1869ebc42681667f0",
+    "collateral": "2592061916",
+    "borrowShares": "1966106643500129",
+    "borrowAssets": "1998708846",
+    "maxBorrow": "2302934879",
+    "liquidatable": false,
+    "healthFactor": 1.1522112806018971,
+    "borderline": false
+  },
+  {
+    "user": "0xdc238cace6757910140a63c2d3c1c4b3db669252",
+    "collateral": "272617747",
+    "borrowShares": "211366802606221",
+    "borrowAssets": "214871711",
+    "maxBorrow": "242209074",
+    "liquidatable": false,
+    "healthFactor": 1.1272264407109411,
+    "borderline": false
+  },
+  {
+    "user": "0xde6d22b7b9ff1b05ad580e073bfc6fcc00ceb561",
+    "collateral": "15206688034",
+    "borrowShares": "1997393786318943",
+    "borrowAssets": "2030514796",
+    "maxBorrow": "13510484481",
+    "liquidatable": false,
+    "healthFactor": 6.653723729378823,
+    "borderline": false
+  },
+  {
+    "user": "0xe5f9d86522940ae8efb72c1a5d691e0a441b8ca5",
+    "collateral": "38990229959",
+    "borrowShares": "31339508356221968",
+    "borrowAssets": "31859183620",
+    "maxBorrow": "34641132613",
+    "liquidatable": false,
+    "healthFactor": 1.0873201594297475,
+    "borderline": false
+  },
+  {
+    "user": "0xe994628bfd1079e972c699f7f0369c0ff73327b7",
+    "collateral": "2877460366",
+    "borrowShares": "2350791397928477",
+    "borrowAssets": "2389772487",
+    "maxBorrow": "2556499056",
+    "liquidatable": false,
+    "healthFactor": 1.0697667120644192,
+    "borderline": false
+  },
+  {
+    "user": "0xe9c0df9bd4607850d410c957fec11ec209de5ef6",
+    "collateral": "204315929467",
+    "borrowShares": "172842373442547938",
+    "borrowAssets": "175708465179",
+    "maxBorrow": "181525864691",
+    "liquidatable": false,
+    "healthFactor": 1.0331082484049565,
+    "borderline": false
+  },
+  {
+    "user": "0xf34b1bf36728dbee1ab4737134a6133680eaaa08",
+    "collateral": "10001968",
+    "borrowShares": "69105993040",
+    "borrowAssets": "70252",
+    "maxBorrow": "8886315",
+    "liquidatable": false,
+    "healthFactor": 126.49198599328133,
+    "borderline": false
+  },
+  {
+    "user": "0xf68823ceb5eebced6323f7930bdab4f15a161b24",
+    "collateral": "15107801065",
+    "borrowShares": "9561305471651416",
+    "borrowAssets": "9719852118",
+    "maxBorrow": "13422627687",
+    "liquidatable": false,
+    "healthFactor": 1.3809497844255165,
+    "borderline": false
+  },
+  {
+    "user": "0xf991acd672d5b344afcb29931af6401ed32e2691",
+    "collateral": "7828274613489",
+    "borrowShares": "6723269008372877109",
+    "borrowAssets": "6834755013585",
+    "maxBorrow": "6955083345501",
+    "liquidatable": false,
+    "healthFactor": 1.0176053613738651,
+    "borderline": false
+  },
+  {
+    "user": "0xff52fc331812c959293891ccdc37404d903f5479",
+    "collateral": "731808853869",
+    "borrowShares": "617960441236798752",
+    "borrowAssets": "628207530992",
+    "maxBorrow": "650180508851",
+    "liquidatable": false,
+    "healthFactor": 1.0349772595439959,
+    "borderline": false
+  },
+  {
+    "user": "0xffca2d534de209ebd707019a4a8c8967e3d1b4fa",
+    "collateral": "4851992822",
+    "borrowShares": "3658585154681783",
+    "borrowAssets": "3719252227",
+    "maxBorrow": "4310785726",
+    "liquidatable": false,
+    "healthFactor": 1.1590463520343548,
+    "borderline": false
+  },
+  {
+    "user": "0xfe2016219921d095766a505b17c68f1117ae4ab8",
+    "collateral": "871181978736",
+    "borrowShares": "736925319775529154",
+    "borrowAssets": "749145098568",
+    "maxBorrow": "774007501060",
+    "liquidatable": false,
+    "healthFactor": 1.0331876996052232,
+    "borderline": false
+  }
+]
