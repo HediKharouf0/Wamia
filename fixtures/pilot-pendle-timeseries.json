@@ -1,0 +1,96 @@
+[
+  {
+    "step": "t0",
+    "block": "25829822",
+    "impliedYield": 0.10582876043473588,
+    "ptSpotPrice": 0.9709909730373762
+  },
+  {
+    "step": "manipulator-1",
+    "block": "25829823",
+    "txStatus": "success",
+    "gasUsed": "2344613",
+    "impliedYield": 0.10938421188327441,
+    "ptSpotPrice": 0.9700793069049487
+  },
+  {
+    "step": "manipulator-2",
+    "block": "25829824",
+    "txStatus": "success",
+    "gasUsed": "508065",
+    "impliedYield": 0.11154796526300914,
+    "ptSpotPrice": 0.9695264321717929
+  },
+  {
+    "step": "manipulator-3",
+    "block": "25829825",
+    "txStatus": "success",
+    "gasUsed": "1012931",
+    "impliedYield": 0.11957122966435763,
+    "ptSpotPrice": 0.9674881776134033
+  },
+  {
+    "step": "manipulator-4",
+    "block": "25829826",
+    "txStatus": "success",
+    "gasUsed": "252469",
+    "impliedYield": 0.12381087610426866,
+    "ptSpotPrice": 0.9664192102224879
+  },
+  {
+    "step": "manipulator-5",
+    "block": "25829827",
+    "txStatus": "success",
+    "gasUsed": "253697",
+    "impliedYield": 0.13181262237342795,
+    "ptSpotPrice": 0.9644149385347854
+  },
+  {
+    "step": "manipulator-6",
+    "block": "25829828",
+    "txStatus": "success",
+    "gasUsed": "254898",
+    "impliedYield": 0.13962058056761606,
+    "ptSpotPrice": 0.9624769000739385
+  },
+  {
+    "step": "manipulator-7",
+    "block": "25829829",
+    "txStatus": "success",
+    "gasUsed": "472109",
+    "impliedYield": 0.15284755212956358,
+    "ptSpotPrice": 0.9592323676340703
+  },
+  {
+    "step": "manipulator-8",
+    "block": "25829830",
+    "txStatus": "success",
+    "gasUsed": "254942",
+    "impliedYield": 0.1681507973253511,
+    "ptSpotPrice": 0.9555381686843062
+  },
+  {
+    "step": "manipulator-9",
+    "block": "25829831",
+    "txStatus": "success",
+    "gasUsed": "311507",
+    "impliedYield": 0.1875281037861536,
+    "ptSpotPrice": 0.950949066534632
+  },
+  {
+    "step": "manipulator-10",
+    "block": "25829832",
+    "txStatus": "success",
+    "gasUsed": "254471",
+    "impliedYield": 0.19493180006619326,
+    "ptSpotPrice": 0.949221379854758
+  },
+  {
+    "step": "manipulator-11",
+    "block": "25829833",
+    "txStatus": "success",
+    "gasUsed": "293064",
+    "impliedYield": 0.20368874898209866,
+    "ptSpotPrice": 0.9471957232673078
+  }
+]
