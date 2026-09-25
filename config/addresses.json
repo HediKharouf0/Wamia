@@ -1,4 +1,7 @@
 {
+  "whales": {
+  "usdc": "0x37305b1cd40574e4c5ce33f8e8306be057fd7341",
+  "usdt": "0xf977814e90da44bfa03b6295a0616a897441acec"},
   "forkBlock": 25829822,
   "morphoBlue": "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
   "morphoMarkets": {
