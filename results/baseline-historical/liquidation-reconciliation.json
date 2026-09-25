@@ -1,0 +1,8 @@
+{
+  "totalRepaidAllMarkets": "35906531949202",
+  "totalRepaidOurMarkets": "35906531949202",
+  "perMarket": {
+    "0x1e9d614631a7df0ec07fb05b2c8cb2491575fd1a63a33bf187a6afb295a4fc64": "35188279705902",
+    "0x6acd18854e43f93f5a90446004c35c72a68af1ad99f08cb247782ce6457914ca": "718252243300"
+  }
+}
