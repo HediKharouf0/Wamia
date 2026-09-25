@@ -1,0 +1,34 @@
+{
+  "forkBlock": 25829822,
+  "morphoBlue": "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+  "morphoMarkets": {
+    "usdc": {
+      "id": "0x1e9d614631a7df0ec07fb05b2c8cb2491575fd1a63a33bf187a6afb295a4fc64",
+      "loanToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "collateralToken": "0xeCfaFdC7741323a945A163ed068B5a3C43483957",
+      "oracle": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+      "irm": "0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC",
+      "lltv": "915000000000000000"
+    },
+    "usdt": {
+      "id": "0x6acd18854e43f93f5a90446004c35c72a68af1ad99f08cb247782ce6457914ca",
+      "loanToken": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      "collateralToken": "0xeCfaFdC7741323a945A163ed068B5a3C43483957",
+      "oracle": "0x217d6DdCDB95112C51657F6270e8C079CFDB51f0",
+      "irm": "0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC",
+      "lltv": "915000000000000000"
+    }
+  },
+  "pendle": {
+    "market": "0x13285bcbc27f92b47b4edb99d744c07b48c977c0",
+    "pt": "0xeCfaFdC7741323a945A163ed068B5a3C43483957",
+    "yt": "0xa8bd3b21291ace53927b35563fc80615919e63d7",
+    "sy": "0x9487bd5a3b16ecb5f3184453e3ee75b800141648",
+    "underlying": "0x5086bf358635b81d8c47c66d1c8b9e567db70c72",
+    "expiry": "2026-12-10T00:00:00.000Z",
+    "router": "0x888888888889758f76e7103c6cbf23abbf58f946"
+  },
+  "liquidationProxy": "0x51a453d677396f62fbb1dff9925a205fa96fab5e",
+  "trueLiquidationCaller": "0xbcea1aacaf365061dc29510dcf3bd544e16e566f",
+  "capitalWallet": "0xD67d8F6B6Ba0a97f043305F6b6f5a8eD1A247F44"
+}
