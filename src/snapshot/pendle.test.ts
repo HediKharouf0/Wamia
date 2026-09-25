@@ -1,8 +1,9 @@
+import { archive } from "../chain/client.js";
 import { readPendleSnapshot } from "./pendle.js";
 
 async function main() {
   const market = "0x13285bcbc27f92b47b4edb99d744c07b48c977c0" as const;
-  const snap = await readPendleSnapshot(market, 25829822n);
+  const snap = await readPendleSnapshot(archive, market, 25829822n);
 
   console.log("Pendle snapshot at fork block:");
   console.log(`  totalPt:  ${snap.totalPt.toFixed(2)}`);

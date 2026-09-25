@@ -1,4 +1,4 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, type PublicClient } from "viem";
 import { mainnet } from "viem/chains";
 import "dotenv/config";
 
@@ -15,3 +15,5 @@ export const fork = createPublicClient({
   chain: mainnet,
   transport: http("http://127.0.0.1:8545"),
 });
+
+export type Client = PublicClient;

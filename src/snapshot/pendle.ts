@@ -1,4 +1,4 @@
-import { archive } from "../chain/client.js";
+import type { Client } from "../chain/client.js";
 import { ptPriceFromYield } from "../pricing/fairValue.js";
 
 const marketAbi = [
@@ -43,29 +43,30 @@ const erc20Abi = [
 export type PendleSnapshot = {
   blockNumber: bigint;
   timestamp: number;
-  totalPt: number;          // human units
-  totalSy: number;          // human units
+  totalPt: number;
+  totalSy: number;
   lastLnImpliedRateRaw: bigint;
-  impliedYield: number;     // e.g. 0.1058 = 10.58%
-  expiry: number;           // unix seconds
-  tau: number;              // years to maturity
-  ptSpotPrice: number;      // in asset/SY terms
+  impliedYield: number;
+  expiry: number;
+  tau: number;
+  ptSpotPrice: number;
 };
 
 export async function readPendleSnapshot(
+  client: Client,
   marketAddress: `0x${string}`,
   blockNumber: bigint
 ): Promise<PendleSnapshot> {
   const [storage, expiry, [syAddr, ptAddr], blockInfo] = await Promise.all([
-    archive.readContract({ address: marketAddress, abi: marketAbi, functionName: "_storage", blockNumber }),
-    archive.readContract({ address: marketAddress, abi: marketAbi, functionName: "expiry", blockNumber }),
-    archive.readContract({ address: marketAddress, abi: marketAbi, functionName: "readTokens", blockNumber }),
-    archive.getBlock({ blockNumber }),
+    client.readContract({ address: marketAddress, abi: marketAbi, functionName: "_storage", blockNumber }),
+    client.readContract({ address: marketAddress, abi: marketAbi, functionName: "expiry", blockNumber }),
+    client.readContract({ address: marketAddress, abi: marketAbi, functionName: "readTokens", blockNumber }),
+    client.getBlock({ blockNumber }),
   ]);
 
   const [ptDecimals, syDecimals] = await Promise.all([
-    archive.readContract({ address: ptAddr, abi: erc20Abi, functionName: "decimals", blockNumber }),
-    archive.readContract({ address: syAddr, abi: erc20Abi, functionName: "decimals", blockNumber }),
+    client.readContract({ address: ptAddr, abi: erc20Abi, functionName: "decimals", blockNumber }),
+    client.readContract({ address: syAddr, abi: erc20Abi, functionName: "decimals", blockNumber }),
   ]);
 
   const [totalPtRaw, totalSyRaw, lastLnImpliedRateRaw] = storage;

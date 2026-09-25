@@ -1,3 +1,4 @@
+import { archive } from "../chain/client.js";
 import { readMorphoSnapshot } from "./morpho.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 
@@ -7,6 +8,7 @@ async function main() {
 
   for (const [name, m] of Object.entries(addresses.morphoMarkets)) {
     const snap = await readMorphoSnapshot(
+      archive,
       morphoBlue,
       m.id as `0x${string}`,
       m.oracle as `0x${string}`,

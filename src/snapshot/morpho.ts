@@ -1,4 +1,4 @@
-import { archive } from "../chain/client.js";
+import type { Client } from "../chain/client.js";
 
 const morphoBlueAbi = [
   {
@@ -33,14 +33,15 @@ export type MorphoMarketSnapshot = {
 };
 
 export async function readMorphoSnapshot(
+  client: Client,
   morphoBlue: `0x${string}`,
   marketId: `0x${string}`,
   oracleAddress: `0x${string}`,
   blockNumber: bigint
 ): Promise<MorphoMarketSnapshot> {
   const [market, oraclePrice] = await Promise.all([
-    archive.readContract({ address: morphoBlue, abi: morphoBlueAbi, functionName: "market", args: [marketId], blockNumber }),
-    archive.readContract({ address: oracleAddress, abi: oracleAbi, functionName: "price", blockNumber }),
+    client.readContract({ address: morphoBlue, abi: morphoBlueAbi, functionName: "market", args: [marketId], blockNumber }),
+    client.readContract({ address: oracleAddress, abi: oracleAbi, functionName: "price", blockNumber }),
   ]);
 
   const [totalSupplyAssets, , totalBorrowAssets, totalBorrowShares, lastUpdate] = market;

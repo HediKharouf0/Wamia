@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import addresses from "../../config/addresses.json" with { type: "json" };
+import { archive } from "../chain/client.js";
 import { readMorphoSnapshot } from "../snapshot/morpho.js";
 import { computePositionHealth } from "../health/morphoHealth.js";
 
@@ -22,7 +23,7 @@ async function main() {
   for (const [name, m] of Object.entries(addresses.morphoMarkets)) {
     const mkt = m as any;
     const positions: any[] = JSON.parse(readFileSync(`fixtures/positions-${name}-forkblock.json`, "utf8"));
-    const snap = await readMorphoSnapshot(morphoBlue, mkt.id, mkt.oracle, forkBlock);
+    const snap = await readMorphoSnapshot(archive, morphoBlue, mkt.id, mkt.oracle, forkBlock);
 
     const healths = positions.map((p) =>
       computePositionHealth(

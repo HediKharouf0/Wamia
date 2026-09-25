@@ -1,4 +1,4 @@
-import { archive } from "../chain/client.js";
+import type { Client } from "../chain/client.js";
 
 const morphoBlueAbi = [
   {
@@ -25,6 +25,7 @@ export type PositionSnapshot = {
 };
 
 export async function readPosition(
+  client: Client,
   morphoBlue: `0x${string}`,
   marketId: `0x${string}`,
   user: `0x${string}`,
@@ -32,7 +33,7 @@ export async function readPosition(
 ): Promise<PositionSnapshot> {
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      const [supplyShares, borrowShares, collateral] = await archive.readContract({
+      const [supplyShares, borrowShares, collateral] = await client.readContract({
         address: morphoBlue,
         abi: morphoBlueAbi,
         functionName: "position",
