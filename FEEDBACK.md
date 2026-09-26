@@ -1,0 +1,67 @@
+# Feedback for 1inch (Aqua, SwapVM, SDK)
+
+Things we ran into while building Levee on the deployed Aqua (v1.0.0) and
+AquaSwapVMRouter (swap-vm v1.0.2). Each item says what happened and what would
+have helped. We add to this file as we go.
+
+## SwapVM
+
+1. The README describes `main`, not the deployed release.
+   The router at `0x1111...0De` is v1.0.2, but the README documents `main`: the
+   `swap(order, amount, takerTraitsAndData)` ABI, the banked opcode numbering in
+   `OpcodeList.sol`, and `contracts/` paths. v1.0.2 uses
+   `swap(order, tokenIn, tokenOut, amount, takerTraitsAndData)`, a jump table in
+   `AquaOpcodes._opcodes()`, and `src/`. A program encoded from `main` runs the
+   wrong instruction on the deployed router without any error: `0x20` is
+   `Extruction` in v1.0.2 but `Deadline` on `main`.
+   Suggestion: a per-release section in the README with the deployed address,
+   ABI, and a table of opcode indices (or exported constants in `AquaOpcodes`).
+
+2. Opcode indices have to be counted by hand.
+   In v1.0.2 the dynamic array drops the first `_notInstruction` slot, so each
+   index is one less than its position in the static list. We counted
+   Extruction = 32 (0x20) and confirmed it with an end-to-end test.
+   Suggestion: named constants next to the table.
+
+3. The `IExtruction` ABI differs between `main` and v1.0.2.
+   v1.0.2's `SwapRegisters` has a fifth field, `amountNetPulled`; `main` has
+   four. An Extruction target compiled against `main` cannot decode the
+   registers sent by the deployed router. Nothing in the docs flags this.
+   Suggestion: version the interface, or call out struct changes in release
+   notes, since Extruction targets are external contracts that outlive a release.
+
+4. Instruction args are limited to 255 bytes, and this isn't documented.
+   `runLoop` reads the args length as one byte. For Extruction that leaves
+   235 bytes for the target's parameters after the 20-byte address, so an
+   `abi.encode`d parameter struct (288 bytes for ours) does not fit. v1.0.2
+   has no `Extruction.build` in `src/`; the only builder (`ProgramBuilder`,
+   in `test/utils`) does revert via `toUint8`.
+   Suggestion: mention the limit on `Extruction`, and ship the builders in `src/`.
+
+5. `AquaOpcodes` has no min-rate guard.
+   `RequireMinRate` / `AdjustMinRate` exist in the full opcode set but not in
+   the Aqua router, so every Extruction-priced Aqua strategy has to reimplement
+   its own price floor or ceiling.
+
+6. The v1.0.2 release pins an older Aqua.
+   `package.json` in swap-vm v1.0.2 depends on `github:1inch/aqua#0.1.0`,
+   while the deployed Aqua is tag v1.0.0. The interfaces are compatible, but it
+   takes a diff to be sure.
+
+## Aqua
+
+7. Virtual balances can promise the same tokens more than once.
+   `ship` does not check the wallet balance, so one wallet can back several
+   strategies with the same SY, and a `pull` fails if the wallet runs short.
+   This is a feature for us (one wallet backs many markets), but it deserves a
+   sentence in the README so LPs and takers know a shipped balance is an
+   allowance, not a reservation.
+
+## TypeScript SDK (`@1inch/aqua-sdk`)
+
+8. The SDK covers `ship`, `dock` and event parsing only.
+   Building a SwapVM order (maker traits, program), taker traits, and calling
+   `quote` / `swap` on the router is where the encoding work is, and there is
+   no helper for it. Its examples also use the standalone `XYCSwap` Aqua app
+   rather than the SwapVM router. We built orders and taker data in Solidity
+   with `MakerTraitsLib` / `TakerTraitsLib` instead, and skipped the SDK.
