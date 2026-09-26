@@ -40,11 +40,17 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
 ## Aqua
 
 5. A shipped balance is an allowance, not a reservation.
-   `ship` doesn't check the wallet balance, so one wallet can back several
-   strategies with the same tokens, and a `pull` fails if the wallet runs short.
-   That's a feature for us (one wallet backs Wamia on many markets), but it
-   deserves a sentence in the [Aqua README](https://github.com/1inch/aqua/blob/main/README.md) so LPs and takers know what a shipped
-   balance means.
+   `ship` doesn't check the maker's wallet balance or ERC-20 approval to Aqua,
+   so one wallet can back several strategies with the same tokens, and a `pull`
+   reverts on `safeTransferFrom` if the wallet runs short, even when the shipped
+   balance covers the amount. That's a feature for us (one wallet backs Wamia on
+   many markets), but `rawBalances` / `safeBalances` only return the shipped
+   balance, so a resolver can't tell which strategies can actually pay.
+   Suggestion: say it in the [Aqua README](https://github.com/1inch/aqua/blob/main/README.md), and add a view returning a
+   strategy's available amount per token, `min(shipped balance, wallet balance,
+   approval to Aqua)`, and 0 if docked, so resolvers can skip strategies that
+   would revert. It's a per-strategy ceiling, since several strategies can share
+   one wallet.
 
 ## TypeScript SDKs
 
