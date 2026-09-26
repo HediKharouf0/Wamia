@@ -120,6 +120,7 @@ const runs = RUNS.map((run) => {
     title: run.title,
     shippedSy: run.shippedSy,
     guards: run.guards,
+    sourceDir: run.dir,
     points: series,
     events: events.sort((a, b) => a.t - b.t),
     summary: {
@@ -144,6 +145,7 @@ const out = {
     refYield: REF_YIELD,
     duration: END_AFTER_FIRST_PUSH,
     source: "results/ (fork replays of the Aug 25, 2026 attack; adaptive attacker, arb lands one block after each push)",
+    repoBase: "https://github.com/HediKharouf0/p1nch/tree/main",
   },
   positions,
   runs,

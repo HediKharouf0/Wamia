@@ -21,6 +21,7 @@ export type Run = {
   title: string;
   shippedSy: number;
   guards: boolean;
+  sourceDir: string;
   points: Point[];
   events: ReplayEvent[];
   summary: {
@@ -38,7 +39,7 @@ export type Run = {
 export type Position = { id: string; market: string; user: string; debtUsd: number; collateralPt: number; liqPrice: number };
 
 export const replay = raw as unknown as {
-  meta: { market: string; forkBlock: number; startTimestamp: number; lltv: number; refYield: number; duration: number; source: string };
+  meta: { market: string; forkBlock: number; startTimestamp: number; lltv: number; refYield: number; duration: number; source: string; repoBase: string };
   positions: Position[];
   runs: Run[];
 };

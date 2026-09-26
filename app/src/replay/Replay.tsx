@@ -188,6 +188,18 @@ function Results({ none, run }: { none: Run; run: Run }) {
         Mainnet fork at block {replay.meta.forkBlock}. The attacker's 11 pushes are replayed with fresh slippage bounds; the searcher's arb lands one block after each push.
         Historical liquidations are skipped so the debt that could be liquidated is measured, not executed.
       </p>
+      <p className="note">
+        Measured here:{" "}
+        <a href={`${replay.meta.repoBase}/results/${none.sourceDir}`} target="_blank" rel="noreferrer">
+          {none.sourceDir}
+        </a>{" "}
+        (no backstop) and{" "}
+        <a href={`${replay.meta.repoBase}/results/${run.sourceDir}`} target="_blank" rel="noreferrer">
+          {run.sourceDir}
+        </a>{" "}
+        ({run.title}) — each folder has the raw JSON and a README with the exact command to reproduce it.
+        Full index: <a href={`${replay.meta.repoBase}/docs/MEASUREMENTS.md`} target="_blank" rel="noreferrer">docs/MEASUREMENTS.md</a>.
+      </p>
     </section>
   );
 }
