@@ -18,8 +18,8 @@ export function Architecture() {
           <div className="top">
             <span className="stage-tag">01</span>
           </div>
-          <h3>LP Wallet + Aqua</h3>
-          <p>LPs sign a standing SwapVM order for SY. Funds stay in the LP's own wallet until a fill actually happens.</p>
+          <h3>LP Wallet + 1inch Aqua</h3>
+          <p>LPs sign a standing 1inch SwapVM order for SY. Funds stay in the LP's own wallet until a fill actually happens.</p>
           <ul>
             <li>No lockup, no separate deposit</li>
             <li>Verified against the LP's live balance on every fill</li>
@@ -30,8 +30,8 @@ export function Architecture() {
           <div className="top">
             <span className="stage-tag">02</span>
           </div>
-          <h3>SwapVM extruction pipeline</h3>
-          <p>When PT dips, SwapVM evaluates the order's constraints, in order, before it prices anything:</p>
+          <h3>1inch SwapVM extruction pipeline</h3>
+          <p>When PT dips, 1inch SwapVM evaluates the order's constraints, in order, before it prices anything:</p>
           <ul>
             <li>WamiaRateGuard — NAV & Curve EMA floor</li>
             <li>WamiaQuoter — 1/(1+y)^τ fair-value discount curve</li>
@@ -46,7 +46,7 @@ export function Architecture() {
           <h3>Searcher execution</h3>
           <p>
             A zero-capital searcher calls <code>WamiaArb.arb()</code>: buy cheap PT on Pendle, sell it to Wamia via
-            SwapVM, settle both legs atomically in <code>preTransferInCallback</code>.
+            1inch SwapVM, settle both legs atomically in <code>preTransferInCallback</code>.
           </p>
           <ul>
             <li>Reverts whole if either leg fails — no partial state</li>

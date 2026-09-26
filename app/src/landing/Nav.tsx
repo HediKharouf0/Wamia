@@ -4,13 +4,13 @@ export function Nav() {
   return (
     <header className="topbar">
       <div className="brand">
-        <h1>
-          WAMIA <span className="one">// TERMINAL</span>
-        </h1>
+        <h1>WAMIA</h1>
       </div>
       <nav className="nav-links" aria-label="Sections">
-        <a href="#attack-replay">Defense Proof</a>
         <a href="#yield-model">Yield Model</a>
+        <a href="#attack-replay">Defense Proof</a>
+        <a href="#taker-comparison">Capital Comparison</a>
+        <a href="#collapse-scenarios">Collapse Scenarios</a>
         <a href="#architecture">Architecture</a>
         <a href="#extruction-specs">Guardrails</a>
       </nav>

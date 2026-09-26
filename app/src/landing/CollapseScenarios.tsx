@@ -57,7 +57,7 @@ export function CollapseScenarios() {
             heading: "Reference addresses",
             lines: [
               { k: "Curve reUSD/USDC pool", v: measurements.meta.contracts.curvePool },
-              { k: "Morpho oracle", v: measurements.meta.contracts.morphoUsdcMarket },
+              { k: "Lending oracle", v: measurements.meta.contracts.morphoUsdcMarket },
             ],
           },
         ]}

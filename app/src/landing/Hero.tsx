@@ -8,15 +8,15 @@ export function Hero() {
     <div className="hero">
       <div className="kicker">
         <span className="led" />
-        <span style={{ fontSize: 12, fontWeight: 600 }}>A standing yield strategy that also protects Morpho debt</span>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>Built on 1inch Aqua &amp; SwapVM · paid to make yield trading safe</span>
       </div>
       <h1>
-        Get paid to keep <span className="accent">Morpho borrowers</span> solvent
+        Get paid to make <span className="accent">yield trading</span> safe
       </h1>
       <p className="lede">
-        Commit SY into a standing on-chain bid and earn an annualized return every time the market needs it — while
-        the same capital absorbs manipulation dumps in the very next block, replayed against a real mainnet attack,
-        not a simulation of one.
+        Commit SY into a standing 1inch Aqua order and earn an annualized return every time the market needs it,
+        while the same capital absorbs manipulation dumps in the very next block via 1inch SwapVM, replayed against
+        a real mainnet attack, not a simulation of one.
       </p>
       <div className="ctas">
         <a className="btn primary" href="#yield-model">
@@ -31,7 +31,7 @@ export function Hero() {
           <div className="d">hold-to-maturity yield, 5M SY committed</div>
         </div>
         <div className="badge">
-          <div className="k">Morpho debt protected</div>
+          <div className="k">Yield positions protected from liquidation</div>
           <div className="v">{usd(none.eligibleDebtUsd)}</div>
           <div className="d">at risk with no backstop, $0 with it</div>
         </div>

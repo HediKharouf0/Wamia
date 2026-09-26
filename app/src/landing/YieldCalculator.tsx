@@ -46,12 +46,8 @@ export function YieldCalculator() {
         <span className="eyebrow-teal">// GROUNDED IN THE ACTUAL REPLAY, NOT A MODEL</span>
         <h2>What An LP Actually Earned</h2>
         <p>
-          This isn't a fitted curve — <code>avgPriceForCapital()</code> interpolates the real average price paid per
-          PT at each capital level from the maker sweep, then <code>yieldFromPtPrice()</code> (the same inverse of{" "}
-          <code>P = 1/(1+y)^τ</code> the pricing engine itself uses) recovers the annualized yield to maturity that
-          price implies. One event/year reproduces the measured 11.3% at 5M SY exactly. More events/year is an
-          explicit assumption you control, not a measurement — each additional Aug-25-scale event is assumed to add
-          the same yield bump, since Aqua capital never leaves your wallet between events.
+          Real prices from the maker sweep, run back through the same pricing formula the contracts use. One
+          event/year reproduces the measured 11.3% at 5M SY exactly; more events/year is a scenario you control.
         </p>
       </div>
       <div className="apy-calc">

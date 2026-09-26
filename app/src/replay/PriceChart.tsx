@@ -63,7 +63,7 @@ export function PriceChart({ run, t, showFills }: { run: Run; t: number; showFil
         className="chart"
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`Pendle spot, Morpho oracle and fair value for ${run.title}`}
+        aria-label={`Pendle spot, lending oracle and fair value for ${run.title}`}
         onPointerMove={onMove}
         onPointerLeave={() => setHover(null)}
       >
@@ -117,7 +117,7 @@ export function PriceChart({ run, t, showFills }: { run: Run; t: number; showFil
         <div className="tooltip" style={{ left: `${Math.min(70, (x(hover, dur) / W) * 100)}%`, top: 8 }}>
           <div className="muted mono">+{(hover / 60).toFixed(1)} min · block {hs.block}</div>
           <div className="row"><span><i className="sw" style={{ background: "var(--spot)" }} />Pendle spot</span><span className="mono">{hs.spot.toFixed(4)}</span></div>
-          <div className="row"><span><i className="sw" style={{ background: "var(--oracle)" }} />Morpho oracle</span><span className="mono">{oracleAt(run, hover).toFixed(4)}</span></div>
+          <div className="row"><span><i className="sw" style={{ background: "var(--oracle)" }} />Lending oracle</span><span className="mono">{oracleAt(run, hover).toFixed(4)}</span></div>
           <div className="row"><span><i className="sw" style={{ background: "var(--fair)" }} />Fair value</span><span className="mono">{hs.fair.toFixed(4)}</span></div>
         </div>
       )}

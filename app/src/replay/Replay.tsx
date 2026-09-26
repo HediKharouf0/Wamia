@@ -25,7 +25,7 @@ function Borrowers({ liquidatable }: { liquidatable: number[] }) {
   return (
     <div className="risk-gauge">
       <div className="meta">
-        <span>{replay.positions.length} Morpho borrowers tracked</span>
+        <span>{replay.positions.length} borrower positions tracked</span>
         <span className="count" style={{ color: count ? "var(--critical)" : "var(--ink-3)" }}>
           {count} liquidatable
         </span>
@@ -47,7 +47,7 @@ function Side({ run, t, withWamia }: { run: Run; t: number; withWamia: boolean }
           <div className="eyebrow">{withWamia ? "With Wamia" : "Without a backstop"}</div>
           <div className="side-title">
             <span className="dot" style={{ background: withWamia ? "var(--wamia)" : "var(--ink-3)" }} />
-            {withWamia ? `${run.title} shipped on Aqua` : "What happened on Aug 25"}
+            {withWamia ? `${run.title} shipped on 1inch Aqua` : "What happened on Aug 25"}
           </div>
         </div>
         <Counter value={now.debtAtRisk} label="debt liquidatable now" />
@@ -157,7 +157,7 @@ function Results({ none, run }: { none: Run; run: Run }) {
         <div className="v">
           {none.summary.oracleMin.toFixed(4)} → {s.oracleMin.toFixed(4)}
         </div>
-        <div className="k">lowest Morpho oracle price</div>
+        <div className="k">lowest lending oracle price</div>
       </div>
       <div className="stat">
         <div className="v">{fmtInt(s.syUsed)} SY</div>
@@ -188,7 +188,7 @@ function Results({ none, run }: { none: Run; run: Run }) {
               heading: "Target contracts",
               lines: [
                 { k: "PT-reUSD (Pendle PT)", v: measurements.meta.contracts.pendlePt },
-                { k: "Morpho Blue market", v: measurements.meta.contracts.morphoUsdcMarket },
+                { k: "Lending market", v: measurements.meta.contracts.morphoUsdcMarket },
                 { k: "Curve reUSD/USDC EMA", v: measurements.meta.contracts.curvePool },
               ],
             },
@@ -281,7 +281,7 @@ export function Replay() {
           <div>
             <div className="head">Aug 25, 2026 crisis log analysis</div>
             <div className="body">
-              PT-reUSD on Morpho was looped to ~91.5% LLTV. At block {replay.meta.forkBlock}, 11 aggressive trades
+              PT-reUSD was looped to ~91.5% LLTV on a lending market. At block {replay.meta.forkBlock}, 11 aggressive trades
               dumped millions of SY, pushing spot down and dragging the oracle TWAP toward the liquidation floor.
             </div>
           </div>
@@ -290,10 +290,10 @@ export function Replay() {
       </div>
       <div className="headline">
         <div>
-          <div className="eyebrow">Aug 25, 2026 · PT-reUSD on Morpho · replayed on a mainnet fork</div>
+          <div className="eyebrow">Aug 25, 2026 · PT-reUSD lending market · replayed on a mainnet fork</div>
           <h2>Eleven trades pushed PT down 2.5%. The oracle followed, and {usdM(none.summary.peakDebtAtRisk)} of loans became liquidatable.</h2>
           <p>
-            Left: the attack as it happened. Right: the same trades against a Wamia strategy on Aqua, filled by a searcher one block after each push. Watch the blue oracle line: it's
+            Left: the attack as it happened. Right: the same trades against a Wamia strategy on 1inch Aqua, filled by a searcher one block after each push. Watch the blue oracle line: it's
             a roughly 15-minute average, so it keeps falling after spot stops, unless someone buys the dip right away.
           </p>
         </div>
@@ -310,7 +310,7 @@ export function Replay() {
 
       <div className="legend" aria-label="Legend">
         <span><i style={{ background: "var(--spot)" }} />Pendle spot</span>
-        <span><i style={{ background: "var(--oracle)", height: 3 }} />Morpho oracle (TWAP)</span>
+        <span><i style={{ background: "var(--oracle)", height: 3 }} />Lending oracle (TWAP)</span>
         <span><i className="dash" />Fair value at 10.58%</span>
         <span><i style={{ background: "var(--critical)" }} />First liquidation price</span>
         <span><i style={{ background: "var(--wamia)", width: 8, height: 8, transform: "rotate(45deg)" }} />Wamia fill</span>

@@ -33,8 +33,8 @@ export function SecurityModules() {
     <div className="landing-section" id="extruction-specs">
       <div className="section-head">
         <span className="eyebrow-teal">// VERIFICATION MATRIX</span>
-        <h2>Extruction Specifications &amp; Security</h2>
-        <p>SwapVM order constraints, quoted verbatim from the contracts — every line below is a real require/error in the codebase, not paraphrased.</p>
+        <h2>1inch SwapVM Extruction Specifications &amp; Security</h2>
+        <p>1inch SwapVM order constraints, quoted verbatim from the contracts — every line below is a real require/error in the codebase, not paraphrased.</p>
       </div>
       <div className="module-grid">
         {MODULES.map((m) => (

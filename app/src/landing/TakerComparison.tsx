@@ -42,9 +42,9 @@ export function TakerComparison() {
         <span className="eyebrow-teal">// CAPITAL ALONE VS. THE PROTOCOL</span>
         <h2>What Capital Alone Can't Do</h2>
         <p>
-          Same replay, no Wamia contracts: a wallet with capital watches the Morpho liquidation ladder and buys
+          Same replay, no Wamia contracts: a wallet with capital watches the lending liquidation ladder and buys
           discounted PT directly on Pendle whenever the risk model says to, sized by the same average-price target
-          the real strategy uses. Even $5M of capital only gets partway there — Wamia's SwapVM standing bid gets the
+          the real strategy uses. Even $5M of capital only gets partway there — Wamia's 1inch SwapVM standing bid gets the
           debt at risk to $0 with the same 5M SY.
         </p>
       </div>
