@@ -1,7 +1,8 @@
 # 5M SY with the v2 guards: full run
 
 `run.log` is the complete console output of this run, on a MacBook against an anvil fork of mainnet at
-block 25829822:
+block 25829822. It was recorded before the project was renamed, so the output still says Levee where it now says
+P1nch. To rerun it:
 
 ```bash
 anvil --fork-url "$ARCHIVE_RPC_URL" --fork-block-number 25829822    # separate terminal
@@ -15,11 +16,11 @@ the searcher sent) and `timeseries.json` (the 77 measurements of prices, the ora
 ## Reading the log
 
 - `manip-N ok: spot ...`: the attacker's Nth push replayed, and Pendle's PT price right after it.
-- `[arb N after manip-M]`: the searcher's Nth arb after that push. Levee bought PT, the searcher bought it back on
-  Pendle in the same transaction and kept the difference. `bid now` is Levee's next price. `(26 sims, 23 ms)` is
+- `[arb N after manip-M]`: the searcher's Nth arb after that push. P1nch bought PT, the searcher bought it back on
+  Pendle in the same transaction and kept the difference. `bid now` is P1nch's next price. `(26 sims, 23 ms)` is
   the searcher's decision: how many trades it simulated to pick the size, and how long that took.
 - `[no arb ...]`: the searcher checked and there was nothing worth doing.
-- `[spend limit reached ...]`: LeveeSpendLimit refused because the strategy had paid out its 1,000,000 SY for that
+- `[spend limit reached ...]`: P1nchSpendLimit refused because the strategy had paid out its 1,000,000 SY for that
   12 s block. The searcher came back the next block and finished.
 - The summary at the end: SY used, the lowest oracle price, and the debt that was eligible for liquidation at the
   worst moment (here $0).

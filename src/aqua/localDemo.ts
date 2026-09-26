@@ -1,12 +1,12 @@
 /**
- * End-to-end Levee flow through the 1inch SDKs, on a local Anvil chain (no fork, no RPC key):
- * deploys Aqua v1.0.0, AquaSwapVMRouter v1.0.2, LeveeQuoter and mock PT/SY/market from the
+ * End-to-end P1nch flow through the 1inch SDKs, on a local Anvil chain (no fork, no RPC key):
+ * deploys Aqua v1.0.0, AquaSwapVMRouter v1.0.2, P1nchQuoter and mock PT/SY/market from the
  * Foundry build, then ships a strategy, quotes and swaps a PT sale, shows the exchange-rate and
  * market-depeg stops, and docks. Every step is a real transaction.
  *
  *   (cd contracts && forge build) && npx tsx src/aqua/localDemo.ts
  *
- * The mainnet-fork version of this flow is contracts/test/fork/LeveeFork.t.sol, and
+ * The mainnet-fork version of this flow is contracts/test/fork/P1nchFork.t.sol, and
  * scenarioMaker will reuse these helpers against the fork.
  */
 import { spawn } from "child_process";
@@ -22,15 +22,15 @@ import {
 } from "viem";
 import { ABI, SwappedEvent } from "@1inch/swap-vm-sdk";
 import {
-  buildLeveeOrder,
+  buildP1nchOrder,
   shipTx,
   dockTx,
   quoteSellPtTx,
   swapSellPtTx,
   strategyHash,
   type CallInfo,
-  type LeveeParams,
-} from "./levee.js";
+  type P1nchParams,
+} from "./p1nch.js";
 
 type Hex = `0x${string}`;
 const PORT = 8546;
@@ -92,10 +92,10 @@ async function main() {
     const [deployer, lp, taker] = (await client.request({ method: "eth_accounts" as any })) as Hex[];
     if (!deployer || !lp || !taker) throw new Error("anvil accounts missing");
 
-    // Official 1inch sources (release tags pinned in contracts/lib) and Levee.
+    // Official 1inch sources (release tags pinned in contracts/lib) and P1nch.
     const aqua = await deploy(deployer, "Aqua.sol", "Aqua");
     const router = await deploy(deployer, "AquaSwapVMRouter.sol", "AquaSwapVMRouter", [aqua, deployer, deployer, "AquaSwapVMRouter", "1.0.2"]);
-    const quoter = await deploy(deployer, "LeveeQuoter.sol", "LeveeQuoter");
+    const quoter = await deploy(deployer, "P1nchQuoter.sol", "P1nchQuoter");
     const pt = await deploy(deployer, "Mocks.sol", "MockToken", ["PT", 6]);
     const sy = await deploy(deployer, "Mocks.sol", "MockSY", [1_096_800n]);
     const market = await deploy(deployer, "Mocks.sol", "MockPendleMarket", [EXPIRY, sy, pt]);
@@ -105,7 +105,7 @@ async function main() {
     // LP: approve Aqua once, ship a strategy built with the SDK.
     await write(lp, sy, "mint", [lp, 1_000_000n * 10n ** 18n]);
     await write(lp, sy, "approve", [aqua, 2n ** 256n - 1n]);
-    const params: LeveeParams = {
+    const params: P1nchParams = {
       pt,
       sy,
       market,
@@ -119,7 +119,7 @@ async function main() {
       maxDeviationBps: 450,
       flags: 0,
     };
-    const order = buildLeveeOrder(lp, quoter, params);
+    const order = buildP1nchOrder(lp, quoter, params);
     await send(lp, shipTx(aqua, router, order, sy, pt, 500_000n * 10n ** 18n));
     console.log(`shipped 500,000 SY, strategy ${strategyHash(order)}`);
 
@@ -136,7 +136,7 @@ async function main() {
     const swapped = SwappedEvent.fromLog({ data: swappedLog!.data, topics: swappedLog!.topics as [Hex, ...Hex[]] });
 
     const syPaid = lpSyBefore - (await balance(sy, lp));
-    // The quote ran against the previous block and the swap lands in a later one. Levee's fair
+    // The quote ran against the previous block and the swap lands in a later one. P1nch's fair
     // value rises toward 1 as maturity approaches, so a few seconds later it pays marginally more.
     // The quote is honored as the taker's min out; the LP wallet pays exactly what the taker gets.
     console.log(`swap: ${swapped.amountIn} PT in, ${swapped.amountOut} SY out (quoted ${quotedOut} one block earlier)`);

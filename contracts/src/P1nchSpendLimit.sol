@@ -4,17 +4,17 @@ pragma solidity 0.8.30;
 import { IExtruction } from "@1inch/swap-vm/src/instructions/Extruction.sol";
 import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
-/// @title LeveeSpendLimit
-/// @notice Spec 7.4 v2: a Levee strategy may pay out at most a share of its shipped SY per block
+/// @title P1nchSpendLimit
+/// @notice Spec 7.4 v2: a P1nch strategy may pay out at most a share of its shipped SY per block
 ///         (a `windowSec` slot, 12 s on mainnet), so a pricing bug or an undetected real collapse
 ///         cannot empty it at once. The share grows linearly as maturity approaches, from
 ///         `minCapBps` when `horizonSec` or more remain to 100% at expiry: less time left, less can
 ///         go wrong. Size it so the whole backstop can still deploy well inside the oracle window.
-/// @dev An Extruction step placed AFTER LeveeQuoter in the program, so `swap.amountOut` holds the SY
+/// @dev An Extruction step placed AFTER P1nchQuoter in the program, so `swap.amountOut` holds the SY
 ///      the trade pays. Spending is keyed by the router-provided order hash and recorded only in
 ///      swap mode and only when called by the router: quotes never consume budget, and nobody can
 ///      burn a strategy's budget by calling this contract directly.
-contract LeveeSpendLimit is IExtruction {
+contract P1nchSpendLimit is IExtruction {
     uint8 public constant EXTRUCTION_OPCODE = 0x20;
     /// @notice shippedSy 16 + windowSec 4 + minCapBps 2 + horizonSec 4 + expiry 8
     uint256 public constant PARAMS_LENGTH = 34;
@@ -24,7 +24,7 @@ contract LeveeSpendLimit is IExtruction {
     address public immutable ROUTER;
 
     struct Params {
-        uint128 shippedSy; // SY shipped with the strategy (same value as in LeveeQuoter's params)
+        uint128 shippedSy; // SY shipped with the strategy (same value as in P1nchQuoter's params)
         uint32 windowSec; // spending window, e.g. 12 (one mainnet slot)
         uint16 minCapBps; // share of shippedSy per window far from maturity, e.g. 2000
         uint32 horizonSec; // the cap starts growing when less than this remains, e.g. 180 days

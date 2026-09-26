@@ -1,8 +1,8 @@
 /**
- * A zero-capital searcher for Levee: sells PT to Levee strategies and buys it back on Pendle in
- * one LeveeArb transaction. It sizes the trade by simulating LeveeArb.arb with eth_call and
+ * A zero-capital searcher for P1nch: sells PT to P1nch strategies and buys it back on Pendle in
+ * one P1nchArb transaction. It sizes the trade by simulating P1nchArb.arb with eth_call and
  * keeping the size that returns the most PT, so the search trusts no model of either pricing
- * curve: whatever Levee and Pendle would do onchain is what it measures.
+ * curve: whatever P1nch and Pendle would do onchain is what it measures.
  */
 import { encodeFunctionData, decodeFunctionResult, decodeErrorResult, BaseError, type Abi } from "viem";
 import type { Order } from "@1inch/swap-vm-sdk";
@@ -66,7 +66,7 @@ export async function maximize(
 export type ArbSource = { order: Order; balanceSy: bigint };
 
 /**
- * Splits a PT amount across Levee strategies in proportion to the SY each still holds. With the
+ * Splits a PT amount across P1nch strategies in proportion to the SY each still holds. With the
  * same parameters and the same usage share, every strategy then quotes the same marginal bid.
  */
 export function splitLegs(sources: ArbSource[], ptAmount: bigint) {
@@ -86,7 +86,7 @@ export function arbCalldata(arbAbi: Abi, sources: ArbSource[], ptAmount: bigint,
   return encodeFunctionData({ abi: arbAbi, functionName: "arb", args: [splitLegs(sources, ptAmount), minProfitPt, profitTo] });
 }
 
-/** Best-effort name of a revert, from the Levee ABIs (custom errors) or Error(string). */
+/** Best-effort name of a revert, from the P1nch ABIs (custom errors) or Error(string). */
 export function revertReason(e: unknown, abi: Abi): string {
   const isHex = (v: unknown): v is Hex => typeof v === "string" && v.startsWith("0x");
   const found = e instanceof BaseError ? (e.walk((x: any) => isHex(x?.raw) || isHex(x?.data)) as any) : null;
@@ -110,7 +110,7 @@ export type ArbPlan = {
 
 /**
  * Finds the profit-maximizing arb size. A small probe first: if even that reverts or earns too
- * little, Pendle already trades at or above Levee's bid (or Levee refuses), and the search stops.
+ * little, Pendle already trades at or above P1nch's bid (or P1nch refuses), and the search stops.
  */
 export async function planArb(
   client: Client,

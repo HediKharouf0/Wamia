@@ -3,8 +3,8 @@ pragma solidity 0.8.30;
 
 import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 
-/// @title LeveeMath
-/// @notice Pricing math for Levee: PT fair value from a reference yield, the maker discount,
+/// @title P1nchMath
+/// @notice Pricing math for P1nch: PT fair value from a reference yield, the maker discount,
 ///         and conversions between PT and SY amounts.
 /// @dev Units:
 ///      - Yields and prices are 1e18 fixed point ("wad"). A PT price is in underlying asset per PT
@@ -15,7 +15,7 @@ import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 ///      - PT has the asset's decimals, so raw PT units are raw asset units at maturity.
 ///      - Every rounding choice favors the maker (the LP): SY out rounds down, PT in rounds up,
 ///        and the price itself rounds down.
-library LeveeMath {
+library P1nchMath {
     uint256 internal constant WAD = 1e18;
     uint256 internal constant BPS = 10_000;
     uint256 internal constant ONE_YEAR = 365 days;

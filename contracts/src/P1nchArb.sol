@@ -6,26 +6,26 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { ITakerCallbacks } from "@1inch/swap-vm/src/interfaces/ITakerCallbacks.sol";
 
-import { LeveeOrders } from "./LeveeOrders.sol";
+import { P1nchOrders } from "./P1nchOrders.sol";
 import { IPendleRouterV4 } from "./interfaces/IPendleRouterV4.sol";
 
-/// @title LeveeArb
-/// @notice Zero-capital arbitrage between Pendle and Levee strategies. When a push sends Pendle's
-///         PT price below a Levee bid, anyone can call `arb`: it sells PT to Levee, and pays for
-///         that PT by buying it on Pendle with the SY Levee just sent, all in one transaction.
+/// @title P1nchArb
+/// @notice Zero-capital arbitrage between Pendle and P1nch strategies. When a push sends Pendle's
+///         PT price below a P1nch bid, anyone can call `arb`: it sells PT to P1nch, and pays for
+///         that PT by buying it on Pendle with the SY P1nch just sent, all in one transaction.
 ///         Buying on Pendle is what pulls the spot price back up.
 /// @dev Flow per leg, inside AquaSwapVMRouter.swap (swap-vm v1.0.2, default transfer order):
-///        1. The router runs the Levee program and pulls SY from the LP (via Aqua) to this contract.
+///        1. The router runs the P1nch program and pulls SY from the LP (via Aqua) to this contract.
 ///        2. It calls `preTransferInCallback`: we swap that SY for PT on Pendle.
 ///        3. It transferFroms the PT from this contract and pushes it to the LP (via Aqua).
-///      If Pendle yields too little PT, or Levee refuses the trade, the whole transaction reverts:
+///      If Pendle yields too little PT, or P1nch refuses the trade, the whole transaction reverts:
 ///      the LP is untouched and the caller only loses gas. Profit stays in PT.
-contract LeveeArb is ITakerCallbacks {
+contract P1nchArb is ITakerCallbacks {
     using SafeERC20 for IERC20;
 
     struct Leg {
         ISwapVM.Order order;
-        uint256 ptAmount; // PT sold to this Levee strategy (exact in)
+        uint256 ptAmount; // PT sold to this P1nch strategy (exact in)
     }
 
     ISwapVM public immutable ROUTER;
@@ -42,7 +42,7 @@ contract LeveeArb is ITakerCallbacks {
     error ProfitTooLow(uint256 profitPt, uint256 minProfitPt);
     error UnexpectedCallback();
 
-    event Arbitraged(address indexed caller, uint256 legs, uint256 ptSoldToLevee, uint256 profitPt);
+    event Arbitraged(address indexed caller, uint256 legs, uint256 ptSoldToP1nch, uint256 profitPt);
 
     // A zero market only makes every Pendle buy revert; this contract holds no funds between calls.
     // forge-lint: disable-next-line(missing-zero-check)
@@ -56,13 +56,13 @@ contract LeveeArb is ITakerCallbacks {
         sy.forceApprove(address(pendleRouter), type(uint256).max);
     }
 
-    /// @notice Sell PT to one or more Levee strategies, funding each sale on Pendle.
-    /// @param legs        Levee orders and the PT amount to sell to each
+    /// @notice Sell PT to one or more P1nch strategies, funding each sale on Pendle.
+    /// @param legs        P1nch orders and the PT amount to sell to each
     /// @param minProfitPt Revert unless at least this much PT is left over
     /// @param profitTo    Receives the PT profit (and any SY dust)
     function arb(Leg[] calldata legs, uint256 minProfitPt, address profitTo) external returns (uint256 profitPt) {
         _inArb = true;
-        bytes memory takerData = LeveeOrders.takerData(address(this), true, 0, true, true, "");
+        bytes memory takerData = P1nchOrders.takerData(address(this), true, 0, true, true, "");
         uint256 sold = 0;
         for (uint256 i = 0; i < legs.length; i++) {
             // One swap per LP by design; any failing leg reverts the whole arb. The amounts are
@@ -86,7 +86,7 @@ contract LeveeArb is ITakerCallbacks {
     }
 
     /// @inheritdoc ITakerCallbacks
-    /// @dev Called after Levee's SY reached this contract and before the router collects PT.
+    /// @dev Called after P1nch's SY reached this contract and before the router collects PT.
     function preTransferInCallback(
         address, /* maker */
         address taker,

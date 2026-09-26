@@ -7,16 +7,16 @@ import { AquaSwapVMRouter } from "@1inch/swap-vm/src/routers/AquaSwapVMRouter.so
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import { LeveeQuoter } from "../src/LeveeQuoter.sol";
-import { LeveeOrders } from "../src/LeveeOrders.sol";
-import { LeveeArb } from "../src/LeveeArb.sol";
+import { P1nchQuoter } from "../src/P1nchQuoter.sol";
+import { P1nchOrders } from "../src/P1nchOrders.sol";
+import { P1nchArb } from "../src/P1nchArb.sol";
 import { IPendleRouterV4 } from "../src/interfaces/IPendleRouterV4.sol";
 import { MockToken, MockSY, MockPendleMarket, MockPendleRouter, MockCurvePool } from "./mocks/Mocks.sol";
-import { LeveeTestParams } from "./utils/LeveeTestParams.sol";
+import { P1nchTestParams } from "./utils/P1nchTestParams.sol";
 
-/// LeveeArb on the official Aqua v1.0.0 + AquaSwapVMRouter v1.0.2 sources, with a mock Pendle
-/// router at a fixed PT price. Fork version: fork/LeveeArbFork.t.sol.
-contract LeveeArbTest is Test {
+/// P1nchArb on the official Aqua v1.0.0 + AquaSwapVMRouter v1.0.2 sources, with a mock Pendle
+/// router at a fixed PT price. Fork version: fork/P1nchArbFork.t.sol.
+contract P1nchArbTest is Test {
     uint256 constant FORK_TS = 1787632115;
     uint256 constant EXPIRY = 1796860800;
     uint256 constant PUSHED_PRICE = 0.9472e18; // Pendle spot after the 11 manipulator trades
@@ -24,13 +24,13 @@ contract LeveeArbTest is Test {
 
     Aqua aqua;
     AquaSwapVMRouter router;
-    LeveeQuoter quoter;
+    P1nchQuoter quoter;
     MockToken pt;
     MockSY sy;
     MockPendleMarket market;
     MockPendleRouter pendle;
     MockCurvePool curve;
-    LeveeArb arbBot;
+    P1nchArb arbBot;
 
     address lp = makeAddr("lp");
     address lp2 = makeAddr("lp2");
@@ -40,14 +40,14 @@ contract LeveeArbTest is Test {
         vm.warp(FORK_TS);
         aqua = new Aqua();
         router = new AquaSwapVMRouter(address(aqua), makeAddr("weth"), address(this), "AquaSwapVMRouter", "1.0.2");
-        quoter = new LeveeQuoter();
+        quoter = new P1nchQuoter();
         pt = new MockToken("PT", 6);
         sy = new MockSY(1.0968e6);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
         pendle = new MockPendleRouter(pt, sy, PUSHED_PRICE);
-        market.setSpot(PUSHED_PRICE); // the market Levee checks shows the pushed price too
+        market.setSpot(PUSHED_PRICE); // the market P1nch checks shows the pushed price too
         curve = new MockCurvePool();
-        arbBot = new LeveeArb(ISwapVM(address(router)), IPendleRouterV4(address(pendle)), address(market), IERC20(address(pt)), IERC20(address(sy)));
+        arbBot = new P1nchArb(ISwapVM(address(router)), IPendleRouterV4(address(pendle)), address(market), IERC20(address(pt)), IERC20(address(sy)));
 
         for (uint256 i = 0; i < 2; i++) {
             address who = i == 0 ? lp : lp2;
@@ -57,12 +57,12 @@ contract LeveeArbTest is Test {
         }
     }
 
-    function _params(uint256 shippedSy) internal view returns (LeveeQuoter.Params memory) {
-        return LeveeTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
+    function _params(uint256 shippedSy) internal view returns (P1nchQuoter.Params memory) {
+        return P1nchTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
     }
 
     function _ship(address maker, uint256 syAmount) internal returns (ISwapVM.Order memory order) {
-        order = LeveeOrders.makerOrder(maker, quoter.program(_params(syAmount)));
+        order = P1nchOrders.makerOrder(maker, quoter.program(_params(syAmount)));
         address[] memory tokens = new address[](2);
         tokens[0] = address(sy);
         tokens[1] = address(pt);
@@ -72,9 +72,9 @@ contract LeveeArbTest is Test {
         aqua.ship(address(router), abi.encode(order), tokens, amounts);
     }
 
-    function _legs(ISwapVM.Order memory order, uint256 ptAmount) internal pure returns (LeveeArb.Leg[] memory legs) {
-        legs = new LeveeArb.Leg[](1);
-        legs[0] = LeveeArb.Leg({ order: order, ptAmount: ptAmount });
+    function _legs(ISwapVM.Order memory order, uint256 ptAmount) internal pure returns (P1nchArb.Leg[] memory legs) {
+        legs = new P1nchArb.Leg[](1);
+        legs[0] = P1nchArb.Leg({ order: order, ptAmount: ptAmount });
     }
 
     function test_SelectorMatchesVerifiedPendleRouter() public pure {
@@ -89,7 +89,7 @@ contract LeveeArbTest is Test {
         vm.prank(searcher);
         uint256 profit = arbBot.arb(_legs(order, 100_000e6), 1, searcher);
 
-        // Levee paid ~88,402 SY for 100k PT; that SY bought ~102,370 PT on Pendle at 0.9472.
+        // P1nch paid ~88,402 SY for 100k PT; that SY bought ~102,370 PT on Pendle at 0.9472.
         uint256 syPaid = lpSyBefore - sy.balanceOf(lp);
         assertApproxEqRel(syPaid, 88_402e18, 0.0001e18);
         assertEq(pt.balanceOf(lp), 100_000e6, "LP holds the PT");
@@ -101,7 +101,7 @@ contract LeveeArbTest is Test {
 
     function test_RevertsWhenPendleIsNotCheaper() public {
         ISwapVM.Order memory order = _ship(lp, 500_000e18);
-        pendle.setPrice(FAIR_PRICE); // Levee bids ~0.970, Pendle asks 0.971: no arb
+        pendle.setPrice(FAIR_PRICE); // P1nch bids ~0.970, Pendle asks 0.971: no arb
         market.setSpot(FAIR_PRICE);
         uint256 lpSyBefore = sy.balanceOf(lp);
 
@@ -114,22 +114,22 @@ contract LeveeArbTest is Test {
 
     function test_RevertsBelowMinProfit() public {
         ISwapVM.Order memory order = _ship(lp, 500_000e18);
-        vm.expectPartialRevert(LeveeArb.ProfitTooLow.selector);
+        vm.expectPartialRevert(P1nchArb.ProfitTooLow.selector);
         arbBot.arb(_legs(order, 100_000e6), 1_000_000e6, searcher);
     }
 
-    function test_RevertsWhenLeveeRefuses() public {
+    function test_RevertsWhenP1nchRefuses() public {
         ISwapVM.Order memory order = _ship(lp, 500_000e18);
         sy.setExchangeRate(1.05e6); // SY depeg: the quoter refuses, the whole arb reverts
-        vm.expectPartialRevert(LeveeQuoter.SyBelowFloor.selector);
+        vm.expectPartialRevert(P1nchQuoter.SyBelowFloor.selector);
         arbBot.arb(_legs(order, 100_000e6), 0, searcher);
         assertEq(sy.balanceOf(lp), 1_000_000e18);
     }
 
     function test_SeveralLpsInOneTransaction() public {
-        LeveeArb.Leg[] memory legs = new LeveeArb.Leg[](2);
-        legs[0] = LeveeArb.Leg({ order: _ship(lp, 300_000e18), ptAmount: 100_000e6 });
-        legs[1] = LeveeArb.Leg({ order: _ship(lp2, 300_000e18), ptAmount: 150_000e6 });
+        P1nchArb.Leg[] memory legs = new P1nchArb.Leg[](2);
+        legs[0] = P1nchArb.Leg({ order: _ship(lp, 300_000e18), ptAmount: 100_000e6 });
+        legs[1] = P1nchArb.Leg({ order: _ship(lp2, 300_000e18), ptAmount: 150_000e6 });
 
         uint256 profit = arbBot.arb(legs, 1, searcher);
         assertEq(pt.balanceOf(lp), 100_000e6);
@@ -138,11 +138,11 @@ contract LeveeArbTest is Test {
     }
 
     function test_CallbackOnlyFromRouterDuringArb() public {
-        vm.expectRevert(abi.encodeWithSelector(LeveeArb.NotRouter.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(P1nchArb.NotRouter.selector, address(this)));
         arbBot.preTransferInCallback(lp, address(arbBot), address(pt), address(sy), 1, 1, bytes32(0), "");
 
         vm.prank(address(router));
-        vm.expectRevert(LeveeArb.NotInArb.selector);
+        vm.expectRevert(P1nchArb.NotInArb.selector);
         arbBot.preTransferInCallback(lp, address(arbBot), address(pt), address(sy), 1, 1, bytes32(0), "");
     }
 }

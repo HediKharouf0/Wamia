@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/// @notice The parts of Pendle's market and SY interfaces that Levee reads.
+/// @notice The parts of Pendle's market and SY interfaces that P1nch reads.
 interface IPMarketLike {
     function expiry() external view returns (uint256);
     function readTokens() external view returns (address sy, address pt, address yt);

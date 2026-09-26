@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import { LeveeQuoter } from "../../src/LeveeQuoter.sol";
+import { P1nchQuoter } from "../../src/P1nchQuoter.sol";
 
-/// Default Levee parameters used across tests (spec 7.3 values).
-library LeveeTestParams {
+/// Default P1nch parameters used across tests (spec 7.3 values).
+library P1nchTestParams {
     function defaults(address pt, address sy, address market, address curvePool, uint256 shippedSy, uint256 minSyRate)
         internal
         pure
-        returns (LeveeQuoter.Params memory p)
+        returns (P1nchQuoter.Params memory p)
     {
         p.pt = pt;
         p.sy = sy;

@@ -1,8 +1,8 @@
-# Levee
+# P1nch
 
 A standing liquidity backstop for Pendle PT markets, built as an Aqua app on 1inch SwapVM.
 
-LPs ship SY to a Levee strategy on Aqua. The strategy buys PT at a small discount to its fair value, and only while the market looks like it's being pushed rather than repriced. When someone dumps PT into a thin Pendle pool, a searcher sells that PT to Levee and buys it back on Pendle in the same transaction, with no capital of its own. That pulls Pendle's price back up before a lending oracle can follow it down.
+LPs ship SY to a P1nch strategy on Aqua. The strategy buys PT at a small discount to its fair value, and only while the market looks like it's being pushed rather than repriced. When someone dumps PT into a thin Pendle pool, a searcher sells that PT to P1nch and buys it back on Pendle in the same transaction, with no capital of its own. That pulls Pendle's price back up before a lending oracle can follow it down.
 
 Built for the 1inch "Build an Aqua App" track. Everything runs on the deployed Aqua (v1.0.0) and AquaSwapVMRouter (swap-vm v1.0.2), unmodified, and is tested on a mainnet fork against the real Pendle, Morpho and Curve contracts.
 
@@ -18,8 +18,8 @@ Nobody was standing there with a deep bid. Keeping idle capital as a standby buy
 
 A bid that is always there, funded by capital that is doing something else in the meantime.
 
-- Aqua lets an LP ship SY to a strategy without locking it. The balance stays in the LP's wallet, so the same wallet can back Levee on several PT markets at once.
-- SwapVM runs the strategy's program on every quote and swap. Levee's program is a few Extruction instructions that call our pricing and risk contracts, so the bid is priced onchain from live Pendle, Curve and SY state at the moment of the trade.
+- Aqua lets an LP ship SY to a strategy without locking it. The balance stays in the LP's wallet, so the same wallet can back P1nch on several PT markets at once.
+- SwapVM runs the strategy's program on every quote and swap. P1nch's program is a few Extruction instructions that call our pricing and risk contracts, so the bid is priced onchain from live Pendle, Curve and SY state at the moment of the trade.
 - The bid is standing, so it fills after every manipulator trade, in the next block. Spot never sits low long enough to pull the oracle average down.
 - LPs earn by buying PT below fair value. PT redeems at par at maturity.
 
@@ -27,16 +27,16 @@ A bid that is always there, funded by capital that is doing something else in th
 
 ```
 LP wallet (SY) --ship--> Aqua --> AquaSwapVMRouter
-                                     program: [Extruction -> LeveeRateGuard]   optional, v2
-                                              [Extruction -> LeveeQuoter]      prices PT -> SY
-                                              [Extruction -> LeveeSpendLimit]  optional, v2
+                                     program: [Extruction -> P1nchRateGuard]   optional, v2
+                                              [Extruction -> P1nchQuoter]      prices PT -> SY
+                                              [Extruction -> P1nchSpendLimit]  optional, v2
 
-Searcher --> LeveeArb.arb():  sell PT to Levee via the router
+Searcher --> P1nchArb.arb():  sell PT to P1nch via the router
                               -> in preTransferInCallback, buy that PT on Pendle with the SY just received
                               -> keep the leftover PT as profit (zero capital, reverts if not profitable)
 ```
 
-`LeveeQuoter` is the pricing step. For every PT sale it:
+`P1nchQuoter` is the pricing step. For every PT sale it:
 
 1. only accepts PT in and SY out, and refuses at or after maturity;
 2. refuses if SY's exchange rate (reUSD's NAV) is below the LP's floor: a real loss in the vault;
@@ -46,8 +46,8 @@ Searcher --> LeveeArb.arb():  sell PT to Levee via the router
 
 The v2 rules are separate Extruction steps an LP can add around it:
 
-- `LeveeRateGuard` (before pricing): refuses if the SY rate drops below the highest rate the strategy has seen, and, after a few days, if reUSD's realized yield is far above the reference (PT would then be worth less than Levee thinks).
-- `LeveeSpendLimit` (after pricing): at most a share of the shipped SY per 12 s block (20% in our runs), growing to 100% as maturity approaches, so a pricing bug or an undetected real collapse can't empty a strategy in one block.
+- `P1nchRateGuard` (before pricing): refuses if the SY rate drops below the highest rate the strategy has seen, and, after a few days, if reUSD's realized yield is far above the reference (PT would then be worth less than P1nch thinks).
+- `P1nchSpendLimit` (after pricing): at most a share of the shipped SY per 12 s block (20% in our runs), growing to 100% as maturity approaches, so a pricing bug or an undetected real collapse can't empty a strategy in one block.
 
 Both keep their state keyed by the order hash and write it only in swap mode and only from the router, so quotes never move it and nobody can burn a strategy's budget from outside. Details, parameters and the program layout are in [contracts/README.md](contracts/README.md).
 
@@ -55,16 +55,16 @@ The TypeScript side builds the same orders with `@1inch/swap-vm-sdk` and `@1inch
 
 ## Results
 
-All numbers come from a mainnet fork at block 25829822 replaying the Aug 25 attack with real 12 s blocks. The searcher runs our bot (`src/strategies/searcher.ts`) and lands one block after each manipulator trade. The attacker is adaptive: same SY per trade as on the day, with fresh slippage bounds, so it doesn't give up just because Levee moved the price. Full tables in [results/maker-results.md](results/maker-results.md).
+All numbers come from a mainnet fork at block 25829822 replaying the Aug 25 attack with real 12 s blocks. The searcher runs our bot (`src/strategies/searcher.ts`) and lands one block after each manipulator trade. The attacker is adaptive: same SY per trade as on the day, with fresh slippage bounds, so it doesn't give up just because P1nch moved the price. Full tables in [results/maker-results.md](results/maker-results.md).
 
 | Setup | Capital | Debt eligible for liquidation | Oracle min |
 |---|---|---|---|
 | No backstop | 0 | $37.35M (20 positions) | 0.9472 |
 | Reactive taker bot (buys after the drop) | 5M SY budget | $11.23M | 0.9629 |
-| Levee | 3M SY shipped | $13.02M (8) | 0.9615 |
-| Levee | 4M SY shipped | $0.20M (1) | 0.9650 |
-| Levee | 5M SY shipped (4.60M used) | $0 | 0.9671 |
-| Levee with the v2 guards | 5M SY shipped (4.54M used) | $0 | 0.9669 |
+| P1nch | 3M SY shipped | $13.02M (8) | 0.9615 |
+| P1nch | 4M SY shipped | $0.20M (1) | 0.9650 |
+| P1nch | 5M SY shipped (4.60M used) | $0 | 0.9671 |
+| P1nch with the v2 guards | 5M SY shipped (4.54M used) | $0 | 0.9669 |
 
 5M SY is about $5.5M. With the guards on, the spend limit bound once (1,000,000 SY in the block after the eighth push) and the searcher finished the job in the next block, with the same outcome.
 
@@ -72,11 +72,11 @@ What the LP gets at 5M: an average price of 0.9691 USD per PT against a fair val
 
 The 5M result also holds with the arb in the same block as each push (latency 0) and with the attacker's exact historical calldata.
 
-### Genuine collapses: Levee must step aside
+### Genuine collapses: P1nch must step aside
 
-A backstop that buys into a real collapse is just a loss. `npm run scenario:collapse` pushes the fork into each case and checks Levee's decision:
+A backstop that buys into a real collapse is just a loss. `npm run scenario:collapse` pushes the fork into each case and checks P1nch's decision:
 
-| Case | What happens | Levee |
+| Case | What happens | P1nch |
 |---|---|---|
 | control | the Aug 25 push | buys |
 | switch-off attempt | 60k reUSD dumped on Curve in one block, last price 0.9865 of NAV, EMA still 0.9999 | buys (one block can't switch it off) |
@@ -97,8 +97,8 @@ cp .env.example .env            # set ARCHIVE_RPC_URL
 
 cd contracts && forge build && forge test   # unit + local end to end on Aqua/router built from their release tags
 set -a && source ../.env && set +a
-forge test --mc LeveeForkTest -vv           # the deployed contracts at block 25829822
-forge test --mc LeveeArbForkTest -vv
+forge test --mc P1nchForkTest -vv           # the deployed contracts at block 25829822
+forge test --mc P1nchArbForkTest -vv
 cd ..
 
 npm run typecheck && npm test
@@ -117,7 +117,7 @@ A replay run takes a few minutes on a laptop (the guarded 5M run took 3.9 min), 
 
 ## Repo map
 
-- `contracts/src/`: `LeveeQuoter`, `LeveeMath`, `LeveeOrders`, `LeveeArb`, `LeveeRateGuard`, `LeveeSpendLimit`.
+- `contracts/src/`: `P1nchQuoter`, `P1nchMath`, `P1nchOrders`, `P1nchArb`, `P1nchRateGuard`, `P1nchSpendLimit`.
 - `contracts/test/`: unit, local end to end on the official sources, SDK parity, and `fork/` tests on mainnet state.
 - `src/aqua/`: building and shipping orders with the 1inch SDKs, fork helpers, the local demo.
 - `src/strategies/`: the searcher (sizes each arb by simulation) and the earlier taker bot.

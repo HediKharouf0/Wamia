@@ -28,7 +28,7 @@ numbers or the pitch. "Fixed" items are already committed.
    liquidation. The taker "1-block latency" results are optimistic. The maker
    design avoids this: its bid is standing, so arbs fill it every block with no
    trigger.
-5. The attacker is replayed with fixed calldata. Once Levee buys between
+5. The attacker is replayed with fixed calldata. Once P1nch buys between
    manipulator transactions, their slippage limits may make them revert, which
    would look like protection but is really the attacker giving up.
    `scenarioMaker` must report manipulator tx statuses and offer an "adaptive
@@ -42,7 +42,7 @@ numbers or the pitch. "Fixed" items are already committed.
    the old fair value until the LP docks. Cheap mitigation: add SwapVM's
    `Deadline` instruction (index 13 in v1.0.2) before the Extruction so
    strategies expire and must be re-shipped with a fresh rate.
-8. Levee's bid vs the risk target. With a 10 bp discount the bid (~0.970) is
+8. P1nch's bid vs the risk target. With a 10 bp discount the bid (~0.970) is
    well above the target the risk model needs (~0.966), so the maker would
    spend more capital than protection requires. Any discount up to ~45 bp
    still keeps the bid above the target and pays LPs more. Worth sweeping.

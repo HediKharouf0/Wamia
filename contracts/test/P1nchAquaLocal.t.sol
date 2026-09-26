@@ -8,21 +8,21 @@ import { AquaSwapVMRouter } from "@1inch/swap-vm/src/routers/AquaSwapVMRouter.so
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { TakerTraitsLib } from "@1inch/swap-vm/src/libs/TakerTraits.sol";
 
-import { LeveeQuoter } from "../src/LeveeQuoter.sol";
-import { LeveeOrders } from "../src/LeveeOrders.sol";
+import { P1nchQuoter } from "../src/P1nchQuoter.sol";
+import { P1nchOrders } from "../src/P1nchOrders.sol";
 import { MockToken, MockSY, MockPendleMarket, MockCurvePool } from "./mocks/Mocks.sol";
-import { LeveeTestParams } from "./utils/LeveeTestParams.sol";
+import { P1nchTestParams } from "./utils/P1nchTestParams.sol";
 
 /// End to end on the official sources: Aqua v1.0.0 and AquaSwapVMRouter v1.0.2 compiled from
 /// their release tags, with mock Pendle tokens. Ship -> quote -> swap with real token movement.
 /// The fork test repeats this against the deployed contracts and real PT/SY.
-contract LeveeAquaLocalTest is Test {
+contract P1nchAquaLocalTest is Test {
     uint256 constant FORK_TS = 1787632115;
     uint256 constant EXPIRY = 1796860800;
 
     Aqua aqua;
     AquaSwapVMRouter router;
-    LeveeQuoter quoter;
+    P1nchQuoter quoter;
     MockToken pt;
     MockSY sy;
     MockPendleMarket market;
@@ -36,7 +36,7 @@ contract LeveeAquaLocalTest is Test {
         vm.warp(FORK_TS);
         aqua = new Aqua();
         router = new AquaSwapVMRouter(address(aqua), makeAddr("weth"), address(this), "AquaSwapVMRouter", "1.0.2");
-        quoter = new LeveeQuoter();
+        quoter = new P1nchQuoter();
         pt = new MockToken("PT", 6);
         sy = new MockSY(1.0968e6);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
@@ -54,8 +54,8 @@ contract LeveeAquaLocalTest is Test {
         pt.approve(address(router), type(uint256).max);
     }
 
-    function _params(uint256 shippedSy) internal view returns (LeveeQuoter.Params memory) {
-        return LeveeTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
+    function _params(uint256 shippedSy) internal view returns (P1nchQuoter.Params memory) {
+        return P1nchTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
     }
 
     function programFor(uint256 shippedSy) external view returns (bytes memory) {
@@ -64,7 +64,7 @@ contract LeveeAquaLocalTest is Test {
 
     function _ship(address maker, uint256 syAmount) internal returns (ISwapVM.Order memory order, bytes32 hash) {
         bytes memory prog = this.programFor(syAmount); // external self-call keeps the stack shallow
-        order = LeveeOrders.makerOrder(maker, prog);
+        order = P1nchOrders.makerOrder(maker, prog);
         address[] memory tokens = new address[](2);
         tokens[0] = address(sy);
         tokens[1] = address(pt);
@@ -76,7 +76,7 @@ contract LeveeAquaLocalTest is Test {
     }
 
     function _sellPt(ISwapVM.Order memory order, uint256 ptIn, uint256 minSyOut) internal returns (uint256, uint256) {
-        bytes memory td = LeveeOrders.takerData(taker, true, minSyOut, true, false, "");
+        bytes memory td = P1nchOrders.takerData(taker, true, minSyOut, true, false, "");
         vm.prank(taker);
         (uint256 amountIn, uint256 amountOut,) = router.swap(order, address(pt), address(sy), ptIn, td);
         return (amountIn, amountOut);
@@ -86,7 +86,7 @@ contract LeveeAquaLocalTest is Test {
         (ISwapVM.Order memory order, bytes32 hash) = _ship(lp, 500_000e18);
         assertEq(hash, router.hash(order), "Aqua strategy hash is the SwapVM order hash");
 
-        bytes memory td = LeveeOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
         (uint256 qIn, uint256 qOut,) = router.quote(order, address(pt), address(sy), 100_000e6, td);
 
         uint256 lpSyBefore = sy.balanceOf(lp);
@@ -111,7 +111,7 @@ contract LeveeAquaLocalTest is Test {
 
     function test_ExactOutSwap() public {
         (ISwapVM.Order memory order,) = _ship(lp, 500_000e18);
-        bytes memory td = LeveeOrders.takerData(taker, false, 0, true, false, "");
+        bytes memory td = P1nchOrders.takerData(taker, false, 0, true, false, "");
         vm.prank(taker);
         (uint256 amountIn, uint256 amountOut,) = router.swap(order, address(pt), address(sy), 50_000e18, td);
         assertEq(amountOut, 50_000e18);
@@ -121,7 +121,7 @@ contract LeveeAquaLocalTest is Test {
 
     function test_ShippedSyIsTheSpendingCap() public {
         (ISwapVM.Order memory order,) = _ship(lp, 50_000e18);
-        vm.expectPartialRevert(LeveeQuoter.InsufficientLiquidity.selector);
+        vm.expectPartialRevert(P1nchQuoter.InsufficientLiquidity.selector);
         _sellPt(order, 100_000e6, 0);
         // Wallet holds 1M SY, but only the shipped 50k is at risk.
         assertEq(sy.balanceOf(lp), 1_000_000e18);
@@ -130,7 +130,7 @@ contract LeveeAquaLocalTest is Test {
     function test_RefusesWhenSyDepegs() public {
         (ISwapVM.Order memory order,) = _ship(lp, 500_000e18);
         sy.setExchangeRate(1.05e6);
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.SyBelowFloor.selector, 1.05e6, 1.09e6));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.SyBelowFloor.selector, 1.05e6, 1.09e6));
         _sellPt(order, 100_000e6, 0);
         assertEq(pt.balanceOf(taker), 1_000_000e6, "nothing moved");
     }
@@ -140,9 +140,9 @@ contract LeveeAquaLocalTest is Test {
         sy.mint(taker, 1_000e18);
         vm.prank(taker);
         sy.approve(address(router), type(uint256).max);
-        bytes memory td = LeveeOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
         vm.prank(taker);
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.OnlyPtToSy.selector, address(sy), address(pt)));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.OnlyPtToSy.selector, address(sy), address(pt)));
         router.swap(order, address(sy), address(pt), 1_000e18, td);
     }
 

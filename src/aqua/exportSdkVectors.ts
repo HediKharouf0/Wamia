@@ -1,5 +1,5 @@
 /**
- * Builds Levee orders and taker data with the 1inch SDKs and writes them to
+ * Builds P1nch orders and taker data with the 1inch SDKs and writes them to
  * contracts/test/fixtures/sdk-vectors.json. contracts/test/SdkParity.t.sol rebuilds the same
  * values with swap-vm's Solidity libraries and requires identical bytes.
  *
@@ -9,21 +9,21 @@ import { writeFileSync, mkdirSync } from "fs";
 import { getAddress, keccak256, toBytes } from "viem";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import {
-  buildLeveeOrder,
-  buildLeveeProgram,
-  encodeLeveeParams,
+  buildP1nchOrder,
+  buildP1nchProgram,
+  encodeP1nchParams,
   sellPtTakerTraits,
   strategyHash,
-  type LeveeGuards,
-  type LeveeParams,
-} from "./levee.js";
+  type P1nchGuards,
+  type P1nchParams,
+} from "./p1nch.js";
 
 const label = (s: string) => getAddress(`0x${keccak256(toBytes(s)).slice(-40)}`);
 
-const maker = label("levee-sdk-vector-maker");
-const quoter = label("levee-sdk-vector-quoter");
+const maker = label("p1nch-sdk-vector-maker");
+const quoter = label("p1nch-sdk-vector-quoter");
 
-const params: LeveeParams = {
+const params: P1nchParams = {
   pt: getAddress(addresses.pendle.pt),
   sy: getAddress(addresses.pendle.sy),
   market: getAddress(addresses.pendle.market),
@@ -38,11 +38,11 @@ const params: LeveeParams = {
   flags: 0,
 };
 
-const order = buildLeveeOrder(maker, quoter, params);
+const order = buildP1nchOrder(maker, quoter, params);
 const built = order.build();
 
-const guards: LeveeGuards = {
-  rateGuard: label("levee-sdk-vector-rate-guard"),
+const guards: P1nchGuards = {
+  rateGuard: label("p1nch-sdk-vector-rate-guard"),
   rateGuardParams: {
     sy: params.sy,
     rateAtShip: 1_096_798n,
@@ -52,10 +52,10 @@ const guards: LeveeGuards = {
     refYieldWad: params.refYieldWad,
     maxYieldGapBps: 1000,
   },
-  spendLimit: label("levee-sdk-vector-spend-limit"),
+  spendLimit: label("p1nch-sdk-vector-spend-limit"),
   spendLimitParams: { shippedSy: params.shippedSy, windowSec: 12, minCapBps: 2000, horizonSec: 30 * 86_400, expiry: 1_796_860_800n },
 };
-const guardedOrder = buildLeveeOrder(maker, quoter, params, guards);
+const guardedOrder = buildP1nchOrder(maker, quoter, params, guards);
 
 const takerCases = [
   { name: "exactInMinOut", exactIn: true, threshold: 88_000n * 10n ** 18n, pullPtFromTaker: true },
@@ -73,8 +73,8 @@ const vectors = {
     shippedSy: params.shippedSy.toString(),
     minSyRate: params.minSyRate.toString(),
   },
-  encodedParams: encodeLeveeParams(params),
-  program: buildLeveeProgram(quoter, params).toString(),
+  encodedParams: encodeP1nchParams(params),
+  program: buildP1nchProgram(quoter, params).toString(),
   orderTraits: `0x${built.traits.toString(16).padStart(64, "0")}`,
   orderData: built.data,
   strategyHash: strategyHash(order),
@@ -92,7 +92,7 @@ const vectors = {
       shippedSy: guards.spendLimitParams.shippedSy.toString(),
       expiry: guards.spendLimitParams.expiry.toString(),
     },
-    program: buildLeveeProgram(quoter, params, guards).toString(),
+    program: buildP1nchProgram(quoter, params, guards).toString(),
     strategyHash: strategyHash(guardedOrder),
   },
   taker: takerCases.map((c) => ({

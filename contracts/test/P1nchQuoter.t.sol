@@ -4,34 +4,34 @@ pragma solidity 0.8.30;
 import { Test } from "forge-std/Test.sol";
 import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
-import { LeveeQuoter } from "../src/LeveeQuoter.sol";
-import { LeveeMath } from "../src/LeveeMath.sol";
+import { P1nchQuoter } from "../src/P1nchQuoter.sol";
+import { P1nchMath } from "../src/P1nchMath.sol";
 import { MockToken, MockSY, MockPendleMarket, MockCurvePool } from "./mocks/Mocks.sol";
 
 /// Unit tests: the quoter is called directly, the way SwapVM's Extruction calls it.
 /// Numbers mirror the fork: ts 1787632115, expiry 2026-12-10, SY rate 1.0968e6.
-contract LeveeQuoterTest is Test {
+contract P1nchQuoterTest is Test {
     uint256 constant FORK_TS = 1787632115;
     uint256 constant EXPIRY = 1796860800;
     uint256 constant SHIPPED = 1_000_000e18;
     uint256 constant RATE = 1.0968e6;
 
-    LeveeQuoter quoter;
+    P1nchQuoter quoter;
     MockToken pt;
     MockSY sy;
     MockPendleMarket market;
     MockCurvePool curve;
-    LeveeQuoter.Params params;
+    P1nchQuoter.Params params;
     bytes args; // encoded once so expectRevert targets the quoter call itself
 
     function setUp() public {
         vm.warp(FORK_TS);
-        quoter = new LeveeQuoter();
+        quoter = new P1nchQuoter();
         pt = new MockToken("PT", 6);
         sy = new MockSY(RATE);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
         curve = new MockCurvePool();
-        params = LeveeQuoter.Params({
+        params = P1nchQuoter.Params({
             pt: address(pt),
             sy: address(sy),
             market: address(market),
@@ -77,7 +77,7 @@ contract LeveeQuoterTest is Test {
         uint256 fair = _fair();
         assertApproxEqRel(fair, 970990654522581086, 1e6);
         SwapRegisters memory out = _sell(1_000e6, SHIPPED);
-        uint256 atMinDiscount = LeveeMath.ptToSyDown(1_000e6, fair * 9990 / 10_000, RATE);
+        uint256 atMinDiscount = P1nchMath.ptToSyDown(1_000e6, fair * 9990 / 10_000, RATE);
         assertLe(out.amountOut, atMinDiscount);
         assertApproxEqRel(out.amountOut, atMinDiscount, 0.00001e18);
     }
@@ -121,7 +121,7 @@ contract LeveeQuoterTest is Test {
         uint256 bal = bound(balance, 0, SHIPPED);
         uint256 fair = _fair();
         uint256 y = quoter.syOutForPtIn(params, fair, RATE, bal, x);
-        assertLe(y, LeveeMath.ptToSyDown(x, fair, RATE));
+        assertLe(y, P1nchMath.ptToSyDown(x, fair, RATE));
         assertLe(quoter.marginalBid(params, fair, bal), fair);
     }
 
@@ -137,31 +137,31 @@ contract LeveeQuoterTest is Test {
     // ---------------------------------------------------------------- refusals
 
     function test_RevertWhen_SyToPt() public {
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.OnlyPtToSy.selector, address(sy), address(pt)));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.OnlyPtToSy.selector, address(sy), address(pt)));
         quoter.extruction(false, 0, _query(address(sy), address(pt), true), _regs(1e18, 0, SHIPPED), args, "");
     }
 
     function test_RevertWhen_Expired() public {
         vm.warp(EXPIRY);
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.MarketExpired.selector, EXPIRY));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.MarketExpired.selector, EXPIRY));
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
     function test_RevertWhen_SyRateDrops() public {
         sy.setExchangeRate(1.05e6);
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.SyBelowFloor.selector, 1.05e6, 1.09e6));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.SyBelowFloor.selector, 1.05e6, 1.09e6));
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
     /// A run: reUSD trades 2% below NAV on Curve while the exchange rate does not move.
     function test_RevertWhen_MarketDepegOnEma() public {
         curve.set(1.02e18, 1.0e18);
-        vm.expectPartialRevert(LeveeQuoter.UnderlyingDepegged.selector);
+        vm.expectPartialRevert(P1nchQuoter.UnderlyingDepegged.selector);
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
-    /// One dump on a thin pool moves the last price but not the EMA: that must not switch Levee off.
-    function test_LastPriceAloneDoesNotStopLevee() public {
+    /// One dump on a thin pool moves the last price but not the EMA: that must not switch P1nch off.
+    function test_LastPriceAloneDoesNotStopP1nch() public {
         curve.set(1.0e18, 1.02e18); // last trade 2% below NAV, EMA still at NAV
         assertEq(quoter.marketToNav(params), 1e18);
         assertGt(_sell(1e6, SHIPPED).amountOut, 0);
@@ -173,7 +173,7 @@ contract LeveeQuoterTest is Test {
         curve.set(0.995e18, 0.995e18);
         _sell(1e6, SHIPPED); // 0.5% below NAV: accepted
         curve.set(0.98e18, 1e18);
-        vm.expectPartialRevert(LeveeQuoter.UnderlyingDepegged.selector);
+        vm.expectPartialRevert(P1nchQuoter.UnderlyingDepegged.selector);
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
@@ -186,7 +186,7 @@ contract LeveeQuoterTest is Test {
 
     function test_RevertWhen_SpotFarBelowFair() public {
         market.setSpot(0.92e18); // ~5.3% below fair: looks like real news, not a push
-        vm.expectPartialRevert(LeveeQuoter.SpotTooFarBelowFair.selector);
+        vm.expectPartialRevert(P1nchQuoter.SpotTooFarBelowFair.selector);
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
@@ -194,19 +194,19 @@ contract LeveeQuoterTest is Test {
         uint256 need = _sell(100_000e6, SHIPPED).amountOut;
         uint256 have = need / 2; // the strategy is mostly used, so the price is worse too
         uint256 wouldPay = quoter.syOutForPtIn(params, _fair(), RATE, have, 100_000e6);
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.InsufficientLiquidity.selector, wouldPay, have));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.InsufficientLiquidity.selector, wouldPay, have));
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(100_000e6, 0, have), args, "");
     }
 
     function test_RevertWhen_ParamsHaveWrongLength() public {
-        vm.expectRevert(abi.encodeWithSelector(LeveeQuoter.BadParamsLength.selector, 128));
+        vm.expectRevert(abi.encodeWithSelector(P1nchQuoter.BadParamsLength.selector, 128));
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), new bytes(128), "");
     }
 
     function test_RevertWhen_ParamsInconsistent() public {
         params.discountMinBps = 70; // above the max
         bytes memory bad = quoter.encodeParams(params);
-        vm.expectRevert(LeveeQuoter.BadParams.selector);
+        vm.expectRevert(P1nchQuoter.BadParams.selector);
         quoter.decodeParams(bad);
     }
 
@@ -232,7 +232,7 @@ contract LeveeQuoterTest is Test {
     function test_ParamsRoundTrip() public view {
         bytes memory encoded = quoter.encodeParams(params);
         assertEq(encoded.length, quoter.PARAMS_LENGTH());
-        LeveeQuoter.Params memory p = quoter.decodeParams(encoded);
+        P1nchQuoter.Params memory p = quoter.decodeParams(encoded);
         assertEq(keccak256(abi.encode(p)), keccak256(abi.encode(params)));
     }
 

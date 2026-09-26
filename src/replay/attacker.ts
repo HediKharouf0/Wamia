@@ -2,11 +2,11 @@
  * The Aug 25 manipulator, in three modes:
  *
  *   historical  its exact calldata. Each trade carries a min YT out and tight bounds for Pendle's
- *               solver, both computed for the historical state. Once Levee lifts the price between
- *               trades, some of them can revert, which would flatter Levee.
+ *               solver, both computed for the historical state. Once P1nch lifts the price between
+ *               trades, some of them can revert, which would flatter P1nch.
  *   adaptive    the same SY per trade (same limit-order fills), with the min out and solver bounds
  *               reset for whatever the state is. The attack pushes with the same money whatever
- *               Levee does. This is the fair comparison.
+ *               P1nch does. This is the fair comparison.
  *   persistent  adaptive, plus extra SY pushed after the last historical trade (see extraAttackEvents).
  *
  * Selector 0x7b8b4b95 matches this signature (checked against the manipulator's real calldata).
@@ -24,7 +24,7 @@ export const swapExactSyForYtAbi = parseAbi([
   `function swapExactSyForYt(address receiver,address market,uint256 exactSyIn,uint256 minYtOut,(uint256 guessMin,uint256 guessMax,uint256 guessOffchain,uint256 maxIteration,uint256 eps) guessYtOut,(address limitRouter,uint256 epsSkipMarket,${fill} normalFills,${fill} flashFills,bytes optData) limit) returns (uint256 netYtOut,uint256 netSyFee,uint256 netSyInterm)`,
 ]);
 
-/** Pendle's default solver settings (the same ones LeveeArb uses). */
+/** Pendle's default solver settings (the same ones P1nchArb uses). */
 const OPEN_APPROX = { guessMin: 0n, guessMax: maxUint256, guessOffchain: 0n, maxIteration: 256n, eps: 10n ** 14n };
 
 /** The manipulator's calldata for this mode; `syIn` replaces the amount (for extra pushes). */

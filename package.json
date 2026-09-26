@@ -1,7 +1,7 @@
 {
   "name": "p1nch",
   "version": "1.0.0",
-  "description": "Levee: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
+  "description": "P1nch: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsx src/pricing/fairValue.test.ts && tsx src/pricing/units.test.ts && tsx src/strategies/sizing.test.ts && tsx src/strategies/searcher.test.ts",

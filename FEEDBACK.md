@@ -1,6 +1,6 @@
 # Feedback for 1inch (Aqua, SwapVM, SDKs)
 
-What we ran into while building Levee on the deployed Aqua (v1.0.0) and
+What we ran into while building P1nch on the deployed Aqua (v1.0.0) and
 AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
 
 ## SwapVM
@@ -52,7 +52,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
 7. A shipped balance is an allowance, not a reservation.
    `ship` doesn't check the wallet balance, so one wallet can back several
    strategies with the same tokens, and a `pull` fails if the wallet runs short.
-   That's a feature for us (one wallet backs Levee on many markets), but it
+   That's a feature for us (one wallet backs P1nch on many markets), but it
    deserves a sentence in the README so LPs and takers know what a shipped
    balance means.
 

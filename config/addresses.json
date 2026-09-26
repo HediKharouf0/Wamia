@@ -38,7 +38,7 @@
   "aqua": {
     "registry": "0x1111113CCf1426A8E30e2bfF5E005d929bF6a90a",
     "swapVmRouter": "0x111111338c5091E8440b67B168bAe16a668AC0De",
-    "note": "Verified at fork block 25829822 by contracts/test/fork/LeveeFork.t.sol: aqua v1.0.0, router EIP-712 domain '1inch SwapVM v1.0' version 1.0.2 (deployed block 25618917)"
+    "note": "Verified at fork block 25829822 by contracts/test/fork/P1nchFork.t.sol: aqua v1.0.0, router EIP-712 domain '1inch SwapVM v1.0' version 1.0.2 (deployed block 25618917)"
   },
   "reusdMarketPrice": {
     "curvePool": "0xf74c91b36c26543a0aa820bef407a577e5498bf0",
