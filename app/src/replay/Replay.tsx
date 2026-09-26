@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useTween } from "../ui";
 import { PriceChart } from "./PriceChart";
 import { clock, fmtInt, replay, runByKey, shortAddr, stateAt, usdM, type Run, type ReplayEvent } from "./data";
+import { GhLink, VerificationDrawer } from "../landing/VerificationDrawer";
+import { measurements } from "../landing/data";
 
 const SIZES = ["3M", "4M", "5M", "5M-guards"] as const;
 const SPEEDS = [30, 60, 120];
 const DUR = replay.meta.duration;
-const maxDebt = Math.max(...replay.positions.map((p) => p.debtUsd));
 
 function Counter({ value, label }: { value: number; label: string }) {
   const shown = useTween(value);
@@ -19,32 +20,18 @@ function Counter({ value, label }: { value: number; label: string }) {
 }
 
 function Borrowers({ liquidatable }: { liquidatable: number[] }) {
-  const set = new Set(liquidatable);
   const count = liquidatable.length;
+  const debtShare = replay.positions.length ? (100 * count) / replay.positions.length : 0;
   return (
-    <div className="capacity">
-      <div className="tiles-caption">
-        <span>
-          {replay.positions.length} Morpho borrowers, sized by debt
-        </span>
-        <span className="mono" style={{ color: count ? "#ff9a9a" : "var(--ink-3)" }}>
+    <div className="risk-gauge">
+      <div className="meta">
+        <span>{replay.positions.length} Morpho borrowers tracked</span>
+        <span className="count" style={{ color: count ? "var(--critical)" : "var(--ink-3)" }}>
           {count} liquidatable
         </span>
       </div>
-      <div className="grid-borrowers">
-        {replay.positions.map((p, i) => {
-          const s = Math.round(18 + 62 * Math.sqrt(p.debtUsd / maxDebt));
-          return (
-            <div
-              key={p.id}
-              className={`tile ${set.has(i) ? "liq" : ""}`}
-              style={{ width: s, height: s }}
-              title={`${shortAddr(p.user)} · ${p.market} loan · debt $${fmtInt(p.debtUsd)} · liquidatable below ${p.liqPrice.toFixed(4)}`}
-            >
-              {s > 44 ? `$${(p.debtUsd / 1e6).toFixed(1)}M` : ""}
-            </div>
-          );
-        })}
+      <div className="bar">
+        <div className="fill" style={{ width: `${debtShare}%` }} />
       </div>
     </div>
   );
@@ -188,18 +175,35 @@ function Results({ none, run }: { none: Run; run: Run }) {
         Mainnet fork at block {replay.meta.forkBlock}. The attacker's 11 pushes are replayed with fresh slippage bounds; the searcher's arb lands one block after each push.
         Historical liquidations are skipped so the debt that could be liquidated is measured, not executed.
       </p>
-      <p className="note">
-        Measured here:{" "}
-        <a href={`${replay.meta.repoBase}/results/${none.sourceDir}`} target="_blank" rel="noreferrer">
-          {none.sourceDir}
-        </a>{" "}
-        (no backstop) and{" "}
-        <a href={`${replay.meta.repoBase}/results/${run.sourceDir}`} target="_blank" rel="noreferrer">
-          {run.sourceDir}
-        </a>{" "}
-        ({run.title}) — each folder has the raw JSON and a README with the exact command to reproduce it.
-        Full index: <a href={`${replay.meta.repoBase}/docs/MEASUREMENTS.md`} target="_blank" rel="noreferrer">docs/MEASUREMENTS.md</a>.
-      </p>
+      <div className="section-actions" style={{ gridColumn: "1 / -1" }}>
+        <span className="muted" style={{ fontSize: 12 }}>
+          Measured in {none.sourceDir} (no backstop) and {run.sourceDir} ({run.title}).
+        </span>
+        <GhLink repoBase={replay.meta.repoBase} path={`results/${run.sourceDir}`} label="View on GitHub" />
+      </div>
+      <div style={{ gridColumn: "1 / -1" }}>
+        <VerificationDrawer
+          columns={[
+            {
+              heading: "Target contracts",
+              lines: [
+                { k: "PT-reUSD (Pendle PT)", v: measurements.meta.contracts.pendlePt },
+                { k: "Morpho Blue market", v: measurements.meta.contracts.morphoUsdcMarket },
+                { k: "Curve reUSD/USDC EMA", v: measurements.meta.contracts.curvePool },
+              ],
+            },
+            {
+              heading: "This run",
+              lines: [
+                { k: "Fork block", v: String(replay.meta.forkBlock) },
+                { k: "Manipulator wallet", v: measurements.meta.contracts.manipulatorWallet },
+                { k: "Source folder", v: `results/${run.sourceDir}` },
+                { k: "Full index", v: `${replay.meta.repoBase}/docs/MEASUREMENTS.md` },
+              ],
+            },
+          ]}
+        />
+      </div>
     </section>
   );
 }
@@ -271,6 +275,19 @@ export function Replay() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="alert-banner">
+        <div style={{ display: "flex", gap: 12 }}>
+          <span className="dot-ping" />
+          <div>
+            <div className="head">Aug 25, 2026 crisis log analysis</div>
+            <div className="body">
+              PT-reUSD on Morpho was looped to ~91.5% LLTV. At block {replay.meta.forkBlock}, 11 aggressive trades
+              dumped millions of SY, pushing spot down and dragging the oracle TWAP toward the liquidation floor.
+            </div>
+          </div>
+        </div>
+        <span className="tag">Oracle manipulation event</span>
+      </div>
       <div className="headline">
         <div>
           <div className="eyebrow">Aug 25, 2026 · PT-reUSD on Morpho · replayed on a mainnet fork</div>
