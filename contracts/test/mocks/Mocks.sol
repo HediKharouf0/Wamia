@@ -3,6 +3,8 @@ pragma solidity 0.8.30;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IPendleRouterV4 } from "../../src/interfaces/IPendleRouterV4.sol";
+import { LeveeMath } from "../../src/LeveeMath.sol";
+import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 
 contract MockToken is ERC20 {
     uint8 private immutable _decimals;
@@ -37,15 +39,50 @@ contract MockPendleMarket {
     uint256 public expiry;
     address public sy;
     address public pt;
+    uint96 public lastLnImpliedRate;
 
     constructor(uint256 expiry_, address sy_, address pt_) {
         expiry = expiry_;
         sy = sy_;
         pt = pt_;
+        lastLnImpliedRate = uint96(LeveeMath.lnImpliedRate(0.10583e18)); // spot = fair by default
     }
 
     function readTokens() external view returns (address, address, address) {
         return (sy, pt, address(0));
+    }
+
+    function setLnImpliedRate(uint96 lnRate) external {
+        lastLnImpliedRate = lnRate;
+    }
+
+    /// @notice Set Pendle spot to `priceWad` (asset per PT) at the current timestamp.
+    function setSpot(uint256 priceWad) external {
+        uint256 secs = expiry - block.timestamp;
+        lastLnImpliedRate = uint96(uint256(-FPM.lnWad(int256(priceWad))) * 365 days / secs);
+    }
+
+    function _storage() external view returns (int128, int128, uint96, uint16, uint16, uint16) {
+        return (0, 0, lastLnImpliedRate, 0, 0, 0);
+    }
+}
+
+/// @notice Curve StableSwap-NG price views with settable values (1e18 = at NAV).
+contract MockCurvePool {
+    uint256 public emaPrice = 1e18;
+    uint256 public lastPrice = 1e18;
+
+    function set(uint256 ema, uint256 last) external {
+        emaPrice = ema;
+        lastPrice = last;
+    }
+
+    function price_oracle(uint256) external view returns (uint256) {
+        return emaPrice;
+    }
+
+    function last_price(uint256) external view returns (uint256) {
+        return lastPrice;
     }
 }
 

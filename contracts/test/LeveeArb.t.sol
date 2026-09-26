@@ -11,7 +11,8 @@ import { LeveeQuoter } from "../src/LeveeQuoter.sol";
 import { LeveeOrders } from "../src/LeveeOrders.sol";
 import { LeveeArb } from "../src/LeveeArb.sol";
 import { IPendleRouterV4 } from "../src/interfaces/IPendleRouterV4.sol";
-import { MockToken, MockSY, MockPendleMarket, MockPendleRouter } from "./mocks/Mocks.sol";
+import { MockToken, MockSY, MockPendleMarket, MockPendleRouter, MockCurvePool } from "./mocks/Mocks.sol";
+import { LeveeTestParams } from "./utils/LeveeTestParams.sol";
 
 /// LeveeArb on the official Aqua v1.0.0 + AquaSwapVMRouter v1.0.2 sources, with a mock Pendle
 /// router at a fixed PT price. Fork version: fork/LeveeArbFork.t.sol.
@@ -28,6 +29,7 @@ contract LeveeArbTest is Test {
     MockSY sy;
     MockPendleMarket market;
     MockPendleRouter pendle;
+    MockCurvePool curve;
     LeveeArb arbBot;
 
     address lp = makeAddr("lp");
@@ -43,6 +45,8 @@ contract LeveeArbTest is Test {
         sy = new MockSY(1.0968e6);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
         pendle = new MockPendleRouter(pt, sy, PUSHED_PRICE);
+        market.setSpot(PUSHED_PRICE); // the market Levee checks shows the pushed price too
+        curve = new MockCurvePool();
         arbBot = new LeveeArb(ISwapVM(address(router)), IPendleRouterV4(address(pendle)), address(market), IERC20(address(pt)), IERC20(address(sy)));
 
         for (uint256 i = 0; i < 2; i++) {
@@ -53,17 +57,12 @@ contract LeveeArbTest is Test {
         }
     }
 
+    function _params(uint256 shippedSy) internal view returns (LeveeQuoter.Params memory) {
+        return LeveeTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
+    }
+
     function _ship(address maker, uint256 syAmount) internal returns (ISwapVM.Order memory order) {
-        LeveeQuoter.Params memory p = LeveeQuoter.Params({
-            pt: address(pt),
-            sy: address(sy),
-            market: address(market),
-            refYieldWad: 0.10583e18,
-            discountBps: 10,
-            maxPtPerTrade: 5_000_000e6,
-            minSyRate: 1.09e6
-        });
-        order = LeveeOrders.makerOrder(maker, quoter.program(p));
+        order = LeveeOrders.makerOrder(maker, quoter.program(_params(syAmount)));
         address[] memory tokens = new address[](2);
         tokens[0] = address(sy);
         tokens[1] = address(pt);
@@ -90,9 +89,9 @@ contract LeveeArbTest is Test {
         vm.prank(searcher);
         uint256 profit = arbBot.arb(_legs(order, 100_000e6), 1, searcher);
 
-        // Levee paid ~88,441 SY for 100k PT; that SY bought ~102,430 PT on Pendle at 0.9472.
+        // Levee paid ~88,402 SY for 100k PT; that SY bought ~102,370 PT on Pendle at 0.9472.
         uint256 syPaid = lpSyBefore - sy.balanceOf(lp);
-        assertApproxEqRel(syPaid, 88_441e18, 0.0001e18);
+        assertApproxEqRel(syPaid, 88_402e18, 0.0001e18);
         assertEq(pt.balanceOf(lp), 100_000e6, "LP holds the PT");
         assertEq(profit, pt.balanceOf(searcher), "profit paid out");
         assertApproxEqRel(profit, syPaid * 1.0968e6 / PUSHED_PRICE - 100_000e6, 1e12);
@@ -103,6 +102,7 @@ contract LeveeArbTest is Test {
     function test_RevertsWhenPendleIsNotCheaper() public {
         ISwapVM.Order memory order = _ship(lp, 500_000e18);
         pendle.setPrice(FAIR_PRICE); // Levee bids ~0.970, Pendle asks 0.971: no arb
+        market.setSpot(FAIR_PRICE);
         uint256 lpSyBefore = sy.balanceOf(lp);
 
         vm.expectPartialRevert(MockPendleRouter.Slippage.selector);

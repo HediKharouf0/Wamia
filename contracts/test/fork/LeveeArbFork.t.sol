@@ -12,6 +12,7 @@ import { LeveeArb } from "../../src/LeveeArb.sol";
 import { LeveeMath } from "../../src/LeveeMath.sol";
 import { IPendleRouterV4 } from "../../src/interfaces/IPendleRouterV4.sol";
 import { IStandardizedYieldLike } from "../../src/interfaces/IPendle.sol";
+import { LeveeTestParams } from "../utils/LeveeTestParams.sol";
 
 interface IPMarketState {
     function _storage() external view returns (int128, int128, uint96 lastLnImpliedRate, uint16, uint16, uint16);
@@ -31,6 +32,7 @@ contract LeveeArbForkTest is Test {
     address constant MARKET = 0x13285bCbc27F92b47B4EDB99D744C07B48C977c0;
     address constant PT = 0xeCfaFdC7741323a945A163ed068B5a3C43483957;
     address constant SY = 0x9487Bd5A3b16Ecb5F3184453E3ee75B800141648;
+    address constant CURVE_REUSD_USDC = 0xf74c91b36C26543A0Aa820bEf407A577e5498BF0;
 
     LeveeQuoter quoter;
     LeveeArb arbBot;
@@ -51,15 +53,7 @@ contract LeveeArbForkTest is Test {
         arbBot = new LeveeArb(ISwapVM(ROUTER), IPendleRouterV4(PENDLE_ROUTER), MARKET, IERC20(PT), IERC20(SY));
 
         uint256 syRate = IStandardizedYieldLike(SY).exchangeRate();
-        params = LeveeQuoter.Params({
-            pt: PT,
-            sy: SY,
-            market: MARKET,
-            refYieldWad: 0.10583e18,
-            discountBps: 10,
-            maxPtPerTrade: 10_000_000e6,
-            minSyRate: uint128(syRate * 99 / 100)
-        });
+        params = LeveeTestParams.defaults(PT, SY, MARKET, CURVE_REUSD_USDC, 5_000_000e18, syRate * 99 / 100);
         order = LeveeOrders.makerOrder(lp, quoter.program(params));
 
         deal(SY, lp, 5_000_000e18);
@@ -111,7 +105,7 @@ contract LeveeArbForkTest is Test {
         uint256 spotBefore = _spot();
         assertApproxEqRel(spotBefore, 0.9472e18, 0.001e18, "attack reproduced");
 
-        (uint256 fair, uint256 bid,) = quoter.bidPrice(params);
+        (uint256 fair,,) = quoter.checkMarket(params);
         uint256 lpSyBefore = IERC20(SY).balanceOf(lp);
 
         vm.prank(searcher);
@@ -119,7 +113,8 @@ contract LeveeArbForkTest is Test {
 
         uint256 spotAfter = _spot();
         uint256 syPaid = lpSyBefore - IERC20(SY).balanceOf(lp);
-        console2.log("Levee fair / bid (reUSD per PT):", fair, bid);
+        uint256 bid = quoter.marginalBid(params, fair, 5_000_000e18 - syPaid);
+        console2.log("Levee fair / marginal bid after (USD per PT):", fair, bid);
         console2.log("Pendle spot before / after arb:", spotBefore, spotAfter);
         console2.log("LP paid SY for 2M PT:", syPaid);
         console2.log("searcher profit (PT):", profit);

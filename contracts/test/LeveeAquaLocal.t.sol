@@ -10,7 +10,8 @@ import { TakerTraitsLib } from "@1inch/swap-vm/src/libs/TakerTraits.sol";
 
 import { LeveeQuoter } from "../src/LeveeQuoter.sol";
 import { LeveeOrders } from "../src/LeveeOrders.sol";
-import { MockToken, MockSY, MockPendleMarket } from "./mocks/Mocks.sol";
+import { MockToken, MockSY, MockPendleMarket, MockCurvePool } from "./mocks/Mocks.sol";
+import { LeveeTestParams } from "./utils/LeveeTestParams.sol";
 
 /// End to end on the official sources: Aqua v1.0.0 and AquaSwapVMRouter v1.0.2 compiled from
 /// their release tags, with mock Pendle tokens. Ship -> quote -> swap with real token movement.
@@ -25,6 +26,7 @@ contract LeveeAquaLocalTest is Test {
     MockToken pt;
     MockSY sy;
     MockPendleMarket market;
+    MockCurvePool curve;
 
     address lp = makeAddr("lp");
     address lp2 = makeAddr("lp2");
@@ -38,6 +40,7 @@ contract LeveeAquaLocalTest is Test {
         pt = new MockToken("PT", 6);
         sy = new MockSY(1.0968e6);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
+        curve = new MockCurvePool();
 
         sy.mint(lp, 1_000_000e18);
         sy.mint(lp2, 1_000_000e18);
@@ -51,20 +54,17 @@ contract LeveeAquaLocalTest is Test {
         pt.approve(address(router), type(uint256).max);
     }
 
-    function _params() internal view returns (LeveeQuoter.Params memory) {
-        return LeveeQuoter.Params({
-            pt: address(pt),
-            sy: address(sy),
-            market: address(market),
-            refYieldWad: 0.10583e18,
-            discountBps: 10,
-            maxPtPerTrade: 5_000_000e6,
-            minSyRate: 1.09e6
-        });
+    function _params(uint256 shippedSy) internal view returns (LeveeQuoter.Params memory) {
+        return LeveeTestParams.defaults(address(pt), address(sy), address(market), address(curve), shippedSy, 1.09e6);
+    }
+
+    function programFor(uint256 shippedSy) external view returns (bytes memory) {
+        return quoter.program(_params(shippedSy));
     }
 
     function _ship(address maker, uint256 syAmount) internal returns (ISwapVM.Order memory order, bytes32 hash) {
-        order = LeveeOrders.makerOrder(maker, quoter.program(_params()));
+        bytes memory prog = this.programFor(syAmount); // external self-call keeps the stack shallow
+        order = LeveeOrders.makerOrder(maker, prog);
         address[] memory tokens = new address[](2);
         tokens[0] = address(sy);
         tokens[1] = address(pt);
@@ -94,7 +94,8 @@ contract LeveeAquaLocalTest is Test {
 
         assertEq(amountIn, qIn);
         assertEq(amountOut, qOut, "swap pays exactly the quote");
-        assertApproxEqRel(amountOut, 88_441e18, 0.0001e18);
+        // 100k PT at fair 0.970991, 0.10% to 0.15% discount on a 500k strategy: ~88,402 SY
+        assertApproxEqRel(amountOut, 88_402e18, 0.0001e18);
 
         // Real token movement: SY left the LP wallet, PT arrived in it.
         assertEq(sy.balanceOf(taker), amountOut);
@@ -115,7 +116,7 @@ contract LeveeAquaLocalTest is Test {
         (uint256 amountIn, uint256 amountOut,) = router.swap(order, address(pt), address(sy), 50_000e18, td);
         assertEq(amountOut, 50_000e18);
         assertEq(pt.balanceOf(lp), amountIn);
-        assertApproxEqRel(amountIn, 56_535e6, 0.0001e18); // 50,000 * 1.0968 / (0.970991 * 0.999)
+        assertApproxEqRel(amountIn, 56_549e6, 0.0001e18); // 50,000 * 1.0968 / (0.970991 * (1 - 0.125%))
     }
 
     function test_ShippedSyIsTheSpendingCap() public {

@@ -28,10 +28,15 @@ contract SdkParityTest is Test {
             pt: vm.parseJsonAddress(json, ".params.pt"),
             sy: vm.parseJsonAddress(json, ".params.sy"),
             market: vm.parseJsonAddress(json, ".params.market"),
+            curvePool: vm.parseJsonAddress(json, ".params.curvePool"),
             refYieldWad: uint64(vm.parseJsonUint(json, ".params.refYieldWad")),
-            discountBps: uint16(vm.parseJsonUint(json, ".params.discountBps")),
-            maxPtPerTrade: uint128(vm.parseJsonUint(json, ".params.maxPtPerTrade")),
-            minSyRate: uint128(vm.parseJsonUint(json, ".params.minSyRate"))
+            discountMinBps: uint16(vm.parseJsonUint(json, ".params.discountMinBps")),
+            discountMaxBps: uint16(vm.parseJsonUint(json, ".params.discountMaxBps")),
+            shippedSy: uint128(vm.parseJsonUint(json, ".params.shippedSy")),
+            minSyRate: uint128(vm.parseJsonUint(json, ".params.minSyRate")),
+            maxDepegBps: uint16(vm.parseJsonUint(json, ".params.maxDepegBps")),
+            maxDeviationBps: uint16(vm.parseJsonUint(json, ".params.maxDeviationBps")),
+            flags: uint8(vm.parseJsonUint(json, ".params.flags"))
         });
         // The program embeds the quoter's address, so put the quoter where the SDK pointed.
         deployCodeTo("LeveeQuoter.sol:LeveeQuoter", quoter);

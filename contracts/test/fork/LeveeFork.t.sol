@@ -10,7 +10,8 @@ import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { LeveeQuoter } from "../../src/LeveeQuoter.sol";
 import { LeveeOrders } from "../../src/LeveeOrders.sol";
 import { LeveeMath } from "../../src/LeveeMath.sol";
-import { IStandardizedYieldLike } from "../../src/interfaces/IPendle.sol";
+import { IStandardizedYieldLike, ICurveStableSwapNGLike } from "../../src/interfaces/IPendle.sol";
+import { LeveeTestParams } from "../utils/LeveeTestParams.sol";
 
 interface IPMarketStorage {
     function _storage()
@@ -32,6 +33,7 @@ contract LeveeForkTest is Test {
     address constant MARKET = 0x13285bCbc27F92b47B4EDB99D744C07B48C977c0;
     address constant PT = 0xeCfaFdC7741323a945A163ed068B5a3C43483957;
     address constant SY = 0x9487Bd5A3b16Ecb5F3184453E3ee75B800141648;
+    address constant CURVE_REUSD_USDC = 0xf74c91b36C26543A0Aa820bEf407A577e5498BF0;
 
     AquaSwapVMRouter router = AquaSwapVMRouter(payable(ROUTER));
     IAqua aqua = IAqua(AQUA);
@@ -52,16 +54,9 @@ contract LeveeForkTest is Test {
         syRate = IStandardizedYieldLike(SY).exchangeRate();
     }
 
-    function _params() internal view returns (LeveeQuoter.Params memory) {
-        return LeveeQuoter.Params({
-            pt: PT,
-            sy: SY,
-            market: MARKET,
-            refYieldWad: 0.10583e18, // pre-attack implied APY
-            discountBps: 10,
-            maxPtPerTrade: 5_000_000e6,
-            minSyRate: uint128(syRate * 99 / 100) // refuse if SY loses 1% vs the fork block
-        });
+    /// Spec defaults; the SY floor is 1% under the rate at the fork block.
+    function _params(uint256 shippedSy) internal view returns (LeveeQuoter.Params memory) {
+        return LeveeTestParams.defaults(PT, SY, MARKET, CURVE_REUSD_USDC, shippedSy, syRate * 99 / 100);
     }
 
     function _ship(uint256 syAmount) internal returns (ISwapVM.Order memory order, bytes32 hash) {
@@ -69,7 +64,7 @@ contract LeveeForkTest is Test {
         vm.prank(lp);
         IERC20Metadata(SY).approve(AQUA, type(uint256).max);
 
-        order = LeveeOrders.makerOrder(lp, quoter.program(_params()));
+        order = LeveeOrders.makerOrder(lp, quoter.program(_params(syAmount)));
         address[] memory tokens = new address[](2);
         tokens[0] = SY;
         tokens[1] = PT;
@@ -104,9 +99,10 @@ contract LeveeForkTest is Test {
         (,, uint96 lastLn,,,) = IPMarketStorage(MARKET)._storage();
         uint256 expiry = IPMarketStorage(MARKET).expiry();
         uint256 spot = LeveeMath.ptPriceFromLnRate(lastLn, expiry - block.timestamp);
-        (uint256 fair,,) = quoter.bidPrice(_params());
-        console2.log("Pendle spot (asset/PT):", spot);
-        console2.log("Levee fair  (asset/PT):", fair);
+        (uint256 fair, uint256 quoterSpot,) = quoter.checkMarket(_params(1e18));
+        assertEq(quoterSpot, spot, "quoter reads the same spot");
+        console2.log("Pendle spot (USD/PT):", spot);
+        console2.log("Levee fair  (USD/PT):", fair);
         assertApproxEqRel(spot, 0.9710e18, 0.0005e18, "matches the 0.9710 spot measured by the harness");
         assertApproxEqRel(fair, spot, 0.0005e18, "10.583% reference = pre-attack market rate");
 
@@ -141,7 +137,30 @@ contract LeveeForkTest is Test {
         assertEq(ptHeld, 100_000e6);
     }
 
-    function test_RefusesWhenSyDepegs() public {
+    /// reUSD's market price on Curve against its NAV, read by the depeg stop.
+    function test_CurvePoolPricesReusdAgainstNav() public view {
+        uint256 ratio = quoter.marketToNav(_params(1e18));
+        console2.log("reUSD market / NAV (Curve EMA and last):", ratio);
+        assertApproxEqRel(ratio, 0.99997e18, 0.00005e18, "at NAV on Aug 25");
+        assertGe(ratio, 0.99e18, "passes the 1% depeg stop");
+    }
+
+    /// A run: reUSD trades 2% below NAV on Curve while SY.exchangeRate() does not move.
+    function test_RefusesOnReusdMarketDepeg() public {
+        (ISwapVM.Order memory order,) = _ship(1_000_000e18);
+        _fundTaker(100_000e6);
+        // Harness only: USDC now costs 1.02 NAV-reUSD, i.e. reUSD at ~0.98 of NAV.
+        vm.mockCall(
+            CURVE_REUSD_USDC, abi.encodeWithSelector(ICurveStableSwapNGLike.price_oracle.selector, 0), abi.encode(1.02e18)
+        );
+
+        bytes memory td = LeveeOrders.takerData(taker, true, 0, true, false, "");
+        vm.prank(taker);
+        vm.expectPartialRevert(LeveeQuoter.UnderlyingDepegged.selector);
+        router.swap(order, PT, SY, 100_000e6, td);
+    }
+
+    function test_RefusesWhenSyRateDrops() public {
         (ISwapVM.Order memory order,) = _ship(1_000_000e18);
         _fundTaker(100_000e6);
         uint256 depegged = syRate * 95 / 100;
