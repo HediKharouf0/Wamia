@@ -7,18 +7,18 @@ import { AquaSwapVMRouter } from "@1inch/swap-vm/src/routers/AquaSwapVMRouter.so
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { MakerTraits } from "@1inch/swap-vm/src/libs/MakerTraits.sol";
 
-import { P1nchQuoter } from "../src/P1nchQuoter.sol";
-import { P1nchOrders } from "../src/P1nchOrders.sol";
-import { P1nchRateGuard } from "../src/P1nchRateGuard.sol";
-import { P1nchSpendLimit } from "../src/P1nchSpendLimit.sol";
+import { WamiaQuoter } from "../src/WamiaQuoter.sol";
+import { WamiaOrders } from "../src/WamiaOrders.sol";
+import { WamiaRateGuard } from "../src/WamiaRateGuard.sol";
+import { WamiaSpendLimit } from "../src/WamiaSpendLimit.sol";
 
-/// The TypeScript side builds orders with the 1inch swap-vm SDK (src/aqua/p1nch.ts); the contracts
-/// build them with swap-vm's Solidity libraries (P1nchOrders.sol). Both must produce the same
+/// The TypeScript side builds orders with the 1inch swap-vm SDK (src/aqua/wamia.ts); the contracts
+/// build them with swap-vm's Solidity libraries (WamiaOrders.sol). Both must produce the same
 /// bytes, or a strategy shipped from TypeScript would not be the one the tests validate.
 /// Regenerate the fixture with `npx tsx src/aqua/exportSdkVectors.ts` from the repo root.
 contract SdkParityTest is Test {
     string json;
-    P1nchQuoter.Params params;
+    WamiaQuoter.Params params;
     address maker;
     address quoter;
 
@@ -26,7 +26,7 @@ contract SdkParityTest is Test {
         json = vm.readFile("test/fixtures/sdk-vectors.json");
         maker = vm.parseJsonAddress(json, ".maker");
         quoter = vm.parseJsonAddress(json, ".quoter");
-        params = P1nchQuoter.Params({
+        params = WamiaQuoter.Params({
             pt: vm.parseJsonAddress(json, ".params.pt"),
             sy: vm.parseJsonAddress(json, ".params.sy"),
             market: vm.parseJsonAddress(json, ".params.market"),
@@ -41,19 +41,19 @@ contract SdkParityTest is Test {
             flags: uint8(vm.parseJsonUint(json, ".params.flags"))
         });
         // The program embeds the quoter's address, so put the quoter where the SDK pointed.
-        deployCodeTo("P1nchQuoter.sol:P1nchQuoter", quoter);
+        deployCodeTo("WamiaQuoter.sol:WamiaQuoter", quoter);
     }
 
     function test_ParamsMatchSdk() public view {
-        assertEq(P1nchQuoter(quoter).encodeParams(params), vm.parseJsonBytes(json, ".encodedParams"));
+        assertEq(WamiaQuoter(quoter).encodeParams(params), vm.parseJsonBytes(json, ".encodedParams"));
     }
 
     function test_ProgramMatchesSdk() public view {
-        assertEq(P1nchQuoter(quoter).program(params), vm.parseJsonBytes(json, ".program"));
+        assertEq(WamiaQuoter(quoter).program(params), vm.parseJsonBytes(json, ".program"));
     }
 
     function test_OrderAndStrategyHashMatchSdk() public {
-        ISwapVM.Order memory order = P1nchOrders.makerOrder(maker, P1nchQuoter(quoter).program(params));
+        ISwapVM.Order memory order = WamiaOrders.makerOrder(maker, WamiaQuoter(quoter).program(params));
         assertEq(bytes32(MakerTraits.unwrap(order.traits)), vm.parseJsonBytes32(json, ".orderTraits"), "traits");
         assertEq(order.data, vm.parseJsonBytes(json, ".orderData"), "data");
 
@@ -71,10 +71,10 @@ contract SdkParityTest is Test {
         address rateGuard = vm.parseJsonAddress(json, ".guarded.rateGuard");
         address spendLimit = vm.parseJsonAddress(json, ".guarded.spendLimit");
         // The guards' program bytes depend on their address and params, not on the router they trust.
-        deployCodeTo("P1nchRateGuard.sol:P1nchRateGuard", abi.encode(address(1)), rateGuard);
-        deployCodeTo("P1nchSpendLimit.sol:P1nchSpendLimit", abi.encode(address(1)), spendLimit);
+        deployCodeTo("WamiaRateGuard.sol:WamiaRateGuard", abi.encode(address(1)), rateGuard);
+        deployCodeTo("WamiaSpendLimit.sol:WamiaSpendLimit", abi.encode(address(1)), spendLimit);
 
-        P1nchRateGuard.Params memory rp = P1nchRateGuard.Params({
+        WamiaRateGuard.Params memory rp = WamiaRateGuard.Params({
             sy: vm.parseJsonAddress(json, ".guarded.rateGuardParams.sy"),
             rateAtShip: uint128(vm.parseJsonUint(json, ".guarded.rateGuardParams.rateAtShip")),
             shipTimestamp: uint64(vm.parseJsonUint(json, ".guarded.rateGuardParams.shipTimestamp")),
@@ -83,7 +83,7 @@ contract SdkParityTest is Test {
             refYieldWad: uint64(vm.parseJsonUint(json, ".guarded.rateGuardParams.refYieldWad")),
             maxYieldGapBps: uint16(vm.parseJsonUint(json, ".guarded.rateGuardParams.maxYieldGapBps"))
         });
-        P1nchSpendLimit.Params memory sp = P1nchSpendLimit.Params({
+        WamiaSpendLimit.Params memory sp = WamiaSpendLimit.Params({
             shippedSy: uint128(vm.parseJsonUint(json, ".guarded.spendLimitParams.shippedSy")),
             windowSec: uint32(vm.parseJsonUint(json, ".guarded.spendLimitParams.windowSec")),
             minCapBps: uint16(vm.parseJsonUint(json, ".guarded.spendLimitParams.minCapBps")),
@@ -91,11 +91,11 @@ contract SdkParityTest is Test {
             expiry: uint64(vm.parseJsonUint(json, ".guarded.spendLimitParams.expiry"))
         });
         bytes memory prog = bytes.concat(
-            P1nchRateGuard(rateGuard).program(rp), P1nchQuoter(quoter).program(params), P1nchSpendLimit(spendLimit).program(sp)
+            WamiaRateGuard(rateGuard).program(rp), WamiaQuoter(quoter).program(params), WamiaSpendLimit(spendLimit).program(sp)
         );
         assertEq(prog, vm.parseJsonBytes(json, ".guarded.program"), "program");
 
-        ISwapVM.Order memory order = P1nchOrders.makerOrder(maker, prog);
+        ISwapVM.Order memory order = WamiaOrders.makerOrder(maker, prog);
         assertEq(keccak256(abi.encode(order)), vm.parseJsonBytes32(json, ".guarded.strategyHash"), "strategy hash");
     }
 
@@ -108,7 +108,7 @@ contract SdkParityTest is Test {
             bool hasCallback = vm.keyExistsJson(json, string.concat(k, ".callbackData"));
             bytes memory cb = hasCallback ? vm.parseJsonBytes(json, string.concat(k, ".callbackData")) : bytes("");
 
-            bytes memory ours = P1nchOrders.takerData(address(0xB0B), exactIn, threshold, pull, hasCallback, cb);
+            bytes memory ours = WamiaOrders.takerData(address(0xB0B), exactIn, threshold, pull, hasCallback, cb);
             assertEq(ours, vm.parseJsonBytes(json, string.concat(k, ".takerData")), vm.parseJsonString(json, string.concat(k, ".name")));
         }
     }

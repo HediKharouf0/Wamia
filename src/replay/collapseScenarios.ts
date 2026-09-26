@@ -1,18 +1,18 @@
 /**
- * Genuine collapse (spec 7.6 step 6): P1nch must not buy when the price drop is real news.
+ * Genuine collapse (spec 7.6 step 6): Wamia must not buy when the price drop is real news.
  * Each case starts from the fork block with the demo strategy (5M SY, discount 10 to 30 bp):
  *
- *   control  the attack's first 7 pushes, nothing else wrong: P1nch buys (arb goes through)
+ *   control  the attack's first 7 pushes, nothing else wrong: Wamia buys (arb goes through)
  *   switchoff an attacker dumps reUSD on the real Curve pool until the last price is >1% under NAV,
- *            then pushes at once: P1nch must keep buying (its depeg stop reads the EMA, which one
+ *            then pushes at once: Wamia must keep buying (its depeg stop reads the EMA, which one
  *            dump barely moves), so the attacker cannot switch the backstop off cheaply
  *   run      a genuine run: reUSD dumped to 2% under NAV and left there, minutes pass until the
- *            pool's EMA is >1% under NAV, exchange rate unchanged, then the same pushes: P1nch
+ *            pool's EMA is >1% under NAV, exchange rate unchanged, then the same pushes: Wamia
  *            refuses (UnderlyingDepegged)
- *   loss     reUSD's NAV oracle reports 5% less, then the same pushes: P1nch refuses
+ *   loss     reUSD's NAV oracle reports 5% less, then the same pushes: Wamia refuses
  *            (SyBelowFloor). Harness edit: the oracle's stored rate is scaled, as if its updater
  *            had posted a loss; there is no public path to do that on a fork.
- *   jump     Pendle more than 4.5% below fair before any arb reacts: P1nch refuses
+ *   jump     Pendle more than 4.5% below fair before any arb reacts: Wamia refuses
  *            (SpotTooFarBelowFair). First the attacker's trade is pushed in 50k SY steps with no arb in
  *            between, to find how far trades alone can move Pendle (its pool stops accepting them
  *            around 2.6% below fair). Since that is short of 4.5%, the market's stored implied rate
@@ -35,8 +35,8 @@ import { readPendleSnapshot } from "../snapshot/pendle.js";
 import { mineEmptyBlockAt } from "./actions.js";
 import { ptPriceFromYield } from "../pricing/fairValue.js";
 import {
-  deployP1nch,
-  shipP1nch,
+  deployWamia,
+  shipWamia,
   walletFor,
   sendAs,
   aquaSyBalance,
@@ -48,8 +48,8 @@ import {
   CURVE_REUSD,
   MARKET,
   SY,
-  type P1nchLp,
-} from "../aqua/forkP1nch.js";
+  type WamiaLp,
+} from "../aqua/forkWamia.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 
 type Hex = `0x${string}`;
@@ -78,10 +78,10 @@ type Ctx = Awaited<ReturnType<typeof setup>>;
 
 async function setup() {
   await freshFork();
-  const p1nch = await deployP1nch(fork, walletFor("p1nch-deployer"));
+  const wamia = await deployWamia(fork, walletFor("wamia-deployer"));
   const rate = await syExchangeRate(fork);
-  const lp = await shipP1nch(fork, p1nch.quoter, walletFor("p1nch-lp-0"), CAPITAL, (rate * 99n) / 100n, { discountMaxBps: DISCOUNT_MAX_BPS });
-  return { p1nch, lp, searcher: walletFor("p1nch-searcher") };
+  const lp = await shipWamia(fork, wamia.quoter, walletFor("wamia-lp-0"), CAPITAL, (rate * 99n) / 100n, { discountMaxBps: DISCOUNT_MAX_BPS });
+  return { wamia, lp, searcher: walletFor("wamia-searcher") };
 }
 
 async function spotAndFair() {
@@ -101,28 +101,28 @@ async function push(count: number) {
   for (let i = 0; i < count; i++) if (!(await tryPush(manipulatorTxs[i]))) throw new Error(`push ${i + 1} reverted`);
 }
 
-/** The searcher's view: arb if it pays, otherwise the reason (P1nch's error when it refuses). */
-async function p1nchResponds(ctx: Ctx) {
+/** The searcher's view: arb if it pays, otherwise the reason (Wamia's error when it refuses). */
+async function wamiaResponds(ctx: Ctx) {
   const balanceSy = await aquaSyBalance(fork, ctx.lp);
   const sources = [{ order: ctx.lp.order, balanceSy }];
   const maxPt = (balanceSy * (await syExchangeRate(fork)) * 10n) / 10n ** 18n / 9n;
-  const plan = await planArb(fork, ctx.p1nch.arb, ctx.p1nch.arbAbi, ctx.p1nch.errorAbi, ctx.searcher, sources, { ...ARB, maxPt });
+  const plan = await planArb(fork, ctx.wamia.arb, ctx.wamia.arbAbi, ctx.wamia.errorAbi, ctx.searcher, sources, { ...ARB, maxPt });
   if (plan.ptAmount > 0n) {
-    const r = await sendAs(fork, ctx.searcher, { to: ctx.p1nch.arb, data: arbCalldata(ctx.p1nch.arbAbi, sources, plan.ptAmount, ARB.minProfitPt, ctx.searcher) }, { gas: 15_000_000n });
+    const r = await sendAs(fork, ctx.searcher, { to: ctx.wamia.arb, data: arbCalldata(ctx.wamia.arbAbi, sources, plan.ptAmount, ARB.minProfitPt, ctx.searcher) }, { gas: 15_000_000n });
     if (r.status !== "success") return { bought: false, reason: "arb reverted on execution", syUsed: 0, ptAmount: 0 };
   }
   const used = CAPITAL - (await aquaSyBalance(fork, ctx.lp));
   return { bought: used > 0n, reason: plan.reason, syUsed: Number(used) / 1e18, ptAmount: Number(plan.ptAmount) / 1e6 };
 }
 
-async function marketToNav(ctx: Ctx, lp: P1nchLp) {
-  return Number((await fork.readContract({ address: ctx.p1nch.quoter, abi: ctx.p1nch.quoterAbi, functionName: "marketToNav", args: [lp.params] })) as bigint) / 1e18;
+async function marketToNav(ctx: Ctx, lp: WamiaLp) {
+  return Number((await fork.readContract({ address: ctx.wamia.quoter, abi: ctx.wamia.quoterAbi, functionName: "marketToNav", args: [lp.params] })) as bigint) / 1e18;
 }
 
 async function control() {
   const ctx = await setup();
   await push(PUSHES);
-  return { case: "control", ...(await spotAndFair()), ...(await p1nchResponds(ctx)) };
+  return { case: "control", ...(await spotAndFair()), ...(await wamiaResponds(ctx)) };
 }
 
 /** reUSD market price over NAV on Curve (coins[0] = reUSD), by the EMA and by the last trade. */
@@ -140,7 +140,7 @@ async function dumpReusd(target: number) {
   let funding = "storage deal";
   if (!(await dealAnyErc20(fork, REUSD, runner, 1_000_000n * unit))) {
     // Fallback: take it from the SY contract, which holds ~145M reUSD. Its exchange rate comes
-    // from the NAV oracle, not its balance, so this does not move the rate P1nch checks.
+    // from the NAV oracle, not its balance, so this does not move the rate Wamia checks.
     const r = await sendAs(fork, SY, { to: REUSD, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [runner, 1_000_000n * unit] }) });
     if (r.status !== "success") throw new Error("could not fund reUSD");
     funding = "transfer from the SY contract";
@@ -160,7 +160,7 @@ async function switchOff() {
   const dump = await dumpReusd(0.99);
   const curve = await curveMarketToNav();
   await push(PUSHES); // right away, same minute
-  return { case: "switchoff", ...dump, curveEmaMarketToNav: curve.ema, curveLastMarketToNav: curve.last, ...(await spotAndFair()), ...(await p1nchResponds(ctx)) };
+  return { case: "switchoff", ...dump, curveEmaMarketToNav: curve.ema, curveLastMarketToNav: curve.last, ...(await spotAndFair()), ...(await wamiaResponds(ctx)) };
 }
 
 async function reusdRun() {
@@ -186,7 +186,7 @@ async function reusdRun() {
     curveLastMarketToNav: curve.last,
     syRate: rateUnchanged,
     ...(await spotAndFair()),
-    ...(await p1nchResponds(ctx)),
+    ...(await wamiaResponds(ctx)),
   };
 }
 
@@ -204,7 +204,7 @@ async function reportedLoss() {
     syRateBefore: before.toString(),
     syRateAfter: after.toString(),
     ...(await spotAndFair()),
-    ...(await p1nchResponds(ctx)),
+    ...(await wamiaResponds(ctx)),
   };
 }
 
@@ -253,7 +253,7 @@ async function priceJump() {
     deviationBps: ((fair - spot) / fair) * 10_000,
     spot,
     fair,
-    ...(await p1nchResponds(ctx)),
+    ...(await wamiaResponds(ctx)),
   };
 }
 
@@ -268,7 +268,7 @@ async function main() {
     const r: any = await run(); // one shape per case, printed below
     results.push(r);
     console.log(
-      `${r.case.padEnd(8)} spot ${r.spot.toFixed(4)} (fair ${r.fair.toFixed(4)}) -> P1nch ${r.bought ? `BOUGHT ${r.ptAmount.toLocaleString()} PT (${r.syUsed.toLocaleString()} SY)` : `refused: ${r.reason}`}` +
+      `${r.case.padEnd(8)} spot ${r.spot.toFixed(4)} (fair ${r.fair.toFixed(4)}) -> Wamia ${r.bought ? `BOUGHT ${r.ptAmount.toLocaleString()} PT (${r.syUsed.toLocaleString()} SY)` : `refused: ${r.reason}`}` +
         `  [${((Date.now() - started) / 1000).toFixed(0)} s]`
     );
     if (r.case === "switchoff") console.log(`         ${r.reusdSoldOnCurve.toLocaleString()} reUSD dumped on Curve in one go: market/NAV ${r.curveLastMarketToNav.toFixed(4)} last, ${r.curveEmaMarketToNav.toFixed(4)} EMA (stop reads the EMA)`);

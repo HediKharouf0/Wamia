@@ -7,11 +7,11 @@ import { IAqua } from "@1inch/aqua/src/interfaces/IAqua.sol";
 import { AquaSwapVMRouter } from "@1inch/swap-vm/src/routers/AquaSwapVMRouter.sol";
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 
-import { P1nchQuoter } from "../../src/P1nchQuoter.sol";
-import { P1nchOrders } from "../../src/P1nchOrders.sol";
-import { P1nchMath } from "../../src/P1nchMath.sol";
+import { WamiaQuoter } from "../../src/WamiaQuoter.sol";
+import { WamiaOrders } from "../../src/WamiaOrders.sol";
+import { WamiaMath } from "../../src/WamiaMath.sol";
 import { IStandardizedYieldLike, ICurveStableSwapNGLike } from "../../src/interfaces/IPendle.sol";
-import { P1nchTestParams } from "../utils/P1nchTestParams.sol";
+import { WamiaTestParams } from "../utils/WamiaTestParams.sol";
 
 interface IPMarketStorage {
     function _storage()
@@ -24,8 +24,8 @@ interface IPMarketStorage {
 
 /// Mainnet fork at block 25829822 (just before the Aug 25 PT-reUSD attack), against the deployed
 /// Aqua and AquaSwapVMRouter and the real PT/SY. Skipped when ARCHIVE_RPC_URL is not set.
-///   cd contracts && set -a && source ../.env && set +a && forge test --mc P1nchForkTest -vv
-contract P1nchForkTest is Test {
+///   cd contracts && set -a && source ../.env && set +a && forge test --mc WamiaForkTest -vv
+contract WamiaForkTest is Test {
     uint256 constant FORK_BLOCK = 25829822;
 
     address constant AQUA = 0x1111113CCf1426A8E30e2bfF5E005d929bF6a90a;
@@ -37,7 +37,7 @@ contract P1nchForkTest is Test {
 
     AquaSwapVMRouter router = AquaSwapVMRouter(payable(ROUTER));
     IAqua aqua = IAqua(AQUA);
-    P1nchQuoter quoter;
+    WamiaQuoter quoter;
     uint256 syRate;
 
     address lp = makeAddr("lp");
@@ -50,13 +50,13 @@ contract P1nchForkTest is Test {
             return;
         }
         vm.createSelectFork(rpc, FORK_BLOCK);
-        quoter = new P1nchQuoter();
+        quoter = new WamiaQuoter();
         syRate = IStandardizedYieldLike(SY).exchangeRate();
     }
 
     /// Spec defaults; the SY floor is 1% under the rate at the fork block.
-    function _params(uint256 shippedSy) internal view returns (P1nchQuoter.Params memory) {
-        return P1nchTestParams.defaults(PT, SY, MARKET, CURVE_REUSD_USDC, shippedSy, syRate * 99 / 100);
+    function _params(uint256 shippedSy) internal view returns (WamiaQuoter.Params memory) {
+        return WamiaTestParams.defaults(PT, SY, MARKET, CURVE_REUSD_USDC, shippedSy, syRate * 99 / 100);
     }
 
     function _ship(uint256 syAmount) internal returns (ISwapVM.Order memory order, bytes32 hash) {
@@ -64,7 +64,7 @@ contract P1nchForkTest is Test {
         vm.prank(lp);
         IERC20Metadata(SY).approve(AQUA, type(uint256).max);
 
-        order = P1nchOrders.makerOrder(lp, quoter.program(_params(syAmount)));
+        order = WamiaOrders.makerOrder(lp, quoter.program(_params(syAmount)));
         address[] memory tokens = new address[](2);
         tokens[0] = SY;
         tokens[1] = PT;
@@ -98,16 +98,16 @@ contract P1nchForkTest is Test {
 
         (,, uint96 lastLn,,,) = IPMarketStorage(MARKET)._storage();
         uint256 expiry = IPMarketStorage(MARKET).expiry();
-        uint256 spot = P1nchMath.ptPriceFromLnRate(lastLn, expiry - block.timestamp);
+        uint256 spot = WamiaMath.ptPriceFromLnRate(lastLn, expiry - block.timestamp);
         (uint256 fair, uint256 quoterSpot,) = quoter.checkMarket(_params(1e18));
         assertEq(quoterSpot, spot, "quoter reads the same spot");
         console2.log("Pendle spot (USD/PT):", spot);
-        console2.log("P1nch fair  (USD/PT):", fair);
+        console2.log("Wamia fair  (USD/PT):", fair);
         assertApproxEqRel(spot, 0.9710e18, 0.0005e18, "matches the 0.9710 spot measured by the harness");
         assertApproxEqRel(fair, spot, 0.0005e18, "10.583% reference = pre-attack market rate");
 
         // Harness measured ~1.13 PT per SY on Pendle, i.e. ~0.885 SY per PT.
-        uint256 syPerPt = P1nchMath.ptToSyDown(1e6, fair, syRate);
+        uint256 syPerPt = WamiaMath.ptToSyDown(1e6, fair, syRate);
         assertApproxEqRel(syPerPt, 0.885e18, 0.01e18, "1 PT is worth ~0.885 SY");
     }
 
@@ -116,11 +116,11 @@ contract P1nchForkTest is Test {
         assertEq(hash, router.hash(order));
         _fundTaker(100_000e6);
 
-        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = WamiaOrders.takerData(taker, true, 0, true, false, "");
         (, uint256 quotedOut,) = router.quote(order, PT, SY, 100_000e6, td);
 
         uint256 lpSyBefore = IERC20Metadata(SY).balanceOf(lp);
-        td = P1nchOrders.takerData(taker, true, quotedOut, true, false, "");
+        td = WamiaOrders.takerData(taker, true, quotedOut, true, false, "");
         vm.prank(taker);
         (uint256 amountIn, uint256 amountOut,) = router.swap(order, PT, SY, 100_000e6, td);
 
@@ -154,9 +154,9 @@ contract P1nchForkTest is Test {
             CURVE_REUSD_USDC, abi.encodeWithSelector(ICurveStableSwapNGLike.price_oracle.selector, 0), abi.encode(1.02e18)
         );
 
-        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = WamiaOrders.takerData(taker, true, 0, true, false, "");
         vm.prank(taker);
-        vm.expectPartialRevert(P1nchQuoter.UnderlyingDepegged.selector);
+        vm.expectPartialRevert(WamiaQuoter.UnderlyingDepegged.selector);
         router.swap(order, PT, SY, 100_000e6, td);
     }
 
@@ -167,9 +167,9 @@ contract P1nchForkTest is Test {
         // Harness only: simulate a collapse of the underlying.
         vm.mockCall(SY, abi.encodeWithSelector(IStandardizedYieldLike.exchangeRate.selector), abi.encode(depegged));
 
-        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = WamiaOrders.takerData(taker, true, 0, true, false, "");
         vm.prank(taker);
-        vm.expectPartialRevert(P1nchQuoter.SyBelowFloor.selector);
+        vm.expectPartialRevert(WamiaQuoter.SyBelowFloor.selector);
         router.swap(order, PT, SY, 100_000e6, td);
     }
 }

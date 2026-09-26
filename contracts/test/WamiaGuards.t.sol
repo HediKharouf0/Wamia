@@ -7,17 +7,17 @@ import { AquaSwapVMRouter } from "@1inch/swap-vm/src/routers/AquaSwapVMRouter.so
 import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
-import { P1nchQuoter } from "../src/P1nchQuoter.sol";
-import { P1nchOrders } from "../src/P1nchOrders.sol";
-import { P1nchSpendLimit } from "../src/P1nchSpendLimit.sol";
-import { P1nchRateGuard } from "../src/P1nchRateGuard.sol";
+import { WamiaQuoter } from "../src/WamiaQuoter.sol";
+import { WamiaOrders } from "../src/WamiaOrders.sol";
+import { WamiaSpendLimit } from "../src/WamiaSpendLimit.sol";
+import { WamiaRateGuard } from "../src/WamiaRateGuard.sol";
 import { MockToken, MockSY, MockPendleMarket, MockCurvePool } from "./mocks/Mocks.sol";
-import { P1nchTestParams } from "./utils/P1nchTestParams.sol";
+import { WamiaTestParams } from "./utils/WamiaTestParams.sol";
 
 /// The v2 rules as Extruction steps. Unit tests call each guard the way the router does; the end-to-end
 /// tests ship the three-step program [RateGuard][Quoter][SpendLimit] to Aqua and trade through the
 /// official AquaSwapVMRouter.
-contract P1nchGuardsTest is Test {
+contract WamiaGuardsTest is Test {
     uint256 constant FORK_TS = 1787632115;
     uint256 constant EXPIRY = 1796860800;
     uint256 constant SHIPPED = 500_000e18;
@@ -25,9 +25,9 @@ contract P1nchGuardsTest is Test {
 
     Aqua aqua;
     AquaSwapVMRouter router;
-    P1nchQuoter quoter;
-    P1nchSpendLimit spendLimit;
-    P1nchRateGuard rateGuard;
+    WamiaQuoter quoter;
+    WamiaSpendLimit spendLimit;
+    WamiaRateGuard rateGuard;
     MockToken pt;
     MockSY sy;
     MockPendleMarket market;
@@ -40,9 +40,9 @@ contract P1nchGuardsTest is Test {
         vm.warp(FORK_TS);
         aqua = new Aqua();
         router = new AquaSwapVMRouter(address(aqua), makeAddr("weth"), address(this), "AquaSwapVMRouter", "1.0.2");
-        quoter = new P1nchQuoter();
-        spendLimit = new P1nchSpendLimit(address(router));
-        rateGuard = new P1nchRateGuard(address(router));
+        quoter = new WamiaQuoter();
+        spendLimit = new WamiaSpendLimit(address(router));
+        rateGuard = new WamiaRateGuard(address(router));
         pt = new MockToken("PT", 6);
         sy = new MockSY(1.0968e6);
         market = new MockPendleMarket(EXPIRY, address(sy), address(pt));
@@ -59,12 +59,12 @@ contract P1nchGuardsTest is Test {
     // ---------------------------------------------------------------- params
 
     /// 20% of the shipped SY per 12 s window; the cap starts growing 30 days before maturity.
-    function _spend() internal pure returns (P1nchSpendLimit.Params memory p) {
-        p = P1nchSpendLimit.Params({ shippedSy: uint128(SHIPPED), windowSec: 12, minCapBps: 2000, horizonSec: 30 days, expiry: uint64(EXPIRY) });
+    function _spend() internal pure returns (WamiaSpendLimit.Params memory p) {
+        p = WamiaSpendLimit.Params({ shippedSy: uint128(SHIPPED), windowSec: 12, minCapBps: 2000, horizonSec: 30 days, expiry: uint64(EXPIRY) });
     }
 
-    function _rate() internal view returns (P1nchRateGuard.Params memory p) {
-        p = P1nchRateGuard.Params({
+    function _rate() internal view returns (WamiaRateGuard.Params memory p) {
+        p = WamiaRateGuard.Params({
             sy: address(sy),
             rateAtShip: 1.0968e6,
             shipTimestamp: uint64(FORK_TS),
@@ -104,7 +104,7 @@ contract P1nchGuardsTest is Test {
         _spendCall(40_000e18); // exactly the cap
         bytes memory args = spendLimit.encodeParams(_spend());
         vm.prank(address(router));
-        vm.expectRevert(abi.encodeWithSelector(P1nchSpendLimit.SpendLimitExceeded.selector, 100_000e18 + 1, 100_000e18));
+        vm.expectRevert(abi.encodeWithSelector(WamiaSpendLimit.SpendLimitExceeded.selector, 100_000e18 + 1, 100_000e18));
         spendLimit.extruction(false, 0, _query(), _regs(1), args, "");
 
         vm.warp(block.timestamp + 12); // next block: a fresh window
@@ -127,18 +127,18 @@ contract P1nchGuardsTest is Test {
 
     function test_SpendLimitOnlyRouterRecords() public {
         bytes memory args = spendLimit.encodeParams(_spend());
-        vm.expectRevert(abi.encodeWithSelector(P1nchSpendLimit.NotRouter.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(WamiaSpendLimit.NotRouter.selector, address(this)));
         spendLimit.extruction(false, 0, _query(), _regs(1e18), args, "");
     }
 
     function test_SpendLimitMustRunAfterPricing() public {
         bytes memory args = spendLimit.encodeParams(_spend());
-        vm.expectRevert(P1nchSpendLimit.NotPricedYet.selector);
+        vm.expectRevert(WamiaSpendLimit.NotPricedYet.selector);
         spendLimit.extruction(true, 0, _query(), _regs(0), args, "");
     }
 
     function test_SpendLimitParamsRoundTrip() public view {
-        P1nchSpendLimit.Params memory p = spendLimit.decodeParams(spendLimit.encodeParams(_spend()));
+        WamiaSpendLimit.Params memory p = spendLimit.decodeParams(spendLimit.encodeParams(_spend()));
         assertEq(p.shippedSy, SHIPPED);
         assertEq(p.horizonSec, 30 days);
         assertEq(p.expiry, EXPIRY);
@@ -154,7 +154,7 @@ contract P1nchGuardsTest is Test {
         sy.setExchangeRate(1.0974e6); // still above the ship rate, but below the mark
         bytes memory args = rateGuard.encodeParams(_rate());
         vm.prank(address(router));
-        vm.expectRevert(abi.encodeWithSelector(P1nchRateGuard.RateBelowHighWaterMark.selector, 1.0974e6, 1.0975e6));
+        vm.expectRevert(abi.encodeWithSelector(WamiaRateGuard.RateBelowHighWaterMark.selector, 1.0974e6, 1.0975e6));
         rateGuard.extruction(false, 0, _query(), _regs(0), args, "");
     }
 
@@ -163,7 +163,7 @@ contract P1nchGuardsTest is Test {
         bytes memory args = rateGuard.encodeParams(_rate());
         rateGuard.extruction(true, 0, _query(), _regs(0), args, "");
         assertEq(rateGuard.highWaterMark(ORDER), 0);
-        vm.expectRevert(abi.encodeWithSelector(P1nchRateGuard.NotRouter.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(WamiaRateGuard.NotRouter.selector, address(this)));
         rateGuard.extruction(false, 0, _query(), _regs(0), args, "");
     }
 
@@ -172,7 +172,7 @@ contract P1nchGuardsTest is Test {
         sy.setExchangeRate(1.1171e6); // ~25% a year over 30 days: above 10.58% + 10 points
         bytes memory args = rateGuard.encodeParams(_rate());
         vm.prank(address(router));
-        vm.expectPartialRevert(P1nchRateGuard.UnderlyingYieldAboveReference.selector);
+        vm.expectPartialRevert(WamiaRateGuard.UnderlyingYieldAboveReference.selector);
         rateGuard.extruction(false, 0, _query(), _regs(0), args, "");
 
         sy.setExchangeRate(1.1062e6); // ~11% a year: fine
@@ -187,7 +187,7 @@ contract P1nchGuardsTest is Test {
     }
 
     function test_RateGuardParamsRoundTrip() public view {
-        P1nchRateGuard.Params memory p = rateGuard.decodeParams(rateGuard.encodeParams(_rate()));
+        WamiaRateGuard.Params memory p = rateGuard.decodeParams(rateGuard.encodeParams(_rate()));
         assertEq(p.sy, address(sy));
         assertEq(p.rateAtShip, 1.0968e6);
         assertEq(p.maxYieldGapBps, 1000);
@@ -197,12 +197,12 @@ contract P1nchGuardsTest is Test {
     // ---------------------------------------------------------------- end to end: [RateGuard][Quoter][SpendLimit]
 
     function guardedProgram() external view returns (bytes memory) {
-        P1nchQuoter.Params memory q = P1nchTestParams.defaults(address(pt), address(sy), address(market), address(curve), SHIPPED, 1.09e6);
+        WamiaQuoter.Params memory q = WamiaTestParams.defaults(address(pt), address(sy), address(market), address(curve), SHIPPED, 1.09e6);
         return bytes.concat(rateGuard.program(_rate()), quoter.program(q), spendLimit.program(_spend()));
     }
 
     function _shipGuarded() internal returns (ISwapVM.Order memory order) {
-        order = P1nchOrders.makerOrder(lp, this.guardedProgram());
+        order = WamiaOrders.makerOrder(lp, this.guardedProgram());
         address[] memory tokens = new address[](2);
         tokens[0] = address(sy);
         tokens[1] = address(pt);
@@ -213,14 +213,14 @@ contract P1nchGuardsTest is Test {
     }
 
     function _sell(ISwapVM.Order memory order, uint256 ptIn) internal returns (uint256 syOut) {
-        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = WamiaOrders.takerData(taker, true, 0, true, false, "");
         vm.prank(taker);
         (, syOut,) = router.swap(order, address(pt), address(sy), ptIn, td);
     }
 
     function test_GuardedStrategyTradesAndHoldsTheSpendLimit() public {
         ISwapVM.Order memory order = _shipGuarded();
-        bytes memory td = P1nchOrders.takerData(taker, true, 0, true, false, "");
+        bytes memory td = WamiaOrders.takerData(taker, true, 0, true, false, "");
         (, uint256 quoted,) = router.quote(order, address(pt), address(sy), 100_000e6, td);
 
         uint256 syOut = _sell(order, 100_000e6);
@@ -229,7 +229,7 @@ contract P1nchGuardsTest is Test {
         assertEq(pt.balanceOf(lp), 100_000e6);
 
         // ~88.4k of the 100k window budget is used: another 20k PT (~17.7k SY) in the same block is refused.
-        vm.expectPartialRevert(P1nchSpendLimit.SpendLimitExceeded.selector);
+        vm.expectPartialRevert(WamiaSpendLimit.SpendLimitExceeded.selector);
         _sell(order, 20_000e6);
 
         vm.warp(block.timestamp + 12);
@@ -241,8 +241,8 @@ contract P1nchGuardsTest is Test {
         sy.setExchangeRate(1.0975e6);
         _sell(order, 1_000e6); // a trade records the high-water mark
         vm.warp(block.timestamp + 12);
-        sy.setExchangeRate(1.0974e6); // tiny drop, still far above P1nchQuoter's 1.09 floor
-        vm.expectPartialRevert(P1nchRateGuard.RateBelowHighWaterMark.selector);
+        sy.setExchangeRate(1.0974e6); // tiny drop, still far above WamiaQuoter's 1.09 floor
+        vm.expectPartialRevert(WamiaRateGuard.RateBelowHighWaterMark.selector);
         _sell(order, 1_000e6);
     }
 }

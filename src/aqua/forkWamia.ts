@@ -1,7 +1,7 @@
 /**
- * P1nch on the mainnet fork: deploys P1nchQuoter and P1nchArb from the Foundry build, and ships
+ * Wamia on the mainnet fork: deploys WamiaQuoter and WamiaArb from the Foundry build, and ships
  * LP strategies to the deployed Aqua with the deployed AquaSwapVMRouter, through the SDK helpers
- * in p1nch.ts. Test-harness code: wallets are funded with anvil cheats; the strategy logic is not.
+ * in wamia.ts. Test-harness code: wallets are funded with anvil cheats; the strategy logic is not.
  */
 import { readFileSync, existsSync } from "fs";
 import { encodeDeployData, encodeFunctionData, getAddress, keccak256, toBytes, parseAbi, type Abi } from "viem";
@@ -9,7 +9,7 @@ import type { Order } from "@1inch/swap-vm-sdk";
 import type { Client } from "../chain/client.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { dealErc20AtSlot } from "../replay/dealErc20.js";
-import { buildP1nchOrder, shipTx, strategyHash, type P1nchGuards, type P1nchParams } from "./p1nch.js";
+import { buildWamiaOrder, shipTx, strategyHash, type WamiaGuards, type WamiaParams } from "./wamia.js";
 
 type Hex = `0x${string}`;
 
@@ -66,11 +66,11 @@ export async function sendAs(
 }
 
 /** `nextTs` gives each setup transaction an explicit timestamp, so setup never runs into the replay. */
-export async function deployP1nch(client: Client, deployer: Hex, nextTs?: () => number, withGuards = false) {
-  const quoterArt = artifact("P1nchQuoter.sol", "P1nchQuoter");
-  const arbArt = artifact("P1nchArb.sol", "P1nchArb");
-  const rateGuardArt = artifact("P1nchRateGuard.sol", "P1nchRateGuard");
-  const spendLimitArt = artifact("P1nchSpendLimit.sol", "P1nchSpendLimit");
+export async function deployWamia(client: Client, deployer: Hex, nextTs?: () => number, withGuards = false) {
+  const quoterArt = artifact("WamiaQuoter.sol", "WamiaQuoter");
+  const arbArt = artifact("WamiaArb.sol", "WamiaArb");
+  const rateGuardArt = artifact("WamiaRateGuard.sol", "WamiaRateGuard");
+  const spendLimitArt = artifact("WamiaSpendLimit.sol", "WamiaSpendLimit");
   const deploy = async (art: { abi: Abi; bytecode: Hex }, args: unknown[]) => {
     const receipt = await sendAs(client, deployer, { data: encodeDeployData({ abi: art.abi, bytecode: art.bytecode, args }) }, { gas: 8_000_000n, timestamp: nextTs?.() });
     if (receipt.status !== "success" || !receipt.contractAddress) throw new Error("deployment failed");
@@ -81,13 +81,13 @@ export async function deployP1nch(client: Client, deployer: Hex, nextTs?: () => 
   // The v2 rules as separate Extruction steps; they only accept state writes from the router.
   const rateGuard = withGuards ? await deploy(rateGuardArt, [ROUTER]) : null;
   const spendLimit = withGuards ? await deploy(spendLimitArt, [ROUTER]) : null;
-  // Custom errors from all P1nch contracts, to name reverts seen by the searcher.
+  // Custom errors from all Wamia contracts, to name reverts seen by the searcher.
   const errorAbi = [...quoterArt.abi, ...arbArt.abi, ...rateGuardArt.abi, ...spendLimitArt.abi].filter((x: any) => x.type === "error") as Abi;
   return { quoter, arb, rateGuard, spendLimit, quoterAbi: quoterArt.abi, arbAbi: arbArt.abi, errorAbi };
 }
 
-/** Spec 7.3 defaults, the same as contracts/test/utils/P1nchTestParams.sol. */
-export function defaultParams(shippedSy: bigint, minSyRate: bigint): P1nchParams {
+/** Spec 7.3 defaults, the same as contracts/test/utils/WamiaTestParams.sol. */
+export function defaultParams(shippedSy: bigint, minSyRate: bigint): WamiaParams {
   return {
     pt: PT,
     sy: SY,
@@ -104,17 +104,17 @@ export function defaultParams(shippedSy: bigint, minSyRate: bigint): P1nchParams
   };
 }
 
-export type P1nchLp = { wallet: Hex; params: P1nchParams; order: Order; hash: Hex; shippedSy: bigint };
+export type WamiaLp = { wallet: Hex; params: WamiaParams; order: Order; hash: Hex; shippedSy: bigint };
 
-/** Funds an LP wallet with SY, approves Aqua once and ships a P1nch strategy built with the SDK. */
-export async function shipP1nch(
+/** Funds an LP wallet with SY, approves Aqua once and ships a Wamia strategy built with the SDK. */
+export async function shipWamia(
   client: Client,
   quoter: Hex,
   wallet: Hex,
   shippedSy: bigint,
   minSyRate: bigint,
   opts: { discountMaxBps?: number | undefined; nextTs?: () => number; guards?: { rateGuard: Hex; spendLimit: Hex } | undefined } = {}
-): Promise<P1nchLp> {
+): Promise<WamiaLp> {
   const ok = await dealErc20AtSlot(client, SY, wallet, shippedSy, SY_BALANCE_SLOT);
   if (!ok) throw new Error("SY funding failed");
   await sendAs(
@@ -128,7 +128,7 @@ export async function shipP1nch(
   if (opts.discountMaxBps !== undefined) params.discountMaxBps = opts.discountMaxBps;
   const shipTs = opts.nextTs?.();
   const guards = opts.guards ? await demoGuards(client, opts.guards, params, shipTs) : undefined;
-  const order = buildP1nchOrder(wallet, quoter, params, guards);
+  const order = buildWamiaOrder(wallet, quoter, params, guards);
   const receipt = await sendAs(client, wallet, shipTx(AQUA, ROUTER, order, SY, PT, shippedSy), { timestamp: shipTs });
   if (receipt.status !== "success") throw new Error(`ship failed for ${wallet}`);
   return { wallet, params, order, hash: strategyHash(order), shippedSy };
@@ -139,7 +139,7 @@ export async function shipP1nch(
  * the last 30 days to maturity; any drop of the SY rate below its high-water mark refused; after
  * 3 days, refuse if reUSD's realized yield exceeds the reference by more than 10 points.
  */
-async function demoGuards(client: Client, at: { rateGuard: Hex; spendLimit: Hex }, params: P1nchParams, shipTs?: number): Promise<P1nchGuards> {
+async function demoGuards(client: Client, at: { rateGuard: Hex; spendLimit: Hex }, params: WamiaParams, shipTs?: number): Promise<WamiaGuards> {
   const ts = shipTs ?? Number((await client.getBlock({ blockTag: "latest" })).timestamp);
   return {
     rateGuard: at.rateGuard,
@@ -164,7 +164,7 @@ async function demoGuards(client: Client, at: { rateGuard: Hex; spendLimit: Hex 
 }
 
 /** SY still available to the strategy in Aqua (its virtual balance). */
-export async function aquaSyBalance(client: Client, lp: P1nchLp): Promise<bigint> {
+export async function aquaSyBalance(client: Client, lp: WamiaLp): Promise<bigint> {
   const [sy] = await client.readContract({
     address: AQUA,
     abi: aquaAbi,
@@ -182,8 +182,8 @@ export async function syExchangeRate(client: Client): Promise<bigint> {
   return client.readContract({ address: SY, abi: erc20Abi, functionName: "exchangeRate" });
 }
 
-/** P1nch's fair value and marginal bid (USD per PT, wad) for a strategy; null if it refuses. */
-export async function p1nchBid(client: Client, quoter: Hex, quoterAbi: Abi, lp: P1nchLp, balanceSy: bigint) {
+/** Wamia's fair value and marginal bid (USD per PT, wad) for a strategy; null if it refuses. */
+export async function wamiaBid(client: Client, quoter: Hex, quoterAbi: Abi, lp: WamiaLp, balanceSy: bigint) {
   try {
     const [fairWad] = (await client.readContract({ address: quoter, abi: quoterAbi, functionName: "checkMarket", args: [lp.params] })) as [bigint, bigint, bigint];
     const bidWad = (await client.readContract({ address: quoter, abi: quoterAbi, functionName: "marginalBid", args: [lp.params, fairWad, balanceSy] })) as bigint;

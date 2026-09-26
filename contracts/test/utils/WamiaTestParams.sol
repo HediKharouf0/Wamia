@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import { P1nchQuoter } from "../../src/P1nchQuoter.sol";
+import { WamiaQuoter } from "../../src/WamiaQuoter.sol";
 
-/// Default P1nch parameters used across tests (spec 7.3 values).
-library P1nchTestParams {
+/// Default Wamia parameters used across tests (spec 7.3 values).
+library WamiaTestParams {
     function defaults(address pt, address sy, address market, address curvePool, uint256 shippedSy, uint256 minSyRate)
         internal
         pure
-        returns (P1nchQuoter.Params memory p)
+        returns (WamiaQuoter.Params memory p)
     {
         p.pt = pt;
         p.sy = sy;

@@ -69,12 +69,12 @@ function Protection({ state }: { state: LiveState }) {
       <h3>Is it protected?</h3>
       {mo ? (
         <p style={{ margin: 0, fontSize: 15 }}>
-          P1nch can absorb <b>${fmt(capUsd / 1e6, 2)}M</b> of PT sales. <b>${fmt(need / 1e6, 2)}M</b> of debt sits within 3% of liquidation, and{" "}
+          Wamia can absorb <b>${fmt(capUsd / 1e6, 2)}M</b> of PT sales. <b>${fmt(need / 1e6, 2)}M</b> of debt sits within 3% of liquidation, and{" "}
           <b style={{ color: mo.liquidatableDebt > 0 ? "#ff9a9a" : "inherit" }}>${fmt(mo.liquidatableDebt / 1e6, 2)}M</b> is liquidatable now.
         </p>
       ) : (
         <p style={{ margin: 0, fontSize: 15 }}>
-          P1nch can absorb <b>${fmt(capUsd / 1e6, 2)}M</b> of PT sales. The local chain has no Morpho, so debt at risk is only shown on the fork.
+          Wamia can absorb <b>${fmt(capUsd / 1e6, 2)}M</b> of PT sales. The local chain has no Morpho, so debt at risk is only shown on the fork.
         </p>
       )}
       <div className="gauge" aria-hidden>
@@ -82,7 +82,7 @@ function Protection({ state }: { state: LiveState }) {
         {mo && <div className="need" style={{ left: `${(100 * need) / scale}%` }} />}
       </div>
       <div className="legend">
-        <span><i style={{ background: "var(--p1nch)", height: 8 }} />real backstop capacity, at NAV</span>
+        <span><i style={{ background: "var(--wamia)", height: 8 }} />real backstop capacity, at NAV</span>
         {mo && <span><i style={{ background: "var(--ink)", width: 2, height: 10 }} />debt within 3% of liquidation</span>}
       </div>
       <p className="muted" style={{ margin: 0, fontSize: 12 }}>
@@ -102,7 +102,7 @@ function Rules({ state, run, busy }: { state: LiveState; run: (l: string, p: str
         <h3>Safety rules</h3>
         <span className={`pill ${refuses ? "bad" : "good"}`}>
           <span className="led" />
-          {refuses ? "P1nch steps aside" : "P1nch is buying"}
+          {refuses ? "Wamia steps aside" : "Wamia is buying"}
         </span>
       </div>
       <div className="rules">
@@ -137,7 +137,7 @@ function Rules({ state, run, busy }: { state: LiveState; run: (l: string, p: str
       </div>
       {state.chain.scenario && (
         <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-          Now push the market from the “Protect a market” tab or with the button below: the searcher finds no arb, because P1nch refuses to buy.
+          Now push the market from the “Protect a market” tab or with the button below: the searcher finds no arb, because Wamia refuses to buy.
         </p>
       )}
       <button className="btn primary" disabled={busy} onClick={() => run("Pushing", "push", { sy: 100_000 })}>

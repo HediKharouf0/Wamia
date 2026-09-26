@@ -4,7 +4,7 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 
 // `npm run app` serves the full app; the live screens talk to the local fork server through /api.
 // `npm run app:hosted` builds only what needs no chain (the replay) into one self-contained HTML file.
-const hosted = process.env.P1NCH_HOSTED === "1";
+const hosted = process.env.WAMIA_HOSTED === "1";
 
 export default defineConfig({
   root: "app",

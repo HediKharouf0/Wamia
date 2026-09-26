@@ -50,23 +50,23 @@ function Borrowers({ liquidatable }: { liquidatable: number[] }) {
   );
 }
 
-function Side({ run, t, withP1nch }: { run: Run; t: number; withP1nch: boolean }) {
+function Side({ run, t, withWamia }: { run: Run; t: number; withWamia: boolean }) {
   const now = stateAt(run, t);
   const left = useTween(now.syLeft, 350);
   return (
     <section className="panel side" aria-label={run.title}>
       <div className="side-head">
         <div>
-          <div className="eyebrow">{withP1nch ? "With P1nch" : "Without a backstop"}</div>
+          <div className="eyebrow">{withWamia ? "With Wamia" : "Without a backstop"}</div>
           <div className="side-title">
-            <span className="dot" style={{ background: withP1nch ? "var(--p1nch)" : "var(--ink-3)" }} />
-            {withP1nch ? `${run.title} shipped on Aqua` : "What happened on Aug 25"}
+            <span className="dot" style={{ background: withWamia ? "var(--wamia)" : "var(--ink-3)" }} />
+            {withWamia ? `${run.title} shipped on Aqua` : "What happened on Aug 25"}
           </div>
         </div>
         <Counter value={now.debtAtRisk} label="debt liquidatable now" />
       </div>
-      <PriceChart run={run} t={t} showFills={withP1nch} />
-      {withP1nch ? (
+      <PriceChart run={run} t={t} showFills={withWamia} />
+      {withWamia ? (
         <div className="capacity">
           <div className="meta">
             <span>Backstop left</span>
@@ -92,7 +92,7 @@ function Side({ run, t, withP1nch }: { run: Run; t: number; withP1nch: boolean }
   );
 }
 
-type FeedItem = { key: string; t: number; side: "none" | "p1nch" | "both"; ev: ReplayEvent };
+type FeedItem = { key: string; t: number; side: "none" | "wamia" | "both"; ev: ReplayEvent };
 
 function Feed({ items, t }: { items: FeedItem[]; t: number }) {
   // Borrowers that cross the line between the same two measurements share one line.
@@ -113,7 +113,7 @@ function Feed({ items, t }: { items: FeedItem[]; t: number }) {
             <span className="when">{clock(et)}</span>
             <span
               className="mark"
-              style={{ background: ev.kind === "push" ? "var(--spot)" : ev.kind === "fill" ? "var(--p1nch)" : "var(--critical)" }}
+              style={{ background: ev.kind === "push" ? "var(--spot)" : ev.kind === "fill" ? "var(--wamia)" : "var(--critical)" }}
             />
             <span className="what">
               {ev.kind === "push" && (
@@ -126,13 +126,13 @@ function Feed({ items, t }: { items: FeedItem[]; t: number }) {
               )}
               {ev.kind === "fill" && (
                 <>
-                  <b>P1nch fill</b>: bought {fmtInt(ev.ptBought)} PT for {fmtInt(ev.syPaid)} SY at {ev.price.toFixed(4)}; spot {ev.spotBefore.toFixed(4)} → {ev.spotAfter.toFixed(4)}{" "}
+                  <b>Wamia fill</b>: bought {fmtInt(ev.ptBought)} PT for {fmtInt(ev.syPaid)} SY at {ev.price.toFixed(4)}; spot {ev.spotBefore.toFixed(4)} → {ev.spotAfter.toFixed(4)}{" "}
                   <span className="muted mono">fork block {ev.block}</span>
                 </>
               )}
               {ev.kind === "liquidatable" && (
                 <>
-                  <b style={{ color: "#ff9a9a" }}>{side === "p1nch" ? "With P1nch" : "Without P1nch (left)"}</b>:{" "}
+                  <b style={{ color: "#ff9a9a" }}>{side === "wamia" ? "With Wamia" : "Without Wamia (left)"}</b>:{" "}
                   {group.length === 1 ? (
                     <>
                       {shortAddr(replay.positions[ev.position]!.user)} became liquidatable, ${fmtInt(ev.debtUsd)} of {replay.positions[ev.position]!.market} debt
@@ -164,7 +164,7 @@ function Results({ none, run }: { none: Run; run: Run }) {
       </div>
       <div className="stat">
         <div className="v" style={{ color: s.peakDebtAtRisk ? "#ff9a9a" : "var(--ink)" }}>{usdM(s.peakDebtAtRisk)}</div>
-        <div className="k">with P1nch, {run.title}</div>
+        <div className="k">with Wamia, {run.title}</div>
       </div>
       <div className="stat">
         <div className="v">
@@ -245,8 +245,8 @@ export function Replay() {
       if (ev.kind === "liquidatable") items.push({ key: `n${i}`, t: ev.t, side: "none", ev });
     });
     run.events.forEach((ev, i) => {
-      if (ev.kind === "fill") items.push({ key: `f${run.key}${i}`, t: ev.t, side: "p1nch", ev });
-      if (ev.kind === "liquidatable") items.push({ key: `l${run.key}${i}`, t: ev.t, side: "p1nch", ev });
+      if (ev.kind === "fill") items.push({ key: `f${run.key}${i}`, t: ev.t, side: "wamia", ev });
+      if (ev.kind === "liquidatable") items.push({ key: `l${run.key}${i}`, t: ev.t, side: "wamia", ev });
     });
     return items.sort((a, b) => a.t - b.t);
   }, [none, run]);
@@ -264,7 +264,7 @@ export function Replay() {
           <div className="eyebrow">Aug 25, 2026 · PT-reUSD on Morpho · replayed on a mainnet fork</div>
           <h2>Eleven trades pushed PT down 2.5%. The oracle followed, and {usdM(none.summary.peakDebtAtRisk)} of loans became liquidatable.</h2>
           <p>
-            Left: the attack as it happened. Right: the same trades against a P1nch strategy on Aqua, filled by a searcher one block after each push. Watch the blue oracle line: it's
+            Left: the attack as it happened. Right: the same trades against a Wamia strategy on Aqua, filled by a searcher one block after each push. Watch the blue oracle line: it's
             a roughly 15-minute average, so it keeps falling after spot stops, unless someone buys the dip right away.
           </p>
         </div>
@@ -284,12 +284,12 @@ export function Replay() {
         <span><i style={{ background: "var(--oracle)", height: 3 }} />Morpho oracle (TWAP)</span>
         <span><i className="dash" />Fair value at 10.58%</span>
         <span><i style={{ background: "var(--critical)" }} />First liquidation price</span>
-        <span><i style={{ background: "var(--p1nch)", width: 8, height: 8, transform: "rotate(45deg)" }} />P1nch fill</span>
+        <span><i style={{ background: "var(--wamia)", width: 8, height: 8, transform: "rotate(45deg)" }} />Wamia fill</span>
       </div>
 
       <div className="sides">
-        <Side run={none} t={t} withP1nch={false} />
-        <Side run={run} t={t} withP1nch />
+        <Side run={none} t={t} withWamia={false} />
+        <Side run={run} t={t} withWamia />
       </div>
 
       <section className="panel timeline" aria-label="Playback">

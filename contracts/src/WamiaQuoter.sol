@@ -5,13 +5,13 @@ import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 import { IExtruction } from "@1inch/swap-vm/src/instructions/Extruction.sol";
 import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
-import { P1nchMath } from "./P1nchMath.sol";
+import { WamiaMath } from "./WamiaMath.sol";
 import { IPMarketLike, IStandardizedYieldLike, ICurveStableSwapNGLike } from "./interfaces/IPendle.sol";
 
-/// @title P1nchQuoter
-/// @notice Pricing and risk rules for P1nch strategies, called by SwapVM's `Extruction`
+/// @title WamiaQuoter
+/// @notice Pricing and risk rules for Wamia strategies, called by SwapVM's `Extruction`
 ///         instruction on the deployed AquaSwapVMRouter (swap-vm v1.0.2).
-/// @dev A P1nch strategy is an Aqua-shipped SwapVM order whose program is a single Extruction
+/// @dev A Wamia strategy is an Aqua-shipped SwapVM order whose program is a single Extruction
 ///      pointing here. The LP ships SY (and PT with amount 0); this contract decides on every trade
 ///      whether to buy PT for SY and at what price. The shipped SY is the hard spending cap.
 ///
@@ -23,7 +23,7 @@ import { IPMarketLike, IStandardizedYieldLike, ICurveStableSwapNGLike } from "./
 ///           NAV on the Curve pool, by the pool's EMA price. Catches a run, where the market price
 ///           falls while the NAV (and so the exchange rate) does not move. The EMA only, not the
 ///           last trade: on a thin pool one dump moves the last price, so an attacker could switch
-///           P1nch off for the cost of that dump right before pushing Pendle (60k reUSD did it on
+///           Wamia off for the cost of that dump right before pushing Pendle (60k reUSD did it on
 ///           the fork). Holding the EMA down takes a depeg sustained for minutes.
 ///        5. Max deviation: refuse if Pendle's spot is more than `maxDeviationBps` below fair
 ///           value. A gap that large suggests real news rather than a push.
@@ -35,7 +35,7 @@ import { IPMarketLike, IStandardizedYieldLike, ICurveStableSwapNGLike } from "./
 ///           so the only meaningful cap is the shipped SY.
 ///
 ///      Stateless, so the same view function serves quote() and swap().
-contract P1nchQuoter is IExtruction {
+contract WamiaQuoter is IExtruction {
     /// @notice Index of `Extruction._extruction` in the AquaOpcodes table of swap-vm v1.0.2.
     uint8 public constant EXTRUCTION_OPCODE = 0x20;
     /// @notice Byte length of the packed parameters (see `encodeParams`).
@@ -129,11 +129,11 @@ contract P1nchQuoter is IExtruction {
             require(ratio >= minRatio, UnderlyingDepegged(ratio, minRatio));
         }
 
-        fairWad = P1nchMath.ptPriceFromYield(p.refYieldWad, secondsLeft);
+        fairWad = WamiaMath.ptPriceFromYield(p.refYieldWad, secondsLeft);
         // Only the implied rate is needed from the market's storage tuple.
         // forge-lint: disable-next-line(unused-return)
         (,, uint96 lastLnImpliedRate,,,) = IPMarketLike(p.market)._storage();
-        spotWad = P1nchMath.ptPriceFromLnRate(lastLnImpliedRate, secondsLeft);
+        spotWad = WamiaMath.ptPriceFromLnRate(lastLnImpliedRate, secondsLeft);
         require(spotWad * BPS >= fairWad * (BPS - p.maxDeviationBps), SpotTooFarBelowFair(spotWad, fairWad));
     }
 
@@ -159,7 +159,7 @@ contract P1nchQuoter is IExtruction {
         pure
         returns (uint256)
     {
-        uint256 a = P1nchMath.ptToSyDown(ptIn, fairWad, syRate);
+        uint256 a = WamiaMath.ptToSyDown(ptIn, fairWad, syRate);
         uint256 spanWad = uint256(p.discountMaxBps - p.discountMinBps) * WAD / BPS;
         uint256 den = WAD + FPM.mulDivUp(spanWad, a, 2 * uint256(p.shippedSy));
         return FPM.fullMulDiv(a, _discountFactor(p, _used(p, balanceOut)), den);
@@ -174,10 +174,10 @@ contract P1nchQuoter is IExtruction {
     {
         uint256 mid = _used(p, balanceOut) + (syOut + 1) / 2;
         uint256 bid = fairWad * _discountFactor(p, mid) / WAD;
-        return P1nchMath.syToPtUp(syOut, bid, syRate);
+        return WamiaMath.syToPtUp(syOut, bid, syRate);
     }
 
-    /// @notice The SwapVM program for a P1nch strategy: one Extruction instruction calling this contract.
+    /// @notice The SwapVM program for a Wamia strategy: one Extruction instruction calling this contract.
     /// @dev Layout: [opcode 1 byte][args length 1 byte][this contract 20 bytes][params 129 bytes].
     function program(Params memory p) external view returns (bytes memory) {
         bytes memory params = encodeParams(p);

@@ -1,5 +1,5 @@
 /**
- * P1nch capital sweep on the fork, compared with the no-backstop baseline and the taker runs.
+ * Wamia capital sweep on the fork, compared with the no-backstop baseline and the taker runs.
  *
  *   npm run scenario:maker                                   # default sweep below
  *   npm run scenario:maker -- --capital 2,3 --latency 0,1    # millions of SY
@@ -9,7 +9,7 @@
  *   npm run scenario:maker -- --capital 5 --dmax 30          # flatter discount curve (default 60 bp)
  *   npm run scenario:maker -- --capital 5 --dmax 30 --guards # v2 rules: rate guard + spend limit steps
  *
- * Capital 0 runs the same harness with no P1nch strategy (the baseline for this attacker mode).
+ * Capital 0 runs the same harness with no Wamia strategy (the baseline for this attacker mode).
  * Needs anvil forked at block 25829822 on port 8545 and `forge build` in contracts/.
  */
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -65,7 +65,7 @@ async function main() {
     }
   }
 
-  console.log("\n\n=== P1nch (maker) ===");
+  console.log("\n\n=== Wamia (maker) ===");
   console.log("run | SY used / shipped | fills | oracle min | peak eligible debt | LP hold (annualized) | manipulator ok");
   for (const s of summaries) {
     const e = s.peakEligible;

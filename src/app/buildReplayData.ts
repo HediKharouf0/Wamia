@@ -1,6 +1,6 @@
 /**
  * Builds app/src/data/replay.json, the only input of the app's replay screen, from committed runs:
- * the no-backstop run and the P1nch runs of the same harness (adaptive attacker, next-block searcher,
+ * the no-backstop run and the Wamia runs of the same harness (adaptive attacker, next-block searcher,
  * 30 bp max discount). Everything shown on the replay screen comes from these files.
  *
  *   npm run app:data
@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { ptPriceFromYield, tauFromTimestamps } from "../pricing/fairValue.js";
 
 const EXPIRY = 1796860800; // PT-reUSD maturity, 2026-12-10
-const REF_YIELD = 0.10583; // P1nch's reference implied APY (pre-attack)
+const REF_YIELD = 0.10583; // Wamia's reference implied APY (pre-attack)
 const LLTV = 0.915;
 const END_AFTER_FIRST_PUSH = 1500; // seconds shown; afterwards nothing changes any more
 

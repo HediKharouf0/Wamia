@@ -15,9 +15,9 @@ type Inspection = { hash: string; maker: string; traits: string; programBytes: n
 type Quote = { ok: true; ptIn: number; syOut: number; usdPerPt: number } | { ok: false; reason: string };
 
 const ROLE: Record<string, string> = {
-  P1nchRateGuard: "Runs first. Refuses if SY's exchange rate fell below its high-water mark, or if reUSD's realized yield runs far above the reference.",
-  P1nchQuoter: "Prices the trade: fair value at the reference yield minus a discount that deepens with use. Refuses on a vault loss, a reUSD run, or a gap that looks like news.",
-  P1nchSpendLimit: "Runs after pricing. Caps what the strategy pays per 12 s block, so a bug or an unseen collapse can't drain it at once.",
+  WamiaRateGuard: "Runs first. Refuses if SY's exchange rate fell below its high-water mark, or if reUSD's realized yield runs far above the reference.",
+  WamiaQuoter: "Prices the trade: fair value at the reference yield minus a discount that deepens with use. Refuses on a vault loss, a reUSD run, or a gap that looks like news.",
+  WamiaSpendLimit: "Runs after pricing. Caps what the strategy pays per 12 s block, so a bug or an unseen collapse can't drain it at once.",
 };
 
 /** Human units for the packed parameters. */
@@ -186,7 +186,7 @@ export function Inspector({ initialHash }: { initialHash: string | null }) {
             </dl>
             <p className="muted" style={{ margin: 0, fontSize: 12 }}>
               {state.chain.mode === "fork"
-                ? "On the fork, the router and Aqua are the deployed 1inch contracts; P1nch's own contracts are deployed by the app server."
+                ? "On the fork, the router and Aqua are the deployed 1inch contracts; Wamia's own contracts are deployed by the app server."
                 : "Local chain: Aqua and the router are built from their release tags."}
             </p>
           </section>

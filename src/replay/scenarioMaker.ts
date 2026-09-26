@@ -1,15 +1,15 @@
 /**
- * P1nch maker scenario (spec 7.6) on the mainnet fork at block 25829822.
+ * Wamia maker scenario (spec 7.6) on the mainnet fork at block 25829822.
  *
- *   1. Deploy P1nchQuoter and P1nchArb; ship P1nch strategies (the LP capital) to the deployed
+ *   1. Deploy WamiaQuoter and WamiaArb; ship Wamia strategies (the LP capital) to the deployed
  *      Aqua with the deployed AquaSwapVMRouter.
  *   2. Replay the Aug 25 plan: the 11 manipulator trades (historical or adaptive calldata, see
  *      attacker.ts) and the background transactions, skipping historical liquidations
  *      (state-only mode, as the taker runs).
- *   3. After each Pendle-moving trade, a searcher sizes and sends a P1nchArb backrun: latency 0
+ *   3. After each Pendle-moving trade, a searcher sizes and sends a WamiaArb backrun: latency 0
  *      lands it right behind the trade (same block on mainnet; +1 s here since anvil needs
  *      increasing timestamps), latency 1 in the next block (+12 s). A trade scheduled before the
- *      arb goes first, which is the conservative order for P1nch.
+ *      arb goes first, which is the conservative order for Wamia.
  *   4. Measure like the taker: spot, oracle and eligible debt at every step, plus every fill,
  *      the SY used, the LP's PnL and the manipulator's tx statuses.
  *
@@ -28,22 +28,22 @@ import { attackInput, extraAttackEvents, type AttackerMode } from "./attacker.js
 import { planArb, arbCalldata } from "../strategies/searcher.js";
 import { tauFromTimestamps } from "../pricing/fairValue.js";
 import {
-  deployP1nch,
-  shipP1nch,
+  deployWamia,
+  shipWamia,
   walletFor,
   sendAs,
   aquaSyBalance,
   balanceOf,
   syExchangeRate,
-  p1nchBid,
+  wamiaBid,
   SY_BALANCE_SLOT,
   PENDLE_ROUTER,
   erc20Abi,
   MARKET,
   PT,
   SY,
-  type P1nchLp,
-} from "../aqua/forkP1nch.js";
+  type WamiaLp,
+} from "../aqua/forkWamia.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 
 type Hex = `0x${string}`;
@@ -52,7 +52,7 @@ const FORK_BLOCK = 25829822n;
 const TICK_SECONDS = 60;
 const POST_TICKS = 30;
 const MAX_ARB_ROUNDS = 10;
-const SPEND_WINDOW_SEC = 12; // P1nchSpendLimit window in the demo guards (one mainnet block)
+const SPEND_WINDOW_SEC = 12; // WamiaSpendLimit window in the demo guards (one mainnet block)
 const MAX_SPEND_RETRIES = 100; // safety stop for the loop after the last event
 const FAIR_AT_T0 = 0.971; // PT spot at the fork block, USD per PT
 const EXTRA_PUSH_CHUNK = 50_000n * 10n ** 18n; // the manipulator's largest trade
@@ -88,7 +88,7 @@ const fmt = (raw: bigint, decimals: number, digits = 0) =>
  * file so separate `npm run` commands share it; if anvil was restarted, the revert fails and the
  * run falls back to a reset.
  */
-const SNAPSHOT_FILE = join(tmpdir(), "p1nch-anvil-fork-snapshot");
+const SNAPSHOT_FILE = join(tmpdir(), "wamia-anvil-fork-snapshot");
 export async function freshFork() {
   const saved = existsSync(SNAPSHOT_FILE) ? readFileSync(SNAPSHOT_FILE, "utf8").trim() : "";
   let reverted = false;
@@ -109,7 +109,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
   await freshFork();
   const expiry = Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000);
 
-  // 1. P1nch contracts and LP strategies. Setup transactions get timestamps 1 s apart from the
+  // 1. Wamia contracts and LP strategies. Setup transactions get timestamps 1 s apart from the
   //    fork block, so they are all mined before the first replayed trade (12 s later).
   const plan: any[] = JSON.parse(readFileSync("fixtures/replay-plan.json", "utf8"));
   let setupTs = Number((await fork.getBlock({ blockNumber: FORK_BLOCK })).timestamp);
@@ -118,20 +118,20 @@ export async function runMakerScenario(config: MakerRunConfig) {
     if (setupTs >= Number(plan[0].timeStamp)) throw new Error("setup does not fit before the first replayed trade: use fewer LPs");
     return setupTs;
   };
-  const deployer = walletFor("p1nch-deployer");
-  const searcher = walletFor("p1nch-searcher");
-  const p1nch = await deployP1nch(fork, deployer, nextTs, config.guards === true);
-  const guardAddresses = p1nch.rateGuard && p1nch.spendLimit ? { rateGuard: p1nch.rateGuard, spendLimit: p1nch.spendLimit } : undefined;
+  const deployer = walletFor("wamia-deployer");
+  const searcher = walletFor("wamia-searcher");
+  const wamia = await deployWamia(fork, deployer, nextTs, config.guards === true);
+  const guardAddresses = wamia.rateGuard && wamia.spendLimit ? { rateGuard: wamia.rateGuard, spendLimit: wamia.spendLimit } : undefined;
   const rateAtShip = await syExchangeRate(fork);
   const minSyRate = (rateAtShip * 99n) / 100n;
 
-  const lps: P1nchLp[] = [];
+  const lps: WamiaLp[] = [];
   const nLps = config.capitalSy > 0n ? config.lps : 0; // zero capital: the no-backstop baseline
   for (let i = 0; i < nLps; i++) {
     const share = i === nLps - 1 ? config.capitalSy - (config.capitalSy / BigInt(nLps)) * BigInt(i) : config.capitalSy / BigInt(nLps);
-    lps.push(await shipP1nch(fork, p1nch.quoter, walletFor(`p1nch-lp-${i}`), share, minSyRate, { discountMaxBps: config.discountMaxBps, nextTs, guards: guardAddresses }));
+    lps.push(await shipWamia(fork, wamia.quoter, walletFor(`wamia-lp-${i}`), share, minSyRate, { discountMaxBps: config.discountMaxBps, nextTs, guards: guardAddresses }));
   }
-  console.log(`[${config.label}] quoter ${p1nch.quoter}, arb ${p1nch.arb}, ${lps.length} LP(s) shipped ${fmt(config.capitalSy, 18)} SY`);
+  console.log(`[${config.label}] quoter ${wamia.quoter}, arb ${wamia.arb}, ${lps.length} LP(s) shipped ${fmt(config.capitalSy, 18)} SY`);
 
   // 2. Events: the replay plan, plus extra pushes for a persistent attacker.
   const manipulator = plan.find((e) => e.role === "manipulator").from as Hex;
@@ -189,7 +189,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
 
   /**
    * The searcher keeps arbing while it pays. Pendle prices a whole swap at its post-trade rate, so
-   * one arb stops well short of P1nch's bid and leaves a new opportunity behind; a real searcher
+   * one arb stops well short of Wamia's bid and leaves a new opportunity behind; a real searcher
    * takes it in the same block (a bundle). Rounds are 1 s apart here and never pass `limitTs`,
    * the next scheduled transaction.
    */
@@ -216,7 +216,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     if (stopReason.startsWith("SpendLimitExceeded") && !pending) {
       flushIdle();
       const next = (Math.floor(lastTs / SPEND_WINDOW_SEC) + 1) * SPEND_WINDOW_SEC;
-      console.log(`#${block} spend-limit  DEFER   P1nch pauses arbing for this block`);
+      console.log(`#${block} spend-limit  DEFER   Wamia pauses arbing for this block`);
       console.log(`         why: this block's spend cap is used up; retries once the next ${SPEND_WINDOW_SEC}s window opens (t+${next - lastTs}s)`);
       pending = { dueTs: next, after, newWindow: true };
     }
@@ -233,10 +233,10 @@ export async function runMakerScenario(config: MakerRunConfig) {
       return false;
     }
     const rate = await syExchangeRate(fork);
-    // Upper bound on PT P1nch could buy: all its SY at a price no lower than 0.9 USD per PT.
+    // Upper bound on PT Wamia could buy: all its SY at a price no lower than 0.9 USD per PT.
     const maxPt = (syLeft * rate * 10n) / 10n ** 18n / 9n;
 
-    const plan = await planArb(fork, p1nch.arb, p1nch.arbAbi, p1nch.errorAbi, searcher, sources, { ...ARB, maxPt });
+    const plan = await planArb(fork, wamia.arb, wamia.arbAbi, wamia.errorAbi, searcher, sources, { ...ARB, maxPt });
     if (plan.ptAmount === 0n) {
       stopReason = plan.reason;
       flushIdle();
@@ -250,7 +250,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const receipt = await sendAs(
       fork,
       searcher,
-      { to: p1nch.arb, data: arbCalldata(p1nch.arbAbi, sources, plan.ptAmount, ARB.minProfitPt, searcher) },
+      { to: wamia.arb, data: arbCalldata(wamia.arbAbi, sources, plan.ptAmount, ARB.minProfitPt, searcher) },
       { gas: 15_000_000n, timestamp: ts }
     );
     block = receipt.blockNumber;
@@ -266,7 +266,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const syPaid = sources.reduce((s, x, i) => s + x.balanceSy - balancesAfter[i]!, 0n);
     const profitPt = (await balanceOf(fork, PT, searcher)) - searcherPtBefore;
     const spotAfter = (await readPendleSnapshot(fork, MARKET, block)).ptSpotPrice;
-    const bid = await p1nchBid(fork, p1nch.quoter, p1nch.quoterAbi, lps[0]!, balancesAfter[0]!);
+    const bid = await wamiaBid(fork, wamia.quoter, wamia.quoterAbi, lps[0]!, balancesAfter[0]!);
     const paidUsdPerPt = Number(syPaid * rate) / 1e18 / 1e6 / (Number(plan.ptAmount) / 1e6);
 
     flushIdle();
@@ -361,7 +361,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     } else if (role === "extra") {
       headline = `extra push ${counters.extra} (persistent attacker): spot ${lastSpot.toFixed(4)} -> ${point.ptSpotPrice.toFixed(4)}`;
     } else {
-      headline = `background tx, replayed for state only (not a P1nch decision)`;
+      headline = `background tx, replayed for state only (not a Wamia decision)`;
     }
     console.log(`#${block} ${role.slice(0, 5)}-${counters[role]}  ${ok ? "OK" : "REVERTED"}   ${headline}`);
     if (ok && (role === "manipulator" || role === "extra")) lastSpot = point.ptSpotPrice;
@@ -449,7 +449,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     `  Manipulator: ${summary.manipulator.historicalOk}/11 historical pushes ok` +
       (config.extraAttackSy > 0n ? `, ${summary.manipulator.extraOk} extra pushes ok, ${summary.manipulator.extraReverted} reverted` : "")
   );
-  console.log(`  P1nch: ${summary.arbs} fills after ${summary.pushesAnswered} trades, ${fmt(syUsed, 18)} of ${fmt(config.capitalSy, 18)} SY used (${(summary.usedShare * 100).toFixed(1)}%), ${pt.toLocaleString(undefined, { maximumFractionDigits: 0 })} PT bought`);
+  console.log(`  Wamia: ${summary.arbs} fills after ${summary.pushesAnswered} trades, ${fmt(syUsed, 18)} of ${fmt(config.capitalSy, 18)} SY used (${(summary.usedShare * 100).toFixed(1)}%), ${pt.toLocaleString(undefined, { maximumFractionDigits: 0 })} PT bought`);
   console.log(`  Spot min ${summary.spotMin.toFixed(4)}, oracle min ${summary.oracleMin.toFixed(4)}`);
   console.log(`  Peak eligible: USDC ${e.usdcCount} pos / $${e.usdcDebt.toLocaleString(undefined, { maximumFractionDigits: 0 })}, USDT ${e.usdtCount} pos / $${e.usdtDebt.toLocaleString(undefined, { maximumFractionDigits: 0 })}`);
   if (costUsd > 0) {

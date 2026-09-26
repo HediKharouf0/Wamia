@@ -3,7 +3,7 @@ pragma solidity 0.8.30;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IPendleRouterV4 } from "../../src/interfaces/IPendleRouterV4.sol";
-import { P1nchMath } from "../../src/P1nchMath.sol";
+import { WamiaMath } from "../../src/WamiaMath.sol";
 import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 
 contract MockToken is ERC20 {
@@ -45,7 +45,7 @@ contract MockPendleMarket {
         expiry = expiry_;
         sy = sy_;
         pt = pt_;
-        lastLnImpliedRate = uint96(P1nchMath.lnImpliedRate(0.10583e18)); // spot = fair by default
+        lastLnImpliedRate = uint96(WamiaMath.lnImpliedRate(0.10583e18)); // spot = fair by default
     }
 
     function readTokens() external view returns (address, address, address) {

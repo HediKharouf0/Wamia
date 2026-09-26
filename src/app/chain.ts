@@ -2,9 +2,9 @@
  * The chain behind the app's live screens. Two modes, picked from what runs on 127.0.0.1:8545:
  *
  *   fork   anvil forked from mainnet at block 25829822 (Aqua, the router, Pendle, Morpho, Curve are
- *          the deployed contracts). P1nch's contracts are deployed on top.
+ *          the deployed contracts). Wamia's contracts are deployed on top.
  *   local  a plain anvil (no RPC key needed): Aqua v1.0.0 and AquaSwapVMRouter v1.0.2 built from
- *          their release tags, P1nch, and mock PT/SY/market/Curve/Pendle router, as in localDemo.ts.
+ *          their release tags, Wamia, and mock PT/SY/market/Curve/Pendle router, as in localDemo.ts.
  *
  * Transactions are sent from impersonated test wallets, one block per action, 12 s apart, so the
  * fork keeps living on Aug 25 instead of jumping to today's date.
@@ -29,7 +29,7 @@ import { dealErc20AtSlot } from "../replay/dealErc20.js";
 type Hex = `0x${string}`;
 export type Mode = "fork" | "local";
 
-export const RPC = process.env.P1NCH_RPC ?? "http://127.0.0.1:8545";
+export const RPC = process.env.WAMIA_RPC ?? "http://127.0.0.1:8545";
 export const EXPIRY = BigInt(Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000));
 export const REF_YIELD_WAD = 105_830_000_000_000_000n;
 const SY_BALANCE_SLOT = 2;
@@ -99,7 +99,7 @@ export async function connect(): Promise<Chain> {
   } catch {
     throw new Error(`no chain at ${RPC}. Start anvil first: anvil --fork-url $ARCHIVE_RPC_URL --fork-block-number 25829822 (or plain anvil for local mode)`);
   }
-  const mode = process.env.P1NCH_MODE === "local" || process.env.P1NCH_MODE === "fork" ? process.env.P1NCH_MODE : await detectMode(client);
+  const mode = process.env.WAMIA_MODE === "local" || process.env.WAMIA_MODE === "fork" ? process.env.WAMIA_MODE : await detectMode(client);
 
   const send: Chain["send"] = async (from, tx, opts = {}) => {
     const latest = await client.getBlock({ blockTag: "latest" });
@@ -122,15 +122,15 @@ export async function connect(): Promise<Chain> {
   };
 
   const art = {
-    quoter: artifact("P1nchQuoter.sol", "P1nchQuoter"),
-    arb: artifact("P1nchArb.sol", "P1nchArb"),
-    rateGuard: artifact("P1nchRateGuard.sol", "P1nchRateGuard"),
-    spendLimit: artifact("P1nchSpendLimit.sol", "P1nchSpendLimit"),
+    quoter: artifact("WamiaQuoter.sol", "WamiaQuoter"),
+    arb: artifact("WamiaArb.sol", "WamiaArb"),
+    rateGuard: artifact("WamiaRateGuard.sol", "WamiaRateGuard"),
+    spendLimit: artifact("WamiaSpendLimit.sol", "WamiaSpendLimit"),
   };
   const errorAbi = [...art.quoter.abi, ...art.arb.abi, ...art.rateGuard.abi, ...art.spendLimit.abi].filter((x: any) => x.type === "error") as Abi;
-  const admin = walletFor("p1nch-app-admin");
-  const lp = walletFor("p1nch-app-lp");
-  const searcher = walletFor("p1nch-app-searcher");
+  const admin = walletFor("wamia-app-admin");
+  const lp = walletFor("wamia-app-lp");
+  const searcher = walletFor("wamia-app-searcher");
 
   let aqua: Hex, router: Hex, pt: Hex, sy: Hex, market: Hex, curve: Hex, pendleRouter: Hex, attacker: Hex;
   let dealSy: Chain["dealSy"];
@@ -157,7 +157,7 @@ export async function connect(): Promise<Chain> {
     market = await deploy(admin, mocks("MockPendleMarket"), [EXPIRY, sy, pt]);
     curve = await deploy(admin, mocks("MockCurvePool"), []);
     pendleRouter = await deploy(admin, mocks("MockPendleRouter"), [pt, sy, 971_000_000_000_000_000n]);
-    attacker = walletFor("p1nch-app-attacker");
+    attacker = walletFor("wamia-app-attacker");
     dealSy = async (to, amount) => {
       await send(admin, { to: sy, data: encodeFunctionData({ abi: erc20Abi, functionName: "mint", args: [to, amount] }) }, { gapSec: 1 });
     };

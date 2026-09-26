@@ -24,7 +24,7 @@ function LadderChart({ ladder, size }: { ladder: Ladder; size: number }) {
         className="chart"
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label="Bid ladder: price P1nch pays per PT as the backstop is used"
+        aria-label="Bid ladder: price Wamia pays per PT as the backstop is used"
         onPointerMove={(e) => {
           const box = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
           const u = (((e.clientX - box.left) / box.width) * W - M.l) / (W - M.l - M.r);
@@ -45,24 +45,24 @@ function LadderChart({ ladder, size }: { ladder: Ladder; size: number }) {
         ))}
         <line x1={M.l} x2={W - M.r} y1={y(ladder.fair)} y2={y(ladder.fair)} stroke="var(--fair)" strokeDasharray="4 4" opacity={0.8} />
         <line x1={M.l} x2={W - M.r} y1={y(ladder.spot)} y2={y(ladder.spot)} stroke="var(--spot)" strokeWidth={1.5} />
-        <path d={area} fill="var(--p1nch-soft)" />
-        <path d={d} fill="none" stroke="var(--p1nch)" strokeWidth={2} />
+        <path d={area} fill="var(--wamia-soft)" />
+        <path d={d} fill="none" stroke="var(--wamia)" strokeWidth={2} />
         {hp && (
           <>
             <line x1={x(hp.usedSy)} x2={x(hp.usedSy)} y1={M.t} y2={H - M.b} stroke="var(--ink-2)" />
-            <circle cx={x(hp.usedSy)} cy={y(hp.bid)} r={4} fill="var(--p1nch)" stroke="var(--panel)" strokeWidth={2} />
+            <circle cx={x(hp.usedSy)} cy={y(hp.bid)} r={4} fill="var(--wamia)" stroke="var(--panel)" strokeWidth={2} />
           </>
         )}
       </svg>
       {hp && (
         <div className="tooltip" style={{ left: `${Math.min(55, (x(hp.usedSy) / W) * 100)}%`, top: 4 }}>
           <div className="row"><span>After {fmt(hp.usedSy)} SY used</span></div>
-          <div className="row"><span>P1nch pays</span><span className="mono">{hp.bid.toFixed(4)}</span></div>
+          <div className="row"><span>Wamia pays</span><span className="mono">{hp.bid.toFixed(4)}</span></div>
           <div className="row"><span>Discount to fair</span><span className="mono">{(((ladder.fair - hp.bid) / ladder.fair) * 1e4).toFixed(1)} bp</span></div>
         </div>
       )}
       <div className="legend" style={{ marginTop: 6 }}>
-        <span><i style={{ background: "var(--p1nch)" }} />P1nch bid</span>
+        <span><i style={{ background: "var(--wamia)" }} />Wamia bid</span>
         <span><i className="dash" />Fair value</span>
         <span><i style={{ background: "var(--spot)" }} />Pendle now</span>
       </div>
@@ -283,7 +283,7 @@ export function LpConsole({ onInspect }: { onInspect: (hash: string) => void }) 
 
 export function ActivityLog({ state }: { state: LiveState }) {
   const items = [...state.activity].reverse();
-  const color: Record<string, string> = { push: "var(--spot)", fill: "var(--p1nch)", error: "var(--critical)", ship: "var(--good)", dock: "var(--ink-3)", scenario: "var(--warning)" };
+  const color: Record<string, string> = { push: "var(--spot)", fill: "var(--wamia)", error: "var(--critical)", ship: "var(--good)", dock: "var(--ink-3)", scenario: "var(--warning)" };
   return (
     <section className="panel feed">
       <div className="eyebrow">On chain</div>

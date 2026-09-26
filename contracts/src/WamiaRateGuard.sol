@@ -7,19 +7,19 @@ import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
 import { IStandardizedYieldLike } from "./interfaces/IPendle.sol";
 
-/// @title P1nchRateGuard
-/// @notice Spec 7.4 v2, two checks on the SY exchange rate (reUSD's NAV), before P1nch prices:
+/// @title WamiaRateGuard
+/// @notice Spec 7.4 v2, two checks on the SY exchange rate (reUSD's NAV), before Wamia prices:
 ///         1. High-water mark: the rate should only grow, so refuse on any drop below the highest
 ///            rate seen by this strategy (or the rate at ship), beyond `maxDropBps` of tolerance.
-///            Tighter than P1nchQuoter's fixed floor once the rate has grown.
+///            Tighter than WamiaQuoter's fixed floor once the rate has grown.
 ///         2. Underlying-yield check: once `minElapsed` has passed since ship, the yield reUSD
 ///            actually earned since then, annualized, must not exceed the reference rate by more
 ///            than `maxYieldGapBps`. If the underlying now earns far more than the reference, PT is
-///            worth less than P1nch's fair value says, and P1nch would overpay.
-/// @dev An Extruction step placed BEFORE P1nchQuoter; it never changes the registers. The high-water
+///            worth less than Wamia's fair value says, and Wamia would overpay.
+/// @dev An Extruction step placed BEFORE WamiaQuoter; it never changes the registers. The high-water
 ///      mark is keyed by the router-provided order hash and written only in swap mode and only when
 ///      called by the router, so quotes never move it and nobody can set it from outside.
-contract P1nchRateGuard is IExtruction {
+contract WamiaRateGuard is IExtruction {
     uint8 public constant EXTRUCTION_OPCODE = 0x20;
     /// @notice sy 20 + rateAtShip 16 + shipTimestamp 8 + maxDropBps 2 + minElapsed 4 + refYieldWad 8 + maxYieldGapBps 2
     uint256 public constant PARAMS_LENGTH = 60;
@@ -37,7 +37,7 @@ contract P1nchRateGuard is IExtruction {
         uint64 shipTimestamp; // when it was shipped
         uint16 maxDropBps; // tolerated dip below the high-water mark, e.g. 0
         uint32 minElapsed; // the yield check starts after this long, e.g. 3 days
-        uint64 refYieldWad; // reference implied APY (same as P1nchQuoter's), e.g. 0.10583e18
+        uint64 refYieldWad; // reference implied APY (same as WamiaQuoter's), e.g. 0.10583e18
         uint16 maxYieldGapBps; // refuse if the underlying earns more than reference + this, e.g. 1000
     }
 

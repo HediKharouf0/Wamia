@@ -129,7 +129,7 @@ export function explainRevert(reason: string): string {
     UnderlyingYieldAboveReference: "reUSD now yields far more than the reference rate",
     InsufficientLiquidity: "more than the strategy has left",
     MarketExpired: "the market has matured",
-    OnlyPtToSy: "P1nch only buys PT",
+    OnlyPtToSy: "Wamia only buys PT",
   };
   return map[name] ? `${map[name]} (${name})` : reason;
 }

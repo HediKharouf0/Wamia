@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/// @notice The one PendleRouterV4 function P1nch's arbitrage uses. Types match the canonical
-///         signature verified in the harness: selector 0x2a50917c (checked in P1nchArb.t.sol).
+/// @notice The one PendleRouterV4 function Wamia's arbitrage uses. Types match the canonical
+///         signature verified in the harness: selector 0x2a50917c (checked in WamiaArb.t.sol).
 interface IPendleRouterV4 {
     struct ApproxParams {
         uint256 guessMin;

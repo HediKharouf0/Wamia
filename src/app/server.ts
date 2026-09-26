@@ -12,7 +12,7 @@ import { encodeFunctionData, decodeFunctionResult, keccak256, maxUint256, parseA
 import { ABI } from "@1inch/swap-vm-sdk";
 import type { Order } from "@1inch/swap-vm-sdk";
 import addresses from "../../config/addresses.json" with { type: "json" };
-import { buildP1nchOrder, dockTx, quoteSellPtTx, shipTx, strategyHash, type P1nchGuards, type P1nchParams } from "../aqua/p1nch.js";
+import { buildWamiaOrder, dockTx, quoteSellPtTx, shipTx, strategyHash, type WamiaGuards, type WamiaParams } from "../aqua/wamia.js";
 import { arbCalldata, planArb, revertReason, type ArbSource } from "../strategies/searcher.js";
 import { attackInput } from "../replay/attacker.js";
 import { scaleValueBehind, setPackedFieldBehind } from "../replay/stateCheats.js";
@@ -20,7 +20,7 @@ import { computePositionHealth } from "../health/morphoHealth.js";
 import { connect, erc20Abi, marketAbi, mockCurveAbi, mockRouterAbi, EXPIRY, REF_YIELD_WAD, RPC, type Artifact, type Chain } from "./chain.js";
 
 type Hex = `0x${string}`;
-const PORT = Number(process.env.P1NCH_API_PORT ?? 8787);
+const PORT = Number(process.env.WAMIA_API_PORT ?? 8787);
 const YEAR = 365 * 86_400;
 const WAD = 10n ** 18n;
 
@@ -33,8 +33,8 @@ type Fill = { at: number; block: number; tx: Hex; ptBought: number; syPaid: numb
 type Strategy = {
   hash: Hex;
   order: Order;
-  params: P1nchParams;
-  guards: P1nchGuards | null;
+  params: WamiaParams;
+  guards: WamiaGuards | null;
   shippedSy: bigint;
   shippedAt: number;
   shipTx: Hex;
@@ -74,10 +74,10 @@ async function sample() {
 function plain(reason: string) {
   const name = reason.split("(")[0] ?? reason;
   const map: Record<string, string> = {
-    UnderlyingDepegged: "P1nch refuses: reUSD trades more than 1% below its NAV",
-    SyBelowFloor: "P1nch refuses: SY's exchange rate is below the floor",
-    SpotTooFarBelowFair: "P1nch refuses: Pendle is more than 4.5% below fair value, which looks like news",
-    RateBelowHighWaterMark: "P1nch refuses: SY's rate dropped below its high-water mark",
+    UnderlyingDepegged: "Wamia refuses: reUSD trades more than 1% below its NAV",
+    SyBelowFloor: "Wamia refuses: SY's exchange rate is below the floor",
+    SpotTooFarBelowFair: "Wamia refuses: Pendle is more than 4.5% below fair value, which looks like news",
+    RateBelowHighWaterMark: "Wamia refuses: SY's rate dropped below its high-water mark",
     SpendLimitExceeded: "the spend limit for this block is used up",
     MarketExpired: "the market has matured",
   };
@@ -87,7 +87,7 @@ function plain(reason: string) {
 // ---------------------------------------------------------------------------------------------
 // Reads
 
-function paramsFor(shippedSy: bigint, discountMaxBps = 30): P1nchParams {
+function paramsFor(shippedSy: bigint, discountMaxBps = 30): WamiaParams {
   return {
     pt: chain.pt,
     sy: chain.sy,
@@ -280,7 +280,7 @@ async function ship(amountSy: number, discountMaxBps: number, withGuards: boolea
   const shipped = BigInt(Math.round(amountSy)) * WAD;
   const params = paramsFor(shipped, discountMaxBps);
   const ts = (await now()) + 12;
-  const guards: P1nchGuards | null = withGuards
+  const guards: WamiaGuards | null = withGuards
     ? {
         rateGuard: chain.rateGuard,
         rateGuardParams: { sy: chain.sy, rateAtShip: await syRate(), shipTimestamp: BigInt(ts), maxDropBps: 0, minElapsed: 3 * 86_400, refYieldWad: REF_YIELD_WAD, maxYieldGapBps: 1000 },
@@ -288,7 +288,7 @@ async function ship(amountSy: number, discountMaxBps: number, withGuards: boolea
         spendLimitParams: { shippedSy: shipped, windowSec: 12, minCapBps: 2000, horizonSec: 30 * 86_400, expiry: EXPIRY },
       }
     : null;
-  const order = buildP1nchOrder(chain.lp, chain.quoter, params, guards ?? undefined);
+  const order = buildWamiaOrder(chain.lp, chain.quoter, params, guards ?? undefined);
   const hash = strategyHash(order);
   if (strategies.some((s) => s.hash === hash && !s.docked)) throw new Error("the same strategy is already shipped; change the size or the discount");
   const r = await chain.send(chain.lp, shipTx(chain.aqua, chain.router, order, chain.sy, chain.pt, shipped));
@@ -348,7 +348,7 @@ async function runSearcher() {
     const lefts = await Promise.all(live.map(syLeft));
     const sources: ArbSource[] = live.map((s, i) => ({ order: s.order, balanceSy: lefts[i]! })).filter((s) => s.balanceSy > 0n);
     if (sources.length === 0) {
-      if (round === 1) await log("nofill", "Searcher: no live P1nch strategy to sell to.");
+      if (round === 1) await log("nofill", "Searcher: no live Wamia strategy to sell to.");
       break;
     }
     const rate = await syRate();
@@ -389,7 +389,7 @@ async function runSearcher() {
       s.fills.push({ at, block: Number(r.blockNumber), tx: r.hash, ptBought: pt, syPaid, price: (syPaid * num(rate, 6)) / pt });
     }
     if (chain.mode === "local") {
-      // The mock Pendle router has a fixed price; after the arb the market trades at P1nch's bid.
+      // The mock Pendle router has a fixed price; after the arb the market trades at Wamia's bid.
       const s0 = live.find((s) => (paidBy.get(s.hash) ?? 0n) > 0n)!;
       const fairNow = (await spotAndFair(at)).fair;
       const bid = num((await chain.client.readContract({ address: chain.quoter, abi: chain.art.quoter.abi, functionName: "marginalBid", args: [s0.params, BigInt(Math.round(fairNow * 1e18)), await syLeft(s0)] })) as bigint, 18);
@@ -398,7 +398,7 @@ async function runSearcher() {
     const after = await spotAndFair(await now());
     await log(
       "fill",
-      `Searcher arb ${round}: P1nch bought ${(num(plan.ptAmount, 6)).toLocaleString("en-US", { maximumFractionDigits: 0 })} PT for ${num(paidTotal, 18).toLocaleString("en-US", { maximumFractionDigits: 0 })} SY, searcher kept ${num(plan.profitPt, 6).toFixed(0)} PT (${plan.evals} simulations, ${plan.ms} ms). Spot now ${after.spot.toFixed(4)}.`,
+      `Searcher arb ${round}: Wamia bought ${(num(plan.ptAmount, 6)).toLocaleString("en-US", { maximumFractionDigits: 0 })} PT for ${num(paidTotal, 18).toLocaleString("en-US", { maximumFractionDigits: 0 })} SY, searcher kept ${num(plan.profitPt, 6).toFixed(0)} PT (${plan.evals} simulations, ${plan.ms} ms). Spot now ${after.spot.toFixed(4)}.`,
       r.hash
     );
     if (chain.mode === "local") break; // one fill per push against the fixed-price mock
@@ -526,7 +526,7 @@ async function inspect(hash: Hex) {
       opcode: `0x${step.opcode.toString(16).padStart(2, "0")}`,
       instruction: step.opcode === 0x20 ? "Extruction" : "unknown",
       target: step.target,
-      contract: which === "quoter" ? "P1nchQuoter" : which === "rateGuard" ? "P1nchRateGuard" : which === "spendLimit" ? "P1nchSpendLimit" : "unknown",
+      contract: which === "quoter" ? "WamiaQuoter" : which === "rateGuard" ? "WamiaRateGuard" : which === "spendLimit" ? "WamiaSpendLimit" : "unknown",
       argsBytes: (step.args.length - 2) / 2,
       params: decoded,
       checks: {
@@ -589,7 +589,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? "/", "http://x");
   const path = url.pathname;
   if (startError) return json(res, 503, { error: startError });
-  if (!chain) return json(res, 503, { error: "starting: deploying P1nch on the chain…" });
+  if (!chain) return json(res, 503, { error: "starting: deploying Wamia on the chain…" });
   try {
     if (req.method === "GET" && path === "/api/state") {
       const [market, lp] = await Promise.all([readMarket(), readLp()]);
@@ -638,14 +638,14 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-createServer((req, res) => void handle(req, res)).listen(PORT, "127.0.0.1", () => console.log(`P1nch app server on http://127.0.0.1:${PORT} (chain ${RPC})`));
+createServer((req, res) => void handle(req, res)).listen(PORT, "127.0.0.1", () => console.log(`Wamia app server on http://127.0.0.1:${PORT} (chain ${RPC})`));
 
 connect()
   .then(async (c) => {
     chain = c;
     baseSnapshot = (await chain.client.request({ method: "evm_snapshot" as any })) as Hex;
     console.log(`${chain.mode} mode: quoter ${chain.quoter}, arb ${chain.arb}, LP ${chain.lp}`);
-    await log("reset", chain.mode === "fork" ? "Connected to the mainnet fork. P1nch deployed next to the real Aqua and router." : "Local mode: Aqua, the router, P1nch and mock Pendle/Curve deployed on a plain anvil.");
+    await log("reset", chain.mode === "fork" ? "Connected to the mainnet fork. Wamia deployed next to the real Aqua and router." : "Local mode: Aqua, the router, Wamia and mock Pendle/Curve deployed on a plain anvil.");
   })
   .catch((e) => {
     startError = e.message;

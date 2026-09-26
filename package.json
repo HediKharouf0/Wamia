@@ -1,7 +1,7 @@
 {
-  "name": "p1nch",
+  "name": "wamia",
   "version": "1.0.0",
-  "description": "P1nch: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
+  "description": "Wamia: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
   "scripts": {
     "typecheck": "tsc --noEmit && tsc -p app/tsconfig.json",
     "test": "tsx src/pricing/fairValue.test.ts && tsx src/pricing/units.test.ts && tsx src/strategies/sizing.test.ts && tsx src/strategies/searcher.test.ts",
@@ -12,20 +12,20 @@
     "app:data": "tsx src/app/buildReplayData.ts",
     "app": "vite --config app/vite.config.ts",
     "app:build": "vite build --config app/vite.config.ts",
-    "app:hosted": "P1NCH_HOSTED=1 vite build --config app/vite.config.ts",
+    "app:hosted": "WAMIA_HOSTED=1 vite build --config app/vite.config.ts",
     "app:server": "tsx src/app/server.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HediKharouf0/p1nch.git"
+    "url": "git+https://github.com/HediKharouf0/wamia.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/HediKharouf0/p1nch/issues"
+    "url": "https://github.com/HediKharouf0/wamia/issues"
   },
-  "homepage": "https://github.com/HediKharouf0/p1nch#readme",
+  "homepage": "https://github.com/HediKharouf0/wamia#readme",
   "dependencies": {
     "@1inch/aqua-sdk": "0.3.4",
     "@1inch/swap-vm-sdk": "0.4.4",

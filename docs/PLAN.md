@@ -10,17 +10,17 @@ UI, real commit history.
 
 - Aqua v1.0.0 and AquaSwapVMRouter v1.0.2 confirmed at fork block 25829822 by
   the fork test (router domain "1inch SwapVM v1.0" 1.0.2). Extruction = 0x20.
-- `P1nchQuoter` to spec 7.4 v1: direction and maturity, SY exchange-rate floor,
+- `WamiaQuoter` to spec 7.4 v1: direction and maturity, SY exchange-rate floor,
   depeg stop on the Curve reUSD/USDC pool (EMA only; the last price alone can be
   moved in one block), max-deviation stop, discount deepening with usage and
   priced over the trade's whole range. The shipped SY is the only cap.
-- Spec 7.4 v2 core as separate Extruction steps: `P1nchRateGuard` (SY rate
-  high-water mark, realized-yield check) and `P1nchSpendLimit` (share of the
+- Spec 7.4 v2 core as separate Extruction steps: `WamiaRateGuard` (SY rate
+  high-water mark, realized-yield check) and `WamiaSpendLimit` (share of the
   shipped SY per 12 s block, growing to 100% at maturity). State written only
   in swap mode and only from the router.
-- TypeScript on the official SDKs (`src/aqua/p1nch.ts`), byte-for-byte parity
+- TypeScript on the official SDKs (`src/aqua/wamia.ts`), byte-for-byte parity
   with Solidity for the plain and the guarded program; local SDK demo.
-- `P1nchArb` (zero capital, through `preTransferInCallback`) and the searcher
+- `WamiaArb` (zero capital, through `preTransferInCallback`) and the searcher
   bot, which sizes each arb by simulation and arbs in several rounds.
 - Maker replay (spec 7.6): adaptive and historical attacker, latency 0 and 1,
   capital sweep, persistent attacker. 5M SY shipped gives zero eligible debt,

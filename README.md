@@ -1,8 +1,8 @@
-# P1nch
+# Wamia
 
 A standing liquidity backstop for Pendle PT markets, built as an Aqua app on 1inch SwapVM.
 
-LPs ship SY to a P1nch strategy on Aqua. The strategy buys PT at a small discount to its fair value, and only while the market looks like it's being pushed rather than repriced. When someone dumps PT into a thin Pendle pool, a searcher sells that PT to P1nch and buys it back on Pendle in the same transaction, with no capital of its own. That pulls Pendle's price back up before a lending oracle can follow it down.
+LPs ship SY to a Wamia strategy on Aqua. The strategy buys PT at a small discount to its fair value, and only while the market looks like it's being pushed rather than repriced. When someone dumps PT into a thin Pendle pool, a searcher sells that PT to Wamia and buys it back on Pendle in the same transaction, with no capital of its own. That pulls Pendle's price back up before a lending oracle can follow it down.
 
 Built for the 1inch "Build an Aqua App" track. Everything runs on the deployed Aqua (v1.0.0) and AquaSwapVMRouter (swap-vm v1.0.2), unmodified, and is tested on a mainnet fork against the real Pendle, Morpho and Curve contracts.
 
@@ -18,8 +18,8 @@ Nobody was standing there with a deep bid. Keeping idle capital as a standby buy
 
 A bid that is always there, funded by capital that is doing something else in the meantime.
 
-- Aqua lets an LP ship SY to a strategy without locking it. The balance stays in the LP's wallet, so the same wallet can back P1nch on several PT markets at once.
-- SwapVM runs the strategy's program on every quote and swap. P1nch's program is a few Extruction instructions that call our pricing and risk contracts, so the bid is priced onchain from live Pendle, Curve and SY state at the moment of the trade.
+- Aqua lets an LP ship SY to a strategy without locking it. The balance stays in the LP's wallet, so the same wallet can back Wamia on several PT markets at once.
+- SwapVM runs the strategy's program on every quote and swap. Wamia's program is a few Extruction instructions that call our pricing and risk contracts, so the bid is priced onchain from live Pendle, Curve and SY state at the moment of the trade.
 - The bid is standing, so it fills after every manipulator trade, in the next block. Spot never sits low long enough to pull the oracle average down.
 - LPs earn by buying PT below fair value. PT redeems at par at maturity.
 
@@ -27,16 +27,16 @@ A bid that is always there, funded by capital that is doing something else in th
 
 ```
 LP wallet (SY) --ship--> Aqua --> AquaSwapVMRouter
-                                     program: [Extruction -> P1nchRateGuard]   optional, v2
-                                              [Extruction -> P1nchQuoter]      prices PT -> SY
-                                              [Extruction -> P1nchSpendLimit]  optional, v2
+                                     program: [Extruction -> WamiaRateGuard]   optional, v2
+                                              [Extruction -> WamiaQuoter]      prices PT -> SY
+                                              [Extruction -> WamiaSpendLimit]  optional, v2
 
-Searcher --> P1nchArb.arb():  sell PT to P1nch via the router
+Searcher --> WamiaArb.arb():  sell PT to Wamia via the router
                               -> in preTransferInCallback, buy that PT on Pendle with the SY just received
                               -> keep the leftover PT as profit (zero capital, reverts if not profitable)
 ```
 
-`P1nchQuoter` is the pricing step. For every PT sale it:
+`WamiaQuoter` is the pricing step. For every PT sale it:
 
 1. only accepts PT in and SY out, and refuses at or after maturity;
 2. refuses if SY's exchange rate (reUSD's NAV) is below the LP's floor: a real loss in the vault;
@@ -46,8 +46,8 @@ Searcher --> P1nchArb.arb():  sell PT to P1nch via the router
 
 The v2 rules are separate Extruction steps an LP can add around it:
 
-- `P1nchRateGuard` (before pricing): refuses if the SY rate drops below the highest rate the strategy has seen, and, after a few days, if reUSD's realized yield is far above the reference (PT would then be worth less than P1nch thinks).
-- `P1nchSpendLimit` (after pricing): at most a share of the shipped SY per 12 s block (20% in our runs), growing to 100% as maturity approaches, so a pricing bug or an undetected real collapse can't empty a strategy in one block.
+- `WamiaRateGuard` (before pricing): refuses if the SY rate drops below the highest rate the strategy has seen, and, after a few days, if reUSD's realized yield is far above the reference (PT would then be worth less than Wamia thinks).
+- `WamiaSpendLimit` (after pricing): at most a share of the shipped SY per 12 s block (20% in our runs), growing to 100% as maturity approaches, so a pricing bug or an undetected real collapse can't empty a strategy in one block.
 
 Both keep their state keyed by the order hash and write it only in swap mode and only from the router, so quotes never move it and nobody can burn a strategy's budget from outside. Details, parameters and the program layout are in [contracts/README.md](contracts/README.md).
 
@@ -55,16 +55,16 @@ The TypeScript side builds the same orders with `@1inch/swap-vm-sdk` and `@1inch
 
 ## Results
 
-All numbers come from a mainnet fork at block 25829822 replaying the Aug 25 attack with real 12 s blocks. The searcher runs our bot (`src/strategies/searcher.ts`) and lands one block after each manipulator trade. The attacker is adaptive: same SY per trade as on the day, with fresh slippage bounds, so it doesn't give up just because P1nch moved the price. Full tables in [results/maker-results.md](results/maker-results.md).
+All numbers come from a mainnet fork at block 25829822 replaying the Aug 25 attack with real 12 s blocks. The searcher runs our bot (`src/strategies/searcher.ts`) and lands one block after each manipulator trade. The attacker is adaptive: same SY per trade as on the day, with fresh slippage bounds, so it doesn't give up just because Wamia moved the price. Full tables in [results/maker-results.md](results/maker-results.md).
 
 | Setup | Capital | Debt eligible for liquidation | Oracle min |
 |---|---|---|---|
 | No backstop | 0 | $37.35M (20 positions) | 0.9472 |
 | Reactive taker bot (buys after the drop) | 5M SY budget | $11.23M | 0.9629 |
-| P1nch | 3M SY shipped | $13.02M (8) | 0.9615 |
-| P1nch | 4M SY shipped | $0.20M (1) | 0.9650 |
-| P1nch | 5M SY shipped (4.60M used) | $0 | 0.9671 |
-| P1nch with the v2 guards | 5M SY shipped (4.54M used) | $0 | 0.9669 |
+| Wamia | 3M SY shipped | $13.02M (8) | 0.9615 |
+| Wamia | 4M SY shipped | $0.20M (1) | 0.9650 |
+| Wamia | 5M SY shipped (4.60M used) | $0 | 0.9671 |
+| Wamia with the v2 guards | 5M SY shipped (4.54M used) | $0 | 0.9669 |
 
 5M SY is about $5.5M. With the guards on, the spend limit bound once (1,000,000 SY in the block after the eighth push) and the searcher finished the job in the next block, with the same outcome.
 
@@ -72,11 +72,11 @@ What the LP gets at 5M: an average price of 0.9691 USD per PT against a fair val
 
 The 5M result also holds with the arb in the same block as each push (latency 0) and with the attacker's exact historical calldata.
 
-### Genuine collapses: P1nch must step aside
+### Genuine collapses: Wamia must step aside
 
-A backstop that buys into a real collapse is just a loss. `npm run scenario:collapse` pushes the fork into each case and checks P1nch's decision:
+A backstop that buys into a real collapse is just a loss. `npm run scenario:collapse` pushes the fork into each case and checks Wamia's decision:
 
-| Case | What happens | P1nch |
+| Case | What happens | Wamia |
 |---|---|---|
 | control | the Aug 25 push | buys |
 | switch-off attempt | 60k reUSD dumped on Curve in one block, last price 0.9865 of NAV, EMA still 0.9999 | buys (one block can't switch it off) |
@@ -90,7 +90,7 @@ A detail from the last case: Pendle's own pool refused trades that would take sp
 
 Four screens, in `app/` (`npm run app`, then open http://localhost:5173):
 
-- Aug 25 replay: the fork runs played back block by block, without and with P1nch side by side. Pendle spot, the Morpho oracle catching up with it, the 20 borrowers turning liquidatable one by one, the backstop draining, and each attack trade with its mainnet transaction. Pick 3M, 4M, 5M or 5M with guards. It reads the committed results, so it needs no chain.
+- Aug 25 replay: the fork runs played back block by block, without and with Wamia side by side. Pendle spot, the Morpho oracle catching up with it, the 20 borrowers turning liquidatable one by one, the backstop draining, and each attack trade with its mainnet transaction. Pick 3M, 4M, 5M or 5M with guards. It reads the committed results, so it needs no chain.
 - Protect a market: an LP picks a size and a discount, sees the bid ladder the quoter will pay, and ships to Aqua. The wallet balance sits next to what the strategy was promised, and it doesn't move when you ship. Push the market and watch the searcher fill the strategy.
 - Is it protected?: fair value, Pendle and the oracle, backstop capacity against the debt close to liquidation, and each safety rule as a light. Trigger a vault loss or a news repricing and the lights turn red; the next push gets no fill.
 - Inspect a strategy: the order's program decoded step by step, each Extruction target checked against this repo's build (same code, no proxy, no DELEGATECALL or SELFDESTRUCT), and a quote tester that calls the router.
@@ -99,7 +99,7 @@ The last three run live on anvil through a small local server:
 
 ```bash
 anvil --fork-url "$ARCHIVE_RPC_URL" --fork-block-number 25829822    # terminal 1 (plain `anvil` works too, with mock Pendle and Curve)
-npm run app:server                                                   # terminal 2: deploys P1nch on that chain
+npm run app:server                                                   # terminal 2: deploys Wamia on that chain
 npm run app                                                          # terminal 3
 ```
 
@@ -110,14 +110,14 @@ On the fork, ship, dock, the attacker's push and the searcher's arbs are real tr
 Requirements: Node 20+, Foundry, and a mainnet archive RPC for the fork parts.
 
 ```bash
-git clone --recurse-submodules https://github.com/HediKharouf0/p1nch.git && cd p1nch
+git clone --recurse-submodules https://github.com/HediKharouf0/wamia.git && cd wamia
 npm install
 cp .env.example .env            # set ARCHIVE_RPC_URL
 
 cd contracts && forge build && forge test   # unit + local end to end on Aqua/router built from their release tags
 set -a && source ../.env && set +a
-forge test --mc P1nchForkTest -vv           # the deployed contracts at block 25829822
-forge test --mc P1nchArbForkTest -vv
+forge test --mc WamiaForkTest -vv           # the deployed contracts at block 25829822
+forge test --mc WamiaArbForkTest -vv
 cd ..
 
 npm run typecheck && npm test
@@ -136,7 +136,7 @@ A replay run takes a few minutes on a laptop (the guarded 5M run took 3.9 min), 
 
 ## Repo map
 
-- `contracts/src/`: `P1nchQuoter`, `P1nchMath`, `P1nchOrders`, `P1nchArb`, `P1nchRateGuard`, `P1nchSpendLimit`.
+- `contracts/src/`: `WamiaQuoter`, `WamiaMath`, `WamiaOrders`, `WamiaArb`, `WamiaRateGuard`, `WamiaSpendLimit`.
 - `contracts/test/`: unit, local end to end on the official sources, SDK parity, and `fork/` tests on mainnet state.
 - `src/aqua/`: building and shipping orders with the 1inch SDKs, fork helpers, the local demo.
 - `src/strategies/`: the searcher (sizes each arb by simulation) and the earlier taker bot.

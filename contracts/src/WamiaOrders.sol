@@ -5,10 +5,10 @@ import { ISwapVM } from "@1inch/swap-vm/src/interfaces/ISwapVM.sol";
 import { MakerTraitsLib } from "@1inch/swap-vm/src/libs/MakerTraits.sol";
 import { TakerTraitsLib } from "@1inch/swap-vm/src/libs/TakerTraits.sol";
 
-/// @title P1nchOrders
-/// @notice Builds the SwapVM order a P1nch LP ships to Aqua, and the taker data used to fill it,
+/// @title WamiaOrders
+/// @notice Builds the SwapVM order a Wamia LP ships to Aqua, and the taker data used to fill it,
 ///         with swap-vm v1.0.2's own trait libraries (no hand-packed bits).
-library P1nchOrders {
+library WamiaOrders {
     /// @notice Aqua-mode order: no signature, balances read from and settled through Aqua,
     ///         receiver = maker, no hooks. Ship it with
     ///         `aqua.ship(router, abi.encode(order), [SY, PT], [syAmount, 0])`.

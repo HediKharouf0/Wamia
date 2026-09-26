@@ -100,7 +100,7 @@ export function PriceChart({ run, t, showFills }: { run: Run; t: number; showFil
               width={7}
               height={7}
               transform={`rotate(45 ${x(f.t, dur)} ${y(f.spotAfter)})`}
-              fill="var(--p1nch)"
+              fill="var(--wamia)"
               stroke="var(--panel)"
               strokeWidth={2}
             />

@@ -1,9 +1,9 @@
 /**
- * P1nch strategies built with 1inch's official SDKs:
+ * Wamia strategies built with 1inch's official SDKs:
  *   - @1inch/swap-vm-sdk: the SwapVM program, the order, taker traits, quote/swap calldata
  *   - @1inch/aqua-sdk:    ship/dock calldata
  *
- * Mirrors contracts/src/P1nchQuoter.sol and P1nchOrders.sol. contracts/test/SdkParity.t.sol
+ * Mirrors contracts/src/WamiaQuoter.sol and WamiaOrders.sol. contracts/test/SdkParity.t.sol
  * checks that both sides produce the same bytes.
  */
 import { encodePacked, keccak256, encodeAbiParameters } from "viem";
@@ -21,8 +21,8 @@ import { AquaProtocolContract, Address as AquaAddress, HexString as AquaHexStrin
 
 type Hex = `0x${string}`;
 
-/** Same fields and packing as P1nchQuoter.Params (129 bytes). */
-export type P1nchParams = {
+/** Same fields and packing as WamiaQuoter.Params (129 bytes). */
+export type WamiaParams = {
   pt: Hex;
   sy: Hex;
   market: Hex;
@@ -37,7 +37,7 @@ export type P1nchParams = {
   flags: number; // 1 if the underlying is coins[1] in the Curve pool
 };
 
-export function encodeP1nchParams(p: P1nchParams): Hex {
+export function encodeWamiaParams(p: WamiaParams): Hex {
   return encodePacked(
     ["address", "address", "address", "address", "uint64", "uint16", "uint16", "uint128", "uint128", "uint16", "uint16", "uint8"],
     [
@@ -57,7 +57,7 @@ export function encodeP1nchParams(p: P1nchParams): Hex {
   );
 }
 
-/** Same fields and packing as P1nchSpendLimit.Params (34 bytes). */
+/** Same fields and packing as WamiaSpendLimit.Params (34 bytes). */
 export type SpendLimitParams = {
   shippedSy: bigint; // SY shipped with the strategy
   windowSec: number; // spending window, 12 = one mainnet block
@@ -66,7 +66,7 @@ export type SpendLimitParams = {
   expiry: bigint; // PT maturity (unix seconds)
 };
 
-/** Same fields and packing as P1nchRateGuard.Params (60 bytes). */
+/** Same fields and packing as WamiaRateGuard.Params (60 bytes). */
 export type RateGuardParams = {
   sy: Hex;
   rateAtShip: bigint; // SY.exchangeRate() at ship
@@ -78,7 +78,7 @@ export type RateGuardParams = {
 };
 
 /** The v2 rules as extra Extruction steps: the rate guard before the quoter, the spend limit after. */
-export type P1nchGuards = { rateGuard: Hex; rateGuardParams: RateGuardParams; spendLimit: Hex; spendLimitParams: SpendLimitParams };
+export type WamiaGuards = { rateGuard: Hex; rateGuardParams: RateGuardParams; spendLimit: Hex; spendLimitParams: SpendLimitParams };
 
 export function encodeSpendLimitParams(p: SpendLimitParams): Hex {
   return encodePacked(["uint128", "uint32", "uint16", "uint32", "uint64"], [p.shippedSy, p.windowSec, p.minCapBps, p.horizonSec, p.expiry]);
@@ -100,17 +100,17 @@ function extructionIx(target: Hex, args: Hex) {
  * quoter, or with guards [RateGuard][Quoter][SpendLimit]. The spend limit must come after the
  * quoter, since it checks the SY the quoter priced.
  */
-export function buildP1nchProgram(quoter: Hex, params: P1nchParams, guards?: P1nchGuards) {
+export function buildWamiaProgram(quoter: Hex, params: WamiaParams, guards?: WamiaGuards) {
   const builder = new AquaProgramBuilder();
   if (guards) builder.add(extructionIx(guards.rateGuard, encodeRateGuardParams(guards.rateGuardParams)));
-  builder.add(extructionIx(quoter, encodeP1nchParams(params)));
+  builder.add(extructionIx(quoter, encodeWamiaParams(params)));
   if (guards) builder.add(extructionIx(guards.spendLimit, encodeSpendLimitParams(guards.spendLimitParams)));
   return builder.build();
 }
 
 /** Aqua-mode order: no signature, receiver = maker, no hooks (MakerTraits.default()). */
-export function buildP1nchOrder(maker: Hex, quoter: Hex, params: P1nchParams, guards?: P1nchGuards): Order {
-  return Order.new({ maker: new Address(maker), traits: MakerTraits.default(), program: buildP1nchProgram(quoter, params, guards) });
+export function buildWamiaOrder(maker: Hex, quoter: Hex, params: WamiaParams, guards?: WamiaGuards): Order {
+  return Order.new({ maker: new Address(maker), traits: MakerTraits.default(), program: buildWamiaProgram(quoter, params, guards) });
 }
 
 /** Aqua strategy hash = router.hash(order) for Aqua orders = keccak256(abi.encode(order)). */
