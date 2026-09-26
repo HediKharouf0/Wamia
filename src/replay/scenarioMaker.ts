@@ -52,6 +52,7 @@ const FORK_BLOCK = 25829822n;
 const TICK_SECONDS = 60;
 const POST_TICKS = 30;
 const MAX_ARB_ROUNDS = 10;
+const SPEND_WINDOW_SEC = 12; // LeveeSpendLimit window in the demo guards (one mainnet block)
 const FAIR_AT_T0 = 0.971; // PT spot at the fork block, USD per PT
 const EXTRA_PUSH_CHUNK = 50_000n * 10n ** 18n; // the manipulator's largest trade
 const ARB = {
@@ -68,6 +69,7 @@ export type MakerRunConfig = {
   attacker: AttackerMode;
   extraAttackSy: bigint; // persistent attacker: more SY pushed after the last historical trade
   discountMaxBps?: number; // override the strategy's deepest discount (default 60 bp)
+  guards?: boolean; // ship [RateGuard][Quoter][SpendLimit] instead of the quoter alone
 };
 
 function gasLimitFor(mainnetGas: bigint) {
@@ -117,7 +119,8 @@ export async function runMakerScenario(config: MakerRunConfig) {
   };
   const deployer = walletFor("levee-deployer");
   const searcher = walletFor("levee-searcher");
-  const levee = await deployLevee(fork, deployer, nextTs);
+  const levee = await deployLevee(fork, deployer, nextTs, config.guards === true);
+  const guardAddresses = levee.rateGuard && levee.spendLimit ? { rateGuard: levee.rateGuard, spendLimit: levee.spendLimit } : undefined;
   const rateAtShip = await syExchangeRate(fork);
   const minSyRate = (rateAtShip * 99n) / 100n;
 
@@ -125,7 +128,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
   const nLps = config.capitalSy > 0n ? config.lps : 0; // zero capital: the no-backstop baseline
   for (let i = 0; i < nLps; i++) {
     const share = i === nLps - 1 ? config.capitalSy - (config.capitalSy / BigInt(nLps)) * BigInt(i) : config.capitalSy / BigInt(nLps);
-    lps.push(await shipLevee(fork, levee.quoter, walletFor(`levee-lp-${i}`), share, minSyRate, { discountMaxBps: config.discountMaxBps, nextTs }));
+    lps.push(await shipLevee(fork, levee.quoter, walletFor(`levee-lp-${i}`), share, minSyRate, { discountMaxBps: config.discountMaxBps, nextTs, guards: guardAddresses }));
   }
   console.log(`[${config.label}] quoter ${levee.quoter}, arb ${levee.arb}, ${lps.length} LP(s) shipped ${fmt(config.capitalSy, 18)} SY`);
 
@@ -157,6 +160,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
   // 3. The searcher's backrun.
   const delay = config.latencyBlocks === 0 ? 1 : 12;
   let pending: { dueTs: number; after: string } | null = null;
+  let stopReason = "";
 
   /**
    * The searcher keeps arbing while it pays. Pendle prices a whole swap at its post-trade rate, so
@@ -167,8 +171,15 @@ export async function runMakerScenario(config: MakerRunConfig) {
   async function runArb(ts: number, limitTs: number) {
     const after = pending!.after;
     pending = null;
+    stopReason = "";
     for (let round = 1; round <= MAX_ARB_ROUNDS && ts < limitTs; round++, ts++) {
       if (!(await arbRound(ts, after, round))) break;
+    }
+    // The spend limit stopped the searcher for this block: it comes back in the next one.
+    if (stopReason.startsWith("SpendLimitExceeded") && !pending) {
+      const next = (Math.floor(lastTs / SPEND_WINDOW_SEC) + 1) * SPEND_WINDOW_SEC;
+      console.log(`    [spend limit reached after ${after}] searcher retries next block (t+${next - lastTs} s)`);
+      pending = { dueTs: next, after };
     }
   }
 
@@ -183,6 +194,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
 
     const plan = await planArb(fork, levee.arb, levee.arbAbi, levee.errorAbi, searcher, sources, { ...ARB, maxPt });
     if (plan.ptAmount === 0n) {
+      stopReason = plan.reason;
       if (round === 1) console.log(`    [no arb after ${after}] ${plan.reason} (${plan.evals} sims, ${plan.ms} ms)`);
       return false;
     }

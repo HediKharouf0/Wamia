@@ -7,6 +7,7 @@
  *   npm run scenario:maker -- --capital 3 --extra-attack 1   # persistent attacker, +1M SY of pushes
  *   npm run scenario:maker -- --capital 3 --lps 4            # same capital across 4 LP wallets
  *   npm run scenario:maker -- --capital 5 --dmax 30          # flatter discount curve (default 60 bp)
+ *   npm run scenario:maker -- --capital 5 --dmax 30 --guards # v2 rules: rate guard + spend limit steps
  *
  * Capital 0 runs the same harness with no Levee strategy (the baseline for this attacker mode).
  * Needs anvil forked at block 25829822 on port 8545 and `forge build` in contracts/.
@@ -40,7 +41,8 @@ async function main() {
   const lps = Number(arg("lps", "1"));
   const extra = arg("extra-attack", "0");
   const dmax = arg("dmax", "");
-  const suffix = (lps > 1 ? `-${lps}lps` : "") + (Number(extra) > 0 ? `-extra${extra}M` : "") + (dmax ? `-dmax${dmax}` : "");
+  const guards = process.argv.includes("--guards");
+  const suffix = (lps > 1 ? `-${lps}lps` : "") + (Number(extra) > 0 ? `-extra${extra}M` : "") + (dmax ? `-dmax${dmax}` : "") + (guards ? "-guards" : "");
 
   const summaries: any[] = [];
   for (const latency of latencies) {
@@ -54,6 +56,7 @@ async function main() {
         attacker,
         extraAttackSy: millions(extra),
         ...(dmax ? { discountMaxBps: Number(dmax) } : {}),
+        guards,
       };
       console.log(`\n=== ${label} ===`);
       const started = Date.now();
