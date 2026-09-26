@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { archive } from "../chain/client.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
-import scenario from "../../config/scenario.json" with { type: "json" };
 
 const CHUNK = 10n;
 const FROM = 25829868n; // first liquidator tx
@@ -13,7 +12,7 @@ async function main() {
   const known = new Set([...fixture.manipulator, ...fixture.liquidator].map((t: any) => t.hash.toLowerCase()));
 
   const labels: Record<string, string> = {};
-  for (const [name, addr] of Object.entries(scenario.wallets)) labels[(addr as string).toLowerCase()] = name;
+  for (const [name, addr] of Object.entries(addresses.wallets)) labels[(addr as string).toLowerCase()] = name;
   labels[addresses.liquidationProxy.toLowerCase()] = "liquidationProxy";
   labels[addresses.trueLiquidationCaller.toLowerCase()] = "trueLiquidationCaller";
 

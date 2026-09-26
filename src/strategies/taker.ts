@@ -171,21 +171,3 @@ export async function buyPt(
   await client.request({ method: "anvil_stopImpersonatingAccount" as any, params: [buyer] });
   return receipt;
 }
-export type TakerTrigger = {
-  spotBelowFairBps: number;
-  targetBps: number;
-  maxCapital: bigint;
-};
-
-export function decideTakerAction(
-  ptSpotPrice: number,
-  fairValuePrice: number,
-  remainingCapitalSy: bigint,
-  trigger: TakerTrigger
-): { shouldBuy: boolean; targetSpendSy: bigint } {
-  const discountBps = ((fairValuePrice - ptSpotPrice) / fairValuePrice) * 10_000;
-  if (discountBps < trigger.spotBelowFairBps) return { shouldBuy: false, targetSpendSy: 0n };
-
-  const spend = remainingCapitalSy / 4n > remainingCapitalSy ? remainingCapitalSy : remainingCapitalSy / 4n;
-  return { shouldBuy: spend > 0n, targetSpendSy: spend };
-}

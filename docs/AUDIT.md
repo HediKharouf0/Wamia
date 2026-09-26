@@ -65,15 +65,14 @@ numbers or the pitch. "Fixed" items are already committed.
 
 ## Hygiene before submission
 
-13. Root `README.md` is still the Foundry template. Judges read it first.
+13. Done: root `README.md` rewritten (was the Foundry template).
 14. Repo must be public for judging; add a LICENSE for our code.
-15. `results/` has three raw replay logs (~430 KB) and `scenario-test-*` runs;
-    `fixtures/` has `attacker_txs_filtered.json` / `liquidator_txs_filtered.json`
-    and `scripts/replay.sh` from the first day. Keep only what the README uses.
-16. `config/scenario.json` duplicates `config/addresses.json` (and labels the
-    liquidation proxy "liquidator"). Merge into `addresses.json`, with Aqua and
-    the router marked verified once the fork test passes.
-17. `strategies/taker.ts` still exports an unused `decideTakerAction`.
+15. Done: removed the three raw replay logs, `scenario-test-*`, `fixtures/scratch/`,
+    `attacker_txs_filtered.json` / `liquidator_txs_filtered.json`, and `scripts/replay.sh`.
+16. Done: `config/scenario.json` merged into `config/addresses.json` (its
+    `wallets` block; `chainId` added). Aqua and the router are marked verified
+    in `addresses.json.aqua.note`.
+17. Done: `strategies/taker.ts`'s unused `decideTakerAction`/`TakerTrigger` removed.
 18. Commit messages lost their dollar amounts (".9M cascade") because `$3...`
     was expanded by the shell. Use single quotes for messages with `$`.
 
