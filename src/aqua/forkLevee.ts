@@ -24,6 +24,7 @@ export const CURVE_REUSD = getAddress(addresses.reusdMarketPrice.curvePool) as H
 
 export const erc20Abi = parseAbi([
   "function approve(address,uint256) returns (bool)",
+  "function transfer(address,uint256) returns (bool)",
   "function balanceOf(address) view returns (uint256)",
   "function exchangeRate() view returns (uint256)",
 ]);

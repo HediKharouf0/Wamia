@@ -7,7 +7,8 @@
     "test": "tsx src/pricing/fairValue.test.ts && tsx src/pricing/units.test.ts && tsx src/strategies/sizing.test.ts && tsx src/strategies/searcher.test.ts",
     "sdk:vectors": "tsx src/aqua/exportSdkVectors.ts",
     "demo:local": "tsx src/aqua/localDemo.ts",
-    "scenario:maker": "tsx src/replay/compareMaker.ts"
+    "scenario:maker": "tsx src/replay/compareMaker.ts",
+    "scenario:collapse": "tsx src/replay/collapseScenarios.ts"
   },
   "repository": {
     "type": "git",

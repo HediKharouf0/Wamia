@@ -86,7 +86,7 @@ const fmt = (raw: bigint, decimals: number, digits = 0) =>
  * run falls back to a reset.
  */
 const SNAPSHOT_FILE = join(tmpdir(), "levee-anvil-fork-snapshot");
-async function freshFork() {
+export async function freshFork() {
   const saved = existsSync(SNAPSHOT_FILE) ? readFileSync(SNAPSHOT_FILE, "utf8").trim() : "";
   let reverted = false;
   if (saved) {
