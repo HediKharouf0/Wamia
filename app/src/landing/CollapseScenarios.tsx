@@ -22,7 +22,7 @@ export function CollapseScenarios() {
           strategy (5M SY, 10–30 bp discount) as the replay above.
         </p>
       </div>
-      <div className="module-grid" style={{ gridTemplateColumns: "repeat(5, 1fr)" }}>
+      <div className="module-grid" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
         {cases.map((c) => {
           const copy = CASE_COPY[c.case] ?? { title: c.case, blurb: "" };
           return (
