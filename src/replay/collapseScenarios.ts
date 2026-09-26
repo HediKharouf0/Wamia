@@ -8,12 +8,16 @@
  *   loss     reUSD's NAV oracle reports 5% less, then the same pushes: Levee refuses
  *            (SyBelowFloor). Harness edit: the oracle's stored rate is scaled, as if its updater
  *            had posted a loss; there is no public path to do that on a fork.
- *   jump     Pendle falls more than 4.5% below fair before any arb reacts (large pushes in a row):
- *            Levee refuses (SpotTooFarBelowFair)
+ *   jump     Pendle more than 4.5% below fair before any arb reacts: Levee refuses
+ *            (SpotTooFarBelowFair). First the attacker's trade is pushed in 50k SY steps with no arb in
+ *            between, to find how far trades alone can move Pendle (its pool stops accepting them
+ *            around 2.6% below fair). Since that is short of 4.5%, the market's stored implied rate
+ *            is then edited to 6% below fair, as if Pendle had repriced on news (harness edit).
  *
  * In every case a zero-capital searcher then looks for the arb, exactly as in scenarioMaker.
  *
- *   npm run scenario:collapse      (anvil forked at block 25829822 on :8545, forge build done)
+ *   npm run scenario:collapse               all four (anvil forked at block 25829822 on :8545, forge build done)
+ *   npm run scenario:collapse -- jump       one case (results file is written only for a full run)
  */
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { encodeFunctionData, parseAbi, maxUint256, getAddress } from "viem";
@@ -21,7 +25,7 @@ import { fork } from "../chain/client.js";
 import { freshFork } from "./scenarioMaker.js";
 import { attackInput } from "./attacker.js";
 import { dealErc20AtSlot } from "./dealErc20.js";
-import { dealAnyErc20, scaleValueBehind } from "./stateCheats.js";
+import { dealAnyErc20, scaleValueBehind, setPackedFieldBehind } from "./stateCheats.js";
 import { planArb, arbCalldata } from "../strategies/searcher.js";
 import { readPendleSnapshot } from "../snapshot/pendle.js";
 import { ptPriceFromYield } from "../pricing/fairValue.js";
@@ -59,6 +63,7 @@ const curveAbi = parseAbi([
 ]);
 const tokenAbi = parseAbi(["function decimals() view returns (uint8)"]);
 const syAbi = parseAbi(["function exchangeRate() view returns (uint256)"]);
+const marketAbi = parseAbi(["function _storage() view returns (int128,int128,uint96,uint16,uint16,uint16)"]);
 
 const plan: any[] = JSON.parse(readFileSync("fixtures/replay-plan.json", "utf8"));
 const manipulatorTxs = plan.filter((e) => e.role === "manipulator");
@@ -80,13 +85,15 @@ async function spotAndFair() {
   return { spot: snap.ptSpotPrice, fair: ptPriceFromYield(REF_YIELD, snap.tau) };
 }
 
-/** Replays manipulator trades with adaptive calldata (same SY per trade, fresh bounds). */
-async function push(count: number, syIn?: bigint) {
-  for (let i = 0; i < count; i++) {
-    const ev = syIn === undefined ? manipulatorTxs[i] : manipulatorTxs[manipulatorTxs.length - 1];
-    const r = await sendAs(fork, manipulator, { to: ev.to, data: attackInput(ev.input, "adaptive", syIn) }, { gas: 3_000_000n });
-    if (r.status !== "success") throw new Error(`push ${i + 1} reverted`);
-  }
+/** One manipulator trade with adaptive calldata (same SY per trade, fresh bounds); false if it reverts. */
+async function tryPush(ev: any, syIn?: bigint): Promise<boolean> {
+  const r = await sendAs(fork, manipulator, { to: ev.to, data: attackInput(ev.input, "adaptive", syIn) }, { gas: 3_000_000n });
+  return r.status === "success";
+}
+
+/** The attack's first `count` trades. */
+async function push(count: number) {
+  for (let i = 0; i < count; i++) if (!(await tryPush(manipulatorTxs[i]))) throw new Error(`push ${i + 1} reverted`);
 }
 
 /** The searcher's view: arb if it pays, otherwise the reason (Levee's error when it refuses). */
@@ -179,20 +186,56 @@ async function priceJump() {
   await dealErc20AtSlot(fork, SY, manipulator, held + 5_000_000n * 10n ** 18n, SY_BALANCE_SLOT);
   await sendAs(fork, manipulator, { to: SY, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [PENDLE_ROUTER, maxUint256] }) });
 
-  // Push in 250k SY trades, with no arb in between, until spot is 5% below fair.
+  // 1. Trades alone: 50k SY pushes with no arb in between, until 5% below fair or Pendle refuses.
+  const template = manipulatorTxs[manipulatorTxs.length - 1];
   let pushes = 0;
+  let stoppedBy = "reached 5% below fair";
   let { spot, fair } = await spotAndFair();
-  while (spot > fair * 0.95 && pushes < 20) {
-    await push(1, 250_000n * 10n ** 18n);
+  while (spot > fair * 0.95) {
+    if (pushes >= 40 || !(await tryPush(template, 50_000n * 10n ** 18n))) {
+      stoppedBy = pushes >= 40 ? "40 pushes" : "Pendle rejected the next push";
+      break;
+    }
     pushes++;
     ({ spot, fair } = await spotAndFair());
   }
-  return { case: "jump", pushes, syPushed: pushes * 250_000, deviationBps: ((fair - spot) / fair) * 10_000, spot, fair, ...(await leveeResponds(ctx)) };
+  const tradesFloorSpot = spot;
+  const tradesFloorBps = ((fair - spot) / fair) * 10_000;
+
+  // 2. If trades cannot open a gap beyond the 4.5% stop, reprice the market as if on news (harness edit).
+  let marketRateEdited = false;
+  if (spot > fair * (1 - 0.045)) {
+    const block = await fork.getBlockNumber({ cacheTime: 0 });
+    const { tau } = await readPendleSnapshot(fork, MARKET, block);
+    const lnRate = BigInt(Math.round((-Math.log(fair * 0.94) / tau) * 1e18)); // spot = fair * 0.94
+    const read = async () => (await fork.readContract({ address: MARKET, abi: marketAbi, functionName: "_storage" }))[2];
+    const call = { to: MARKET, data: encodeFunctionData({ abi: marketAbi, functionName: "_storage" }) };
+    if (!(await setPackedFieldBehind(fork, call, read, lnRate, 96))) throw new Error("could not find the market's stored implied rate");
+    marketRateEdited = true;
+    ({ spot, fair } = await spotAndFair());
+  }
+  return {
+    case: "jump",
+    pushes,
+    syPushed: pushes * 50_000,
+    stoppedBy,
+    tradesFloorSpot,
+    tradesFloorBps,
+    marketRateEdited,
+    deviationBps: ((fair - spot) / fair) * 10_000,
+    spot,
+    fair,
+    ...(await leveeResponds(ctx)),
+  };
 }
 
 async function main() {
+  // `npm run scenario:collapse -- jump` runs only the named case(s): control, run, loss, jump.
+  const cases = { control, run: reusdRun, loss: reportedLoss, jump: priceJump } as const;
+  const only = process.argv.slice(2);
+  const selected = Object.entries(cases).filter(([name]) => only.length === 0 || only.includes(name)).map(([, fn]) => fn);
   const results: any[] = [];
-  for (const run of [control, reusdRun, reportedLoss, priceJump]) {
+  for (const run of selected) {
     const started = Date.now();
     const r: any = await run(); // one shape per case, printed below
     results.push(r);
@@ -202,13 +245,16 @@ async function main() {
     );
     if (r.case === "run") console.log(`         ${r.reusdSoldOnCurve.toLocaleString()} reUSD sold on Curve: market/NAV ${r.curveLastMarketToNav.toFixed(4)} last, ${r.curveEmaMarketToNav.toFixed(4)} EMA; SY rate unchanged at ${r.syRate}`);
     if (r.case === "loss") console.log(`         SY rate ${r.syRateBefore} -> ${r.syRateAfter} (stored rate edited in ${r.editedContract})`);
-    if (r.case === "jump") console.log(`         ${r.syPushed.toLocaleString()} SY pushed with no arb in between: ${r.deviationBps.toFixed(0)} bp below fair`);
+    if (r.case === "jump") {
+      console.log(`         trades alone: ${r.syPushed.toLocaleString()} SY pushed with no arb, ${r.stoppedBy}, lowest spot ${r.tradesFloorSpot.toFixed(4)} (${r.tradesFloorBps.toFixed(0)} bp below fair)`);
+      if (r.marketRateEdited) console.log(`         then the market's implied rate was edited (news repricing): ${r.deviationBps.toFixed(0)} bp below fair`);
+    }
   }
 
   const expected = { control: true, run: false, loss: false, jump: false } as Record<string, boolean>;
   const ok = results.every((r) => r.bought === expected[r.case]);
   mkdirSync("results", { recursive: true });
-  writeFileSync("results/collapse-scenarios.json", JSON.stringify(results, null, 2));
+  if (only.length === 0) writeFileSync("results/collapse-scenarios.json", JSON.stringify(results, null, 2));
   console.log(ok ? "\nAll four cases behaved as designed." : "\nUNEXPECTED: a case did not behave as designed.");
   if (!ok) process.exit(1);
 }

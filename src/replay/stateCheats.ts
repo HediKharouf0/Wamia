@@ -63,3 +63,29 @@ export async function scaleValueBehind(
   }
   return null;
 }
+
+/**
+ * Sets a field packed inside a storage word (e.g. a uint96 sharing a slot with other fields):
+ * finds, among the slots the call reads, a word holding `current` in `widthBits` bits at some byte
+ * offset, writes `next` there, and keeps the edit only if `read()` then returns `next`.
+ */
+export async function setPackedFieldBehind(
+  client: Client,
+  call: { to: Hex; data: Hex },
+  read: () => Promise<bigint>,
+  next: bigint,
+  widthBits: number
+): Promise<Slot | null> {
+  const current = await read();
+  const mask = (1n << BigInt(widthBits)) - 1n;
+  for (const { address, key } of await slotsReadBy(client, call)) {
+    const old = await readWord(client, address, key);
+    for (let shift = 0n; shift + BigInt(widthBits) <= 256n; shift += 8n) {
+      if (((old >> shift) & mask) !== current) continue;
+      await setWord(client, address, key, (old & ~(mask << shift)) | ((next & mask) << shift));
+      if ((await read().catch(() => null)) === next) return { address, key };
+      await setWord(client, address, key, old);
+    }
+  }
+  return null;
+}
