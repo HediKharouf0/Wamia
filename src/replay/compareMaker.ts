@@ -6,6 +6,7 @@
  *   npm run scenario:maker -- --capital 3 --attacker historical
  *   npm run scenario:maker -- --capital 3 --extra-attack 1   # persistent attacker, +1M SY of pushes
  *   npm run scenario:maker -- --capital 3 --lps 4            # same capital across 4 LP wallets
+ *   npm run scenario:maker -- --capital 5 --dmax 30          # flatter discount curve (default 60 bp)
  *
  * Capital 0 runs the same harness with no Levee strategy (the baseline for this attacker mode).
  * Needs anvil forked at block 25829822 on port 8545 and `forge build` in contracts/.
@@ -38,12 +39,13 @@ async function main() {
   const attacker = arg("attacker", "adaptive") as AttackerMode;
   const lps = Number(arg("lps", "1"));
   const extra = arg("extra-attack", "0");
+  const dmax = arg("dmax", "");
+  const suffix = (lps > 1 ? `-${lps}lps` : "") + (Number(extra) > 0 ? `-extra${extra}M` : "") + (dmax ? `-dmax${dmax}` : "");
 
   const summaries: any[] = [];
   for (const latency of latencies) {
     for (const c of capitals) {
-      const label =
-        `maker-${c}M-L${latency}-${attacker}` + (lps > 1 ? `-${lps}lps` : "") + (Number(extra) > 0 ? `-extra${extra}M` : "");
+      const label = `maker-${c}M-L${latency}-${attacker}${suffix}`;
       const config: MakerRunConfig = {
         label,
         capitalSy: millions(c),
@@ -51,6 +53,7 @@ async function main() {
         latencyBlocks: latency,
         attacker,
         extraAttackSy: millions(extra),
+        ...(dmax ? { discountMaxBps: Number(dmax) } : {}),
       };
       console.log(`\n=== ${label} ===`);
       const started = Date.now();
@@ -86,12 +89,15 @@ async function main() {
       : "\nNo run in this sweep reached zero eligible debt."
   );
 
-  const out = `results/maker-sweep-${attacker}${lps > 1 ? `-${lps}lps` : ""}${Number(extra) > 0 ? `-extra${extra}M` : ""}.json`;
+  const out = `results/maker-sweep-${attacker}${suffix}.json`;
   writeFileSync(out, JSON.stringify(summaries, null, 2));
   console.log(`Summaries written to ${out}`);
 }
 
-main().catch((e) => {
-  console.error("FAILED:", e);
-  process.exit(1);
-});
+// Exit explicitly: the RPC client keeps connections open after the last request.
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error("FAILED:", e);
+    process.exit(1);
+  });

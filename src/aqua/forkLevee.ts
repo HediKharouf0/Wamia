@@ -48,7 +48,7 @@ export async function sendAs(
   client: Client,
   from: Hex,
   tx: { to?: Hex; data: Hex },
-  opts: { gas?: bigint; timestamp?: number } = {}
+  opts: { gas?: bigint; timestamp?: number | undefined } = {}
 ) {
   await client.request({ method: "anvil_impersonateAccount" as any, params: [from] });
   await client.request({ method: "anvil_setBalance" as any, params: [from, "0x56BC75E2D63100000"] });
@@ -64,11 +64,12 @@ export async function sendAs(
   return receipt;
 }
 
-export async function deployLevee(client: Client, deployer: Hex) {
+/** `nextTs` gives each setup transaction an explicit timestamp, so setup never runs into the replay. */
+export async function deployLevee(client: Client, deployer: Hex, nextTs?: () => number) {
   const quoterArt = artifact("LeveeQuoter.sol", "LeveeQuoter");
   const arbArt = artifact("LeveeArb.sol", "LeveeArb");
   const deploy = async (art: { abi: Abi; bytecode: Hex }, args: unknown[]) => {
-    const receipt = await sendAs(client, deployer, { data: encodeDeployData({ abi: art.abi, bytecode: art.bytecode, args }) }, { gas: 8_000_000n });
+    const receipt = await sendAs(client, deployer, { data: encodeDeployData({ abi: art.abi, bytecode: art.bytecode, args }) }, { gas: 8_000_000n, timestamp: nextTs?.() });
     if (receipt.status !== "success" || !receipt.contractAddress) throw new Error("deployment failed");
     return getAddress(receipt.contractAddress) as Hex;
   };
@@ -100,14 +101,27 @@ export function defaultParams(shippedSy: bigint, minSyRate: bigint): LeveeParams
 export type LeveeLp = { wallet: Hex; params: LeveeParams; order: Order; hash: Hex; shippedSy: bigint };
 
 /** Funds an LP wallet with SY, approves Aqua once and ships a Levee strategy built with the SDK. */
-export async function shipLevee(client: Client, quoter: Hex, wallet: Hex, shippedSy: bigint, minSyRate: bigint): Promise<LeveeLp> {
+export async function shipLevee(
+  client: Client,
+  quoter: Hex,
+  wallet: Hex,
+  shippedSy: bigint,
+  minSyRate: bigint,
+  opts: { discountMaxBps?: number | undefined; nextTs?: () => number } = {}
+): Promise<LeveeLp> {
   const ok = await dealErc20AtSlot(client, SY, wallet, shippedSy, SY_BALANCE_SLOT);
   if (!ok) throw new Error("SY funding failed");
-  await sendAs(client, wallet, { to: SY, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [AQUA, 2n ** 256n - 1n] }) });
+  await sendAs(
+    client,
+    wallet,
+    { to: SY, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [AQUA, 2n ** 256n - 1n] }) },
+    { timestamp: opts.nextTs?.() }
+  );
 
   const params = defaultParams(shippedSy, minSyRate);
+  if (opts.discountMaxBps !== undefined) params.discountMaxBps = opts.discountMaxBps;
   const order = buildLeveeOrder(wallet, quoter, params);
-  const receipt = await sendAs(client, wallet, shipTx(AQUA, ROUTER, order, SY, PT, shippedSy));
+  const receipt = await sendAs(client, wallet, shipTx(AQUA, ROUTER, order, SY, PT, shippedSy), { timestamp: opts.nextTs?.() });
   if (receipt.status !== "success") throw new Error(`ship failed for ${wallet}`);
   return { wallet, params, order, hash: strategyHash(order), shippedSy };
 }

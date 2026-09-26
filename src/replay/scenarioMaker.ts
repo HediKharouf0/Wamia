@@ -65,6 +65,7 @@ export type MakerRunConfig = {
   latencyBlocks: 0 | 1;
   attacker: AttackerMode;
   extraAttackSy: bigint; // persistent attacker: more SY pushed after the last historical trade
+  discountMaxBps?: number; // override the strategy's deepest discount (default 60 bp)
 };
 
 function gasLimitFor(mainnetGas: bigint) {
@@ -78,10 +79,18 @@ export async function runMakerScenario(config: MakerRunConfig) {
   await resetFork(fork, FORK_BLOCK);
   const expiry = Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000);
 
-  // 1. Levee contracts and LP strategies.
+  // 1. Levee contracts and LP strategies. Setup transactions get timestamps 1 s apart from the
+  //    fork block, so they are all mined before the first replayed trade (12 s later).
+  const plan: any[] = JSON.parse(readFileSync("fixtures/replay-plan.json", "utf8"));
+  let setupTs = Number((await fork.getBlock({ blockNumber: FORK_BLOCK })).timestamp);
+  const nextTs = () => {
+    setupTs += 1;
+    if (setupTs >= Number(plan[0].timeStamp)) throw new Error("setup does not fit before the first replayed trade: use fewer LPs");
+    return setupTs;
+  };
   const deployer = walletFor("levee-deployer");
   const searcher = walletFor("levee-searcher");
-  const levee = await deployLevee(fork, deployer);
+  const levee = await deployLevee(fork, deployer, nextTs);
   const rateAtShip = await syExchangeRate(fork);
   const minSyRate = (rateAtShip * 99n) / 100n;
 
@@ -89,12 +98,11 @@ export async function runMakerScenario(config: MakerRunConfig) {
   const nLps = config.capitalSy > 0n ? config.lps : 0; // zero capital: the no-backstop baseline
   for (let i = 0; i < nLps; i++) {
     const share = i === nLps - 1 ? config.capitalSy - (config.capitalSy / BigInt(nLps)) * BigInt(i) : config.capitalSy / BigInt(nLps);
-    lps.push(await shipLevee(fork, levee.quoter, walletFor(`levee-lp-${i}`), share, minSyRate));
+    lps.push(await shipLevee(fork, levee.quoter, walletFor(`levee-lp-${i}`), share, minSyRate, { discountMaxBps: config.discountMaxBps, nextTs }));
   }
   console.log(`[${config.label}] quoter ${levee.quoter}, arb ${levee.arb}, ${lps.length} LP(s) shipped ${fmt(config.capitalSy, 18)} SY`);
 
   // 2. Events: the replay plan, plus extra pushes for a persistent attacker.
-  const plan: any[] = JSON.parse(readFileSync("fixtures/replay-plan.json", "utf8"));
   const manipulator = plan.find((e) => e.role === "manipulator").from as Hex;
   let events = plan;
   if (config.extraAttackSy > 0n) {
@@ -104,7 +112,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const held = await balanceOf(fork, SY, manipulator);
     await dealErc20AtSlot(fork, SY, manipulator, held + config.extraAttackSy, SY_BALANCE_SLOT);
     // The attacker's own setup: its historical approvals may cover only what it spent then.
-    await sendAs(fork, manipulator, { to: SY, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [PENDLE_ROUTER, maxUint256] }) });
+    await sendAs(fork, manipulator, { to: SY, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [PENDLE_ROUTER, maxUint256] }) }, { timestamp: nextTs() });
   }
 
   let block = await fork.getBlockNumber({ cacheTime: 0 });
