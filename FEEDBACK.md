@@ -5,7 +5,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
 
 ## SwapVM
 
-1. The README describes `main`, not the deployed release.
+1. The [swap-vm README](https://github.com/1inch/swap-vm/blob/main/README.md) describes `main`, not the deployed release.
    The router at `0x1111...0De` is v1.0.2, but the README documents `main`: the
    `swap(order, amount, takerTraitsAndData)` ABI, the opcode numbering in
    `OpcodeList.sol`, and `contracts/` paths. v1.0.2 uses
@@ -43,7 +43,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    `ship` doesn't check the wallet balance, so one wallet can back several
    strategies with the same tokens, and a `pull` fails if the wallet runs short.
    That's a feature for us (one wallet backs Wamia on many markets), but it
-   deserves a sentence in the README so LPs and takers know what a shipped
+   deserves a sentence in the [Aqua README](https://github.com/1inch/aqua/blob/main/README.md) so LPs and takers know what a shipped
    balance means.
 
 ## TypeScript SDKs
@@ -53,8 +53,8 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    the standalone `XYCSwap` Aqua app. Orders, traits, programs and
    `quote` / `swap` on the router live in `@1inch/swap-vm-sdk` (whose
    instruction table does match the deployed v1.0.2 router). We missed it at
-   first because neither the Aqua SDK nor the Aqua README links to it.
-   Suggestion: link the two READMEs, and show the Aqua + SwapVM router flow in
+   first because neither the [Aqua SDK README](https://github.com/1inch/sdks/blob/master/typescript/aqua/README.md) nor the [Aqua README](https://github.com/1inch/aqua/blob/main/README.md) links to it.
+   Suggestion: link the [Aqua SDK](https://github.com/1inch/sdks/blob/master/typescript/aqua/README.md) and [SwapVM SDK](https://github.com/1inch/sdks/blob/master/typescript/swap-vm/README.md) READMEs, and show the Aqua + SwapVM router flow in
    the Aqua SDK examples.
 
 7. `AquaProgramBuilder` has no `extruction()` method.
@@ -72,7 +72,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    `@1inch/aqua-sdk` 0.3.4 pins sdk-core 0.1.5 and `@1inch/swap-vm-sdk` 0.4.4
    pins 0.1.6, so npm installs two copies, and an `Address` from one isn't
    assignable to the other in TypeScript ("separate declarations of a private
-   property"). The swap-vm-sdk README quick start, which passes its `Address`
+   property"). The [swap-vm-sdk README](https://github.com/1inch/sdks/blob/master/typescript/swap-vm/README.md) quick start, which passes its `Address`
    to `aqua.ship`, doesn't typecheck with the latest versions. We import
    `Address` from each SDK separately.
    Suggestion: a shared sdk-core range, or re-export one copy.
