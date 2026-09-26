@@ -1,0 +1,70 @@
+$ cd contracts && forge build
+$ cd .. && npm run scenario:maker -- --capital 5 --dmax 30 --guards
+[⠊] Compiling...
+[⠆] Compiling 2 files with Solc 0.8.30
+[⠰] Solc 0.8.30 finished in 248.28ms
+Compiler run successful!
+
+> p1nch@1.0.0 scenario:maker
+> tsx src/replay/compareMaker.ts --capital 5 --dmax 30 --guards
+
+
+=== maker-5M-L1-adaptive-dmax30-guards ===
+[maker-5M-L1-adaptive-dmax30-guards] quoter 0x3677124A29570E19Fa4e9fd1f3cbF6a45479bF1a, arb 0x6B1bAB9Efc493983165D8637cDF2C3c945904ae0, 1 LP(s) shipped 5,000,000 SY
+[maker-5M-L1-adaptive-dmax30-guards] t0: PT 0.9710, oracle 0.9710
+  manip-1 ok: spot 0.9701
+    [no arb after manip-1 ok] Error(Slippage: INSUFFICIENT_PT_OUT) (1 sims, 464 ms)
+  manip-2 ok: spot 0.9695
+    [no arb after manip-2 ok] Error(Slippage: INSUFFICIENT_PT_OUT) (1 sims, 2 ms)
+  manip-3 ok: spot 0.9675
+  [arb 1 after manip-3 ok] Levee bought 281,590 PT for 249,029 SY (0.9700 USD/PT), searcher +268 PT, spot 0.9675 -> 0.9684, bid now 0.9699 (26 sims, 103 ms, gas 486373)
+  [arb 2 after manip-3 ok] Levee bought 128,727 PT for 113,834 SY (0.9699 USD/PT), searcher +55 PT, spot 0.9684 -> 0.9689, bid now 0.9699 (26 sims, 24 ms, gas 430485)
+  manip-4 ok: spot 0.9677
+  [arb 1 after manip-4 ok] Levee bought 212,559 PT for 187,955 SY (0.9698 USD/PT), searcher +169 PT, spot 0.9677 -> 0.9685, bid now 0.9698 (26 sims, 27 ms, gas 425651)
+  manip-5 ok: spot 0.9663
+  [arb 1 after manip-5 ok] Levee bought 424,504 PT for 375,325 SY (0.9697 USD/PT), searcher +603 PT, spot 0.9663 -> 0.9677, bid now 0.9697 (26 sims, 26 ms, gas 434795)
+  [arb 2 after manip-5 ok] Levee bought 171,368 PT for 151,499 SY (0.9696 USD/PT), searcher +124 PT, spot 0.9677 -> 0.9683, bid now 0.9696 (26 sims, 30 ms, gas 435133)
+  manip-6 ok: spot 0.9662
+  [arb 1 after manip-6 ok] Levee bought 369,516 PT for 326,642 SY (0.9695 USD/PT), searcher +573 PT, spot 0.9662 -> 0.9674, bid now 0.9695 (26 sims, 25 ms, gas 433941)
+  [arb 2 after manip-6 ok] Levee bought 213,853 PT for 189,021 SY (0.9694 USD/PT), searcher +152 PT, spot 0.9674 -> 0.9681, bid now 0.9694 (26 sims, 25 ms, gas 425553)
+  manip-7 ok: spot 0.9647
+  [arb 1 after manip-7 ok] Levee bought 594,935 PT for 525,776 SY (0.9693 USD/PT), searcher +1,217 PT, spot 0.9647 -> 0.9667, bid now 0.9692 (26 sims, 28 ms, gas 428907)
+  [arb 2 after manip-7 ok] Levee bought 271,459 PT for 239,867 SY (0.9692 USD/PT), searcher +264 PT, spot 0.9667 -> 0.9676, bid now 0.9691 (25 sims, 22 ms, gas 412616)
+  [arb 3 after manip-7 ok] Levee bought 116,918 PT for 103,304 SY (0.9691 USD/PT), searcher +59 PT, spot 0.9676 -> 0.9680, bid now 0.9691 (25 sims, 25 ms, gas 436003)
+  manip-8 ok: spot 0.9645
+  manip-9 ok: spot 0.9612
+  [arb 1 after manip-8 ok] Levee bought 1,016,913 PT for 898,322 SY (0.9689 USD/PT), searcher +3,778 PT, spot 0.9612 -> 0.9646, bid now 0.9687 (25 sims, 23 ms, gas 420652)
+  [arb 2 after manip-8 ok] Levee bought 115,124 PT for 101,678 SY (0.9687 USD/PT), searcher +365 PT, spot 0.9646 -> 0.9650, bid now 0.9687 (24 sims, 21 ms, gas 433725)
+    [spend limit reached after manip-8 ok] searcher retries next block (t+11 s)
+  [arb 1 after manip-8 ok] Levee bought 427,373 PT for 377,421 SY (0.9686 USD/PT), searcher +682 PT, spot 0.9650 -> 0.9664, bid now 0.9685 (24 sims, 18 ms, gas 429001)
+  [arb 2 after manip-8 ok] Levee bought 230,302 PT for 203,361 SY (0.9685 USD/PT), searcher +160 PT, spot 0.9664 -> 0.9672, bid now 0.9685 (23 sims, 20 ms, gas 433957)
+  manip-10 ok: spot 0.9662
+  [arb 1 after manip-10 ok] Levee bought 217,032 PT for 191,627 SY (0.9684 USD/PT), searcher +210 PT, spot 0.9662 -> 0.9669, bid now 0.9684 (23 sims, 24 ms, gas 420606)
+  [arb 2 after manip-10 ok] Levee bought 118,138 PT for 104,303 SY (0.9684 USD/PT), searcher +60 PT, spot 0.9669 -> 0.9673, bid now 0.9683 (22 sims, 23 ms, gas 434059)
+  manip-11 ok: spot 0.9662
+  [arb 1 after manip-11 ok] Levee bought 230,673 PT for 203,647 SY (0.9683 USD/PT), searcher +171 PT, spot 0.9662 -> 0.9670, bid now 0.9683 (22 sims, 22 ms, gas 433941)
+    [no arb after backg-9 ok] profit below minimum (21 sims, 20 ms)
+    [no arb after backg-13 ok] profit below minimum (21 sims, 15 ms)
+
+[maker-5M-L1-adaptive-dmax30-guards] Summary (state-only: 29 historical liquidation txs skipped by design)
+  Manipulator: 11/11 historical pushes ok
+  Levee: 17 fills after 8 trades, 4,542,611 of 5,000,000 SY used (90.9%), 5,140,985 PT bought
+  Spot min 0.9612, oracle min 0.9669
+  Peak eligible: USDC 0 pos / $0, USDT 0 pos / $0
+  LP: paid 0.9691 USD/PT, hold to maturity 3.18% (11.3% annualized; fair-value buyers 10.58%), mark to market at 0.971 0.19%
+  Searcher profit: 8,910 PT
+  (run took 3.9 min)
+
+
+=== Levee (maker) ===
+run | SY used / shipped | fills | oracle min | peak eligible debt | LP hold (annualized) | manipulator ok
+maker-5M-L1-adaptive-dmax30-guards | 4.54M / 5.00M | 17 | 0.9669 | $0.00M (USDC 0, USDT 0) | 3.18% (11.3%) | 11/11
+
+=== Earlier runs, same harness (taker latency is +1 s per block) ===
+baseline-state-only | oracle min 0.9472 | peak eligible debt $37.35M
+taker-100k-L1 | oracle min 0.9484 | peak eligible debt $37.35M
+taker-2M-L1 | oracle min 0.9589 | peak eligible debt $26.14M
+taker-5M-L1 | oracle min 0.9629 | peak eligible debt $11.23M
+
+Smallest shipped capital with zero eligible debt: 5.00M SY (maker-5M-L1-adaptive-dmax30-guards), of which 4.54M was used; LP hold to maturity 11.3% annualized
+Summaries written to results/maker-sweep-adaptive-dmax30-guards.json
