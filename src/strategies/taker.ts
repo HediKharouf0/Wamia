@@ -148,10 +148,12 @@ export async function buyPt(
 ) {
   await client.request({ method: "anvil_impersonateAccount" as any, params: [buyer] });
 
+  // Approve the max, not just this buy: quoteBuyPt is an eth_call that needs a standing
+  // allowance, and an exact approval left it at 0 after a partial buy, so the next quote reverted.
   const approveData = encodeFunctionData({
     abi: erc20Abi,
     functionName: "approve",
-    args: [router, syAmount],
+    args: [router, 2n ** 256n - 1n],
   });
   const approveHash = await client.request({
     method: "eth_sendTransaction" as any,
