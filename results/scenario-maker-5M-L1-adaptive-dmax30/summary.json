@@ -1,0 +1,44 @@
+{
+  "label": "maker-5M-L1-adaptive-dmax30",
+  "config": {
+    "label": "maker-5M-L1-adaptive-dmax30",
+    "capitalSy": "5000000000000000000000000",
+    "lps": 1,
+    "latencyBlocks": 1,
+    "attacker": "adaptive",
+    "extraAttackSy": "0",
+    "discountMaxBps": 30
+  },
+  "skippedLiquidations": 29,
+  "manipulator": {
+    "historicalOk": 11,
+    "historicalReverted": 0,
+    "extraOk": 0,
+    "extraReverted": 0
+  },
+  "arbs": 17,
+  "pushesAnswered": 8,
+  "arbsReverted": 0,
+  "shippedSy": 5000000,
+  "syUsed": 4595338.821577655,
+  "usedShare": 0.9190677643155309,
+  "ptBought": 5200714.043223,
+  "searcherProfitPt": 8904.003764,
+  "spotMin": 0.9611558981107066,
+  "oracleMin": 0.9671016371123551,
+  "peakEligible": {
+    "usdcCount": 0,
+    "usdcDebt": 0,
+    "usdtCount": 0,
+    "usdtDebt": 0
+  },
+  "lp": {
+    "costUsd": 5040158.428828729,
+    "avgPaidUsdPerPt": 0.9691281595065798,
+    "holdToMaturity": 0.031855271349393366,
+    "holdToMaturityAnnualized": 0.113110506267881,
+    "markToMarketAtFair": 0.0019314684802607118,
+    "markToMarketAtEndSpot": -0.0020007663023412503,
+    "daysToMaturity": 106.81222222222222
+  }
+}
