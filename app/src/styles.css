@@ -250,19 +250,19 @@ input[type="range"].size { accent-color: var(--wamia); width: 100%; }
 .hero .kicker .led { width: 6px; height: 6px; border-radius: 50%; background: var(--wamia); animation: pulse 1.6s ease-in-out infinite; }
 .hero h1 { font: 700 44px/1.15 var(--font-display); margin: 0; letter-spacing: -0.02em; max-width: 20ch; color: var(--ink); }
 .hero h1 .accent { background: linear-gradient(90deg, var(--wamia), #7ee8c9 60%, var(--oracle)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero .lede { font: 16px/1.65 var(--font-body); color: var(--ink-2); max-width: 58ch; margin: 0; }
+.hero .lede { font: 16px/1.65 var(--font-body); color: var(--ink-2); max-width: 52ch; margin: 0 auto; text-align: center; text-wrap: balance; }
 .hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
 .hero .epoch { display: none; }
 
-.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 20px; margin-top: 24px; width: 100%; }
+.badge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 28px 20px; margin-top: 24px; width: 100%; max-width: 640px; margin-left: auto; margin-right: auto; }
 .badge { border-left: 1px solid var(--line); padding: 0 20px; text-align: center; }
 .badge:first-child { border-left: none; }
 .badge.dim { border-left-color: var(--line); }
 .badge .k { font: 600 10px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
-.badge .v { font: 700 26px var(--font-display); color: var(--ink); margin-top: 4px; }
+.badge .v { font: 700 44px var(--font-display); letter-spacing: -0.01em; color: var(--ink); margin-top: 6px; }
 .badge .v.accent { color: var(--wamia); }
 .badge .v.plain { color: var(--ink); }
-.badge .d { font: 12px var(--font-body); color: var(--ink-2); margin-top: 2px; }
+.badge .d { font: 12px var(--font-body); color: var(--ink-2); margin-top: 4px; }
 
 .alert-banner {
   border: 1px solid var(--critical-soft); background: var(--panel); padding: 14px 18px; border-radius: var(--radius-sm);
