@@ -37,19 +37,9 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    (`ProgramBuilder`, in `test/utils`) reverts through `toUint8`.
    Suggestion: mention the limit on `Extruction`, and ship the builders in `src/`.
 
-5. `AquaOpcodes` has no min-rate guard.
-   `RequireMinRate` / `AdjustMinRate` exist in the full opcode set but not in the
-   Aqua router, so every Extruction-priced Aqua strategy has to write its own
-   price floor or ceiling.
-
-6. The v1.0.2 release pins an older Aqua.
-   swap-vm v1.0.2's `package.json` depends on `github:1inch/aqua#0.1.0`, while
-   the deployed Aqua is tag v1.0.0. The interfaces are compatible, but it takes
-   a diff to be sure.
-
 ## Aqua
 
-7. A shipped balance is an allowance, not a reservation.
+5. A shipped balance is an allowance, not a reservation.
    `ship` doesn't check the wallet balance, so one wallet can back several
    strategies with the same tokens, and a `pull` fails if the wallet runs short.
    That's a feature for us (one wallet backs Wamia on many markets), but it
@@ -58,7 +48,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
 
 ## TypeScript SDKs
 
-8. The Aqua SDK doesn't point to the SwapVM SDK.
+6. The Aqua SDK doesn't point to the SwapVM SDK.
    `@1inch/aqua-sdk` only covers `ship`, `dock` and events, and its examples use
    the standalone `XYCSwap` Aqua app. Orders, traits, programs and
    `quote` / `swap` on the router live in `@1inch/swap-vm-sdk` (whose
@@ -67,7 +57,7 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    Suggestion: link the two READMEs, and show the Aqua + SwapVM router flow in
    the Aqua SDK examples.
 
-9. `AquaProgramBuilder` has no `extruction()` method.
+7. `AquaProgramBuilder` has no `extruction()` method.
    The SDK's Aqua opcode table includes Extruction (index 32, matching the
    router), but the builder has no method for it, so we call
    `new AquaProgramBuilder().add(instructions.extruction.extruction.createIx(args))`.
@@ -78,11 +68,11 @@ AquaSwapVMRouter (swap-vm v1.0.2), with a suggestion for each.
    accepts it.
    Suggestion: add `extruction()` to `AquaProgramBuilder`.
 
-10. The two SDKs pin different `@1inch/sdk-core` versions.
-    `@1inch/aqua-sdk` 0.3.4 pins sdk-core 0.1.5 and `@1inch/swap-vm-sdk` 0.4.4
-    pins 0.1.6, so npm installs two copies, and an `Address` from one isn't
-    assignable to the other in TypeScript ("separate declarations of a private
-    property"). The swap-vm-sdk README quick start, which passes its `Address`
-    to `aqua.ship`, doesn't typecheck with the latest versions. We import
-    `Address` from each SDK separately.
-    Suggestion: a shared sdk-core range, or re-export one copy.
+8. The two SDKs pin different `@1inch/sdk-core` versions.
+   `@1inch/aqua-sdk` 0.3.4 pins sdk-core 0.1.5 and `@1inch/swap-vm-sdk` 0.4.4
+   pins 0.1.6, so npm installs two copies, and an `Address` from one isn't
+   assignable to the other in TypeScript ("separate declarations of a private
+   property"). The swap-vm-sdk README quick start, which passes its `Address`
+   to `aqua.ship`, doesn't typecheck with the latest versions. We import
+   `Address` from each SDK separately.
+   Suggestion: a shared sdk-core range, or re-export one copy.
