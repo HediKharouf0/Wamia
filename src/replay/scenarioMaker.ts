@@ -75,8 +75,28 @@ function gasLimitFor(mainnetGas: bigint) {
 const fmt = (raw: bigint, decimals: number, digits = 0) =>
   (Number(raw) / 10 ** decimals).toLocaleString(undefined, { maximumFractionDigits: digits });
 
-export async function runMakerScenario(config: MakerRunConfig) {
+/**
+ * Every run starts from the fork block. The first run resets the fork and takes an anvil snapshot;
+ * later runs revert to it. Unlike anvil_reset, a revert keeps the mainnet state anvil has already
+ * fetched, so later runs skip most upstream requests. The state they start from is identical.
+ * (A snapshot is used up by its revert, so a new one is taken each time.)
+ */
+let forkSnapshot: string | null = null;
+async function freshFork() {
+  if (forkSnapshot !== null) {
+    const reverted = await fork.request({ method: "evm_revert" as any, params: [forkSnapshot] as any });
+    forkSnapshot = null;
+    if (reverted === true && (await fork.getBlockNumber({ cacheTime: 0 })) === FORK_BLOCK) {
+      forkSnapshot = (await fork.request({ method: "evm_snapshot" as any })) as string;
+      return;
+    }
+  }
   await resetFork(fork, FORK_BLOCK);
+  forkSnapshot = (await fork.request({ method: "evm_snapshot" as any })) as string;
+}
+
+export async function runMakerScenario(config: MakerRunConfig) {
+  await freshFork();
   const expiry = Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000);
 
   // 1. Levee contracts and LP strategies. Setup transactions get timestamps 1 s apart from the

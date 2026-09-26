@@ -50,3 +50,23 @@ export async function readPosition(
   }
   throw new Error("unreachable");
 }
+
+/**
+ * Many positions in one eth_call through Multicall3 (deployed on mainnet, so on the fork too).
+ * Same values as calling readPosition for each user.
+ */
+export async function readPositions(
+  client: Client,
+  morphoBlue: `0x${string}`,
+  marketId: `0x${string}`,
+  users: `0x${string}`[],
+  blockNumber: bigint
+): Promise<PositionSnapshot[]> {
+  const results = await client.multicall({
+    contracts: users.map((user) => ({ address: morphoBlue, abi: morphoBlueAbi, functionName: "position", args: [marketId, user] }) as const),
+    allowFailure: false,
+    blockNumber,
+    batchSize: 0, // one call, no calldata size limit
+  });
+  return results.map(([supplyShares, borrowShares, collateral], i) => ({ user: users[i]!, supplyShares, borrowShares, collateral }));
+}
