@@ -49,6 +49,7 @@ type Hex = `0x${string}`;
 const FORK_BLOCK = 25829822n;
 const TICK_SECONDS = 60;
 const POST_TICKS = 30;
+const MAX_ARB_ROUNDS = 10;
 const FAIR_AT_T0 = 0.971; // PT spot at the fork block, USD per PT
 const EXTRA_PUSH_CHUNK = 50_000n * 10n ** 18n; // the manipulator's largest trade
 const ARB = {
@@ -122,21 +123,33 @@ export async function runMakerScenario(config: MakerRunConfig) {
   const delay = config.latencyBlocks === 0 ? 1 : 12;
   let pending: { dueTs: number; after: string } | null = null;
 
-  async function runArb(ts: number) {
+  /**
+   * The searcher keeps arbing while it pays. Pendle prices a whole swap at its post-trade rate, so
+   * one arb stops well short of Levee's bid and leaves a new opportunity behind; a real searcher
+   * takes it in the same block (a bundle). Rounds are 1 s apart here and never pass `limitTs`,
+   * the next scheduled transaction.
+   */
+  async function runArb(ts: number, limitTs: number) {
     const after = pending!.after;
     pending = null;
+    for (let round = 1; round <= MAX_ARB_ROUNDS && ts < limitTs; round++, ts++) {
+      if (!(await arbRound(ts, after, round))) break;
+    }
+  }
 
+  /** One arb transaction at `ts`; false when there is nothing worth doing. */
+  async function arbRound(ts: number, after: string, round: number): Promise<boolean> {
     const sources = await Promise.all(lps.map(async (lp) => ({ lp, order: lp.order, balanceSy: await aquaSyBalance(fork, lp) })));
     const syLeft = sources.reduce((s, x) => s + x.balanceSy, 0n);
-    if (syLeft === 0n) return;
+    if (syLeft === 0n) return false;
     const rate = await syExchangeRate(fork);
     // Upper bound on PT Levee could buy: all its SY at a price no lower than 0.9 USD per PT.
     const maxPt = (syLeft * rate * 10n) / 10n ** 18n / 9n;
 
     const plan = await planArb(fork, levee.arb, levee.arbAbi, levee.errorAbi, searcher, sources, { ...ARB, maxPt });
     if (plan.ptAmount === 0n) {
-      console.log(`    [no arb after ${after}] ${plan.reason} (${plan.evals} sims, ${plan.ms} ms)`);
-      return;
+      if (round === 1) console.log(`    [no arb after ${after}] ${plan.reason} (${plan.evals} sims, ${plan.ms} ms)`);
+      return false;
     }
 
     const spotBefore = (await readPendleSnapshot(fork, MARKET, block)).ptSpotPrice;
@@ -151,8 +164,8 @@ export async function runMakerScenario(config: MakerRunConfig) {
     lastTs = ts;
     if (receipt.status !== "success") {
       console.log(`    [arb after ${after} REVERTED] simulated ${fmt(plan.ptAmount, 6)} PT`);
-      arbs.push({ after, block: block.toString(), status: "reverted", ptAmount: plan.ptAmount.toString() });
-      return;
+      arbs.push({ after, round, block: block.toString(), status: "reverted", ptAmount: plan.ptAmount.toString() });
+      return false;
     }
 
     const balancesAfter = await Promise.all(lps.map((lp) => aquaSyBalance(fork, lp)));
@@ -163,12 +176,13 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const paidUsdPerPt = Number(syPaid * rate) / 1e18 / 1e6 / (Number(plan.ptAmount) / 1e6);
 
     console.log(
-      `  [arb after ${after}] Levee bought ${fmt(plan.ptAmount, 6)} PT for ${fmt(syPaid, 18)} SY (${paidUsdPerPt.toFixed(4)} USD/PT), ` +
+      `  [arb ${round} after ${after}] Levee bought ${fmt(plan.ptAmount, 6)} PT for ${fmt(syPaid, 18)} SY (${paidUsdPerPt.toFixed(4)} USD/PT), ` +
         `searcher +${fmt(profitPt, 6)} PT, spot ${spotBefore.toFixed(4)} -> ${spotAfter.toFixed(4)}, ` +
         `bid now ${bid ? bid.bid.toFixed(4) : "refused"} (${plan.evals} sims, ${plan.ms} ms, gas ${receipt.gasUsed})`
     );
     arbs.push({
       after,
+      round,
       block: block.toString(),
       timestamp: ts,
       status: "success",
@@ -185,7 +199,8 @@ export async function runMakerScenario(config: MakerRunConfig) {
       searchMs: plan.ms,
       gasUsed: receipt.gasUsed.toString(),
     });
-    points.push(await measurePoint(fork, `arb after ${after}`, block, positions));
+    points.push(await measurePoint(fork, `arb ${round} after ${after}`, block, positions));
+    return true;
   }
 
   /** Mines ticks and runs a pending arb, in time order, for everything strictly before `ts`. */
@@ -194,7 +209,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
       const nextTick = lastTs + TICK_SECONDS;
       const arbTs = pending ? Math.max(pending.dueTs, lastTs + 1) : Infinity;
       if (arbTs < ts && arbTs <= nextTick) {
-        await runArb(arbTs);
+        await runArb(arbTs, ts);
       } else if (nextTick < ts) {
         block = await mineEmptyBlockAt(fork, nextTick);
         lastTs = nextTick;
@@ -240,7 +255,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
       pending = { dueTs: ts + delay, after: label };
     }
   }
-  if (pending) await runArb(Math.max((pending as { dueTs: number }).dueTs, lastTs + 1));
+  if (pending) await runArb(Math.max((pending as { dueTs: number }).dueTs, lastTs + 1), Infinity);
 
   for (let k = 0; k < POST_TICKS; k++) {
     lastTs += TICK_SECONDS;
@@ -275,6 +290,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
       extraReverted: pushes.filter((p) => p.extra && p.status !== "success").length,
     },
     arbs: arbs.filter((a) => a.status === "success").length,
+    pushesAnswered: new Set(arbs.filter((a) => a.status === "success").map((a) => a.after)).size,
     arbsReverted: arbs.filter((a) => a.status !== "success").length,
     shippedSy: Number(config.capitalSy) / 1e18,
     syUsed: Number(syUsed) / 1e18,
@@ -312,7 +328,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     `  Manipulator: ${summary.manipulator.historicalOk}/11 historical pushes ok` +
       (config.extraAttackSy > 0n ? `, ${summary.manipulator.extraOk} extra pushes ok, ${summary.manipulator.extraReverted} reverted` : "")
   );
-  console.log(`  Levee: ${summary.arbs} fills, ${fmt(syUsed, 18)} of ${fmt(config.capitalSy, 18)} SY used (${(summary.usedShare * 100).toFixed(1)}%), ${pt.toLocaleString(undefined, { maximumFractionDigits: 0 })} PT bought`);
+  console.log(`  Levee: ${summary.arbs} fills after ${summary.pushesAnswered} trades, ${fmt(syUsed, 18)} of ${fmt(config.capitalSy, 18)} SY used (${(summary.usedShare * 100).toFixed(1)}%), ${pt.toLocaleString(undefined, { maximumFractionDigits: 0 })} PT bought`);
   console.log(`  Spot min ${summary.spotMin.toFixed(4)}, oracle min ${summary.oracleMin.toFixed(4)}`);
   console.log(`  Peak eligible: USDC ${e.usdcCount} pos / $${e.usdcDebt.toLocaleString(undefined, { maximumFractionDigits: 0 })}, USDT ${e.usdtCount} pos / $${e.usdtDebt.toLocaleString(undefined, { maximumFractionDigits: 0 })}`);
   if (costUsd > 0) {
