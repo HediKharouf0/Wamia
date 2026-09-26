@@ -14,9 +14,8 @@ export function Hero() {
         Get paid to make <span className="accent">yield trading</span> safe
       </h1>
       <p className="lede">
-        Commit SY into a standing 1inch Aqua order and earn an annualized return every time the market needs it,
-        while the same capital absorbs manipulation dumps in the very next block via 1inch SwapVM, replayed against
-        a real mainnet attack, not a simulation of one.
+        Commit SY into a standing 1inch Aqua order, earn yield on it, and let 1inch SwapVM absorb manipulation
+        dumps the very next block, proven against a real mainnet attack.
       </p>
       <div className="ctas">
         <a className="btn primary" href="#yield-model">
