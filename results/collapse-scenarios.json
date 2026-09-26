@@ -1,0 +1,67 @@
+[
+  {
+    "case": "control",
+    "spot": 0.9592383920105764,
+    "fair": 0.9710030842581654,
+    "bought": true,
+    "reason": "max profit",
+    "syUsed": 1157393.0460564757,
+    "ptAmount": 1308946.986324
+  },
+  {
+    "case": "switchoff",
+    "reusdFunding": "storage deal",
+    "reusdSoldOnCurve": 60000,
+    "curveEmaMarketToNav": 0.9999476162186741,
+    "curveLastMarketToNav": 0.9865439354118876,
+    "spot": 0.9592385097213111,
+    "fair": 0.9710032886857473,
+    "bought": true,
+    "reason": "max profit",
+    "syUsed": 1157393.2896687174,
+    "ptAmount": 1308946.986324
+  },
+  {
+    "case": "run",
+    "reusdFunding": "storage deal",
+    "reusdSoldOnCurve": 80000,
+    "minutesHeld": 19,
+    "curveEmaMarketToNav": 0.9899449034243027,
+    "curveLastMarketToNav": 0.9794571221418721,
+    "syRate": "1096798",
+    "spot": 0.959240705805825,
+    "fair": 0.9710070334349741,
+    "bought": false,
+    "reason": "UnderlyingDepegged(989774946423246737, 990000000000000000)",
+    "syUsed": 0,
+    "ptAmount": 0
+  },
+  {
+    "case": "loss",
+    "editedContract": "0xd1d104a7515989ac82f1afda15a23650411b05b8",
+    "syRateBefore": "1096798",
+    "syRateAfter": "1041958",
+    "spot": 0.9592387354065578,
+    "fair": 0.9710036727619263,
+    "bought": false,
+    "reason": "SyBelowFloor(1041958, 1085830)",
+    "syUsed": 0,
+    "ptAmount": 0
+  },
+  {
+    "case": "jump",
+    "pushes": 4,
+    "syPushed": 200000,
+    "stoppedBy": "Pendle rejected the next push",
+    "tradesFloorSpot": 0.9492913197671351,
+    "tradesFloorBps": 223.60847486609796,
+    "marketRateEdited": true,
+    "deviationBps": 600.0001199396385,
+    "spot": 0.912743560123412,
+    "fair": 0.9710037997548898,
+    "bought": false,
+    "reason": "SpotTooFarBelowFair(912743560123411841, 971003799754889937)",
+    "syUsed": 0,
+    "ptAmount": 0
+  }
+]
