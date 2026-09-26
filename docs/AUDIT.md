@@ -80,7 +80,8 @@ numbers or the pitch. "Fixed" items are already committed.
 ## Contracts (written today)
 
 19. Local tests: 32 pass (unit, and end to end on Aqua v1.0.0 + router v1.0.2
-    built from source). The mainnet fork test is written but has not run yet.
+    built from source). The mainnet fork test passes (4/4) on the deployed
+    contracts at block 25829822.
 20. The per-trade cap is stateless, so splitting a trade bypasses it. The real
     cap is the shipped SY. A per-hour limit needs storage written only in swap
     mode (planned v2).

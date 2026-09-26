@@ -1,7 +1,8 @@
 {
   "whales": {
-  "usdc": "0x37305b1cd40574e4c5ce33f8e8306be057fd7341",
-  "usdt": "0xf977814e90da44bfa03b6295a0616a897441acec"},
+    "usdc": "0x37305b1cd40574e4c5ce33f8e8306be057fd7341",
+    "usdt": "0xf977814e90da44bfa03b6295a0616a897441acec"
+  },
   "forkBlock": 25829822,
   "morphoBlue": "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
   "morphoMarkets": {
@@ -33,5 +34,10 @@
   },
   "liquidationProxy": "0x51a453d677396f62fbb1dff9925a205fa96fab5e",
   "trueLiquidationCaller": "0xbcea1aacaf365061dc29510dcf3bd544e16e566f",
-  "capitalWallet": "0xD67d8F6B6Ba0a97f043305F6b6f5a8eD1A247F44"
+  "capitalWallet": "0xD67d8F6B6Ba0a97f043305F6b6f5a8eD1A247F44",
+  "aqua": {
+    "registry": "0x1111113CCf1426A8E30e2bfF5E005d929bF6a90a",
+    "swapVmRouter": "0x111111338c5091E8440b67B168bAe16a668AC0De",
+    "note": "Verified at fork block 25829822 by contracts/test/fork/LeveeFork.t.sol: aqua v1.0.0, router EIP-712 domain '1inch SwapVM v1.0' version 1.0.2 (deployed block 25618917)"
+  }
 }

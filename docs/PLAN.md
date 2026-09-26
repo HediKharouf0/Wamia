@@ -12,7 +12,10 @@ is fine), tests or a UI, and a real commit history.
 - Old step 2: unit bug and PnL total fixed, taker sizing fixed. Rerun pending.
 - Old steps 3 to 5: Foundry project, `LeveeMath`, `LeveeQuoter`, `LeveeOrders`,
   local end-to-end test on the official sources.
-- Old step 6: fork test written, not run yet.
+- Old step 6: fork test passes on mainnet state at block 25829822 (4/4):
+  router domain "1inch SwapVM v1.0" 1.0.2, SY rate 1096798, Levee fair value
+  0.9709907 vs Pendle spot 0.9709910, 100k PT sold for 88,441 SY through the
+  deployed router.
 - Old step 10 (better taker sizing): done as part of step 2.
 - TypeScript side on the official SDKs (`src/aqua/levee.ts`), checked byte for
   byte against the Solidity side, with a local end-to-end demo
