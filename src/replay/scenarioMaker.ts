@@ -15,7 +15,9 @@
  *
  * Needs anvil forked at the fork block on port 8545 and `forge build` in contracts/.
  */
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { encodeFunctionData, maxUint256 } from "viem";
 import { fork } from "../chain/client.js";
 import { resetFork, sendHistoricalTx, mineEmptyBlockAt } from "./actions.js";
@@ -79,20 +81,25 @@ const fmt = (raw: bigint, decimals: number, digits = 0) =>
  * Every run starts from the fork block. The first run resets the fork and takes an anvil snapshot;
  * later runs revert to it. Unlike anvil_reset, a revert keeps the mainnet state anvil has already
  * fetched, so later runs skip most upstream requests. The state they start from is identical.
- * (A snapshot is used up by its revert, so a new one is taken each time.)
+ * (A snapshot is used up by its revert, so a new one is taken each time.) The id is kept in a temp
+ * file so separate `npm run` commands share it; if anvil was restarted, the revert fails and the
+ * run falls back to a reset.
  */
-let forkSnapshot: string | null = null;
+const SNAPSHOT_FILE = join(tmpdir(), "levee-anvil-fork-snapshot");
 async function freshFork() {
-  if (forkSnapshot !== null) {
-    const reverted = await fork.request({ method: "evm_revert" as any, params: [forkSnapshot] as any });
-    forkSnapshot = null;
-    if (reverted === true && (await fork.getBlockNumber({ cacheTime: 0 })) === FORK_BLOCK) {
-      forkSnapshot = (await fork.request({ method: "evm_snapshot" as any })) as string;
-      return;
+  const saved = existsSync(SNAPSHOT_FILE) ? readFileSync(SNAPSHOT_FILE, "utf8").trim() : "";
+  let reverted = false;
+  if (saved) {
+    try {
+      reverted = (await fork.request({ method: "evm_revert" as any, params: [saved] as any })) === true;
+    } catch {
+      reverted = false;
     }
   }
-  await resetFork(fork, FORK_BLOCK);
-  forkSnapshot = (await fork.request({ method: "evm_snapshot" as any })) as string;
+  if (!reverted || (await fork.getBlockNumber({ cacheTime: 0 })) !== FORK_BLOCK) {
+    await resetFork(fork, FORK_BLOCK);
+  }
+  writeFileSync(SNAPSHOT_FILE, (await fork.request({ method: "evm_snapshot" as any })) as string);
 }
 
 export async function runMakerScenario(config: MakerRunConfig) {
