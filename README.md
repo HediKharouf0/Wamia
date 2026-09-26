@@ -86,6 +86,25 @@ A backstop that buys into a real collapse is just a loss. `npm run scenario:coll
 
 A detail from the last case: Pendle's own pool refused trades that would take spot more than about 2.2 to 2.6% below fair, so trades alone couldn't reach the 4.5% stop. We had to edit the market's stored rate to simulate a repricing.
 
+## The app
+
+Four screens, in `app/` (`npm run app`, then open http://localhost:5173):
+
+- Aug 25 replay: the fork runs played back block by block, without and with P1nch side by side. Pendle spot, the Morpho oracle catching up with it, the 20 borrowers turning liquidatable one by one, the backstop draining, and each attack trade with its mainnet transaction. Pick 3M, 4M, 5M or 5M with guards. It reads the committed results, so it needs no chain.
+- Protect a market: an LP picks a size and a discount, sees the bid ladder the quoter will pay, and ships to Aqua. The wallet balance sits next to what the strategy was promised, and it doesn't move when you ship. Push the market and watch the searcher fill the strategy.
+- Is it protected?: fair value, Pendle and the oracle, backstop capacity against the debt close to liquidation, and each safety rule as a light. Trigger a vault loss or a news repricing and the lights turn red; the next push gets no fill.
+- Inspect a strategy: the order's program decoded step by step, each Extruction target checked against this repo's build (same code, no proxy, no DELEGATECALL or SELFDESTRUCT), and a quote tester that calls the router.
+
+The last three run live on anvil through a small local server:
+
+```bash
+anvil --fork-url "$ARCHIVE_RPC_URL" --fork-block-number 25829822    # terminal 1 (plain `anvil` works too, with mock Pendle and Curve)
+npm run app:server                                                   # terminal 2: deploys P1nch on that chain
+npm run app                                                          # terminal 3
+```
+
+On the fork, ship, dock, the attacker's push and the searcher's arbs are real transactions against the deployed Aqua, router and Pendle; funding the LP wallet and the collapse scenarios are storage edits. `npm run app:hosted` builds the replay alone into one HTML file.
+
 ## Run it
 
 Requirements: Node 20+, Foundry, and a mainnet archive RPC for the fork parts.
@@ -123,5 +142,6 @@ A replay run takes a few minutes on a laptop (the guarded 5M run took 3.9 min), 
 - `src/strategies/`: the searcher (sizes each arb by simulation) and the earlier taker bot.
 - `src/replay/`: the fork replays (`compareMaker.ts`, `scenarioMaker.ts`, `collapseScenarios.ts`) and the attacker modes.
 - `src/pricing/`, `src/health/`, `src/measure/`: fair value, Morpho position health, what each run measures.
+- `app/`, `src/app/`: the app (Vite + React) and its local server; `npm run app:data` rebuilds the replay data from `results/`.
 - `results/`: committed run outputs and the summary tables.
 - `FEEDBACK.md`: what we ran into with Aqua, SwapVM and the SDKs.

@@ -30,7 +30,11 @@ export function App() {
   const [tab, setTab] = useState<TabId>(initialTab);
   const [inspectHash, setInspectHash] = useState<string | null>(null);
   useEffect(() => {
-    history.replaceState(null, "", `#${tab}`);
+    try {
+      history.replaceState(null, "", `#${tab}`);
+    } catch {
+      /* some embedded frames refuse history edits; the tab still works */
+    }
   }, [tab]);
   useEffect(() => {
     const onHash = () => setTab(initialTab());
