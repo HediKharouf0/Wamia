@@ -86,17 +86,6 @@ A backstop that buys into a real collapse is just a loss. `npm run scenario:coll
 
 A detail from the last case: Pendle's own pool refused trades that would take spot more than about 2.2 to 2.6% below fair, so trades alone couldn't reach the 4.5% stop. We had to edit the market's stored rate to simulate a repricing.
 
-## What it doesn't do
-
-- It's a shield sized to the flow, not a wall. An attacker who keeps buying YT after the historical attack drains it: 200k SY of extra YT buys (which Pendle turns into 20 to 35 times as much PT) used up the whole 5M, and eligible debt went back to $37.35M. Deeper capital or more LPs raise the bar; they don't remove it.
-- The depeg stop reads a thin pool (about $450K on Curve) through an EMA with a ~20 min half-life. That's deliberate, so one block can't switch Levee off, but it also means a real run takes a while to register, and someone willing to hold a dump for long enough can switch it off.
-- The reference yield is fixed at ship. After a real repricing, a strategy keeps bidding the old fair value until the deviation stop, the yield check or the LP docks it. An updatable reference rate is future work.
-- Levee is passive. It needs a searcher to route PT to it. We ship the arb contract and bot, and it's profitable, but on mainnet it would rely on searchers or 1inch resolvers picking it up.
-- Aqua's shipped balances are allowances, not reservations. An LP who ships the same SY to several strategies sees swaps fail once the wallet runs short.
-- Replays skip the 29 historical liquidations and measure eligible debt from position health. Hackathon code, not audited.
-
-Not built yet from the v2 list: a cross-market check against other stablecoin PTs, an updatable reference rate, two-sided quoting, a UI, and a Dutch auction to exit PT near maturity.
-
 ## Run it
 
 Requirements: Node 20+, Foundry, and a mainnet archive RPC for the fork parts.
