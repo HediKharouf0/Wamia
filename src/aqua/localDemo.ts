@@ -129,9 +129,13 @@ async function main() {
     const swapped = SwappedEvent.fromLog({ data: swappedLog!.data, topics: swappedLog!.topics as [Hex, ...Hex[]] });
 
     const syPaid = lpSyBefore - (await balance(sy, lp));
-    console.log(`swap: ${swapped.amountIn} PT in, ${swapped.amountOut} SY out (quoted ${quotedOut})`);
+    // The quote ran against the previous block and the swap lands in a later one. Levee's fair
+    // value rises toward 1 as maturity approaches, so a few seconds later it pays marginally more.
+    // The quote is honored as the taker's min out; the LP wallet pays exactly what the taker gets.
+    console.log(`swap: ${swapped.amountIn} PT in, ${swapped.amountOut} SY out (quoted ${quotedOut} one block earlier)`);
     console.log(`  LP wallet: -${syPaid} SY, +${await balance(pt, lp)} PT; taker got ${await balance(sy, taker)} SY`);
-    if (swapped.amountOut !== quotedOut || syPaid !== quotedOut) throw new Error("swap did not pay the quote");
+    if (swapped.amountOut < quotedOut) throw new Error("swap paid less than the quote");
+    if (syPaid !== swapped.amountOut || (await balance(sy, taker)) !== swapped.amountOut) throw new Error("SY did not move LP -> taker");
 
     // Depeg stop: SY loses value, the same quote now reverts.
     await write(deployer, sy, "setExchangeRate", [1_050_000n]);
