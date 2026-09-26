@@ -10,25 +10,18 @@ Everything runs on the deployed Aqua (v1.0.0) and AquaSwapVMRouter (swap-vm v1.0
 
 ## The Problem — Aug 25, 2026
 
-PT-reUSD (Pendle, matures Dec 10, 2026) is used as collateral on Morpho, looped to ~91% LTV. One wallet bought YT eleven times in ~9 minutes, forcing Pendle's router to sell PT into a thin pool. A few hundred thousand dollars of YT moved millions of PT and pushed the price down ~3%. Morpho's oracle (a 15-minute TWAP of Pendle's rate) followed, and leveraged borrowers got liquidated — even though PT's value at maturity never changed.
+A wallet forced Pendle's router to sell millions of PT-reUSD (looped ~91% LTV on Morpho) by buying YT eleven times in ~9 minutes, pushing PT down ~3%. Morpho's 15-minute-TWAP oracle followed, and leveraged borrowers got liquidated even though PT's value at maturity never changed. Reacting after the fact is too late — the oracle is an average, so minutes near the bottom keep dragging it down after spot recovers.
 
 | | Without a backstop |
 |---|---|
 | Debt eligible for liquidation | $37.35M across 20 positions |
 | Oracle low | 0.9472 |
 
-No one was standing there with a deep bid, and a bot that reacts after the fact is too late — the oracle is an average, so minutes spent near the bottom keep dragging it down even after spot recovers.
-
 ---
 
 ## The Idea
 
-A bid that's always there, funded by capital that's doing something else in the meantime.
-
-- **Aqua** lets an LP ship SY to a strategy without locking it — balance stays in the LP's own wallet.
-- **SwapVM** runs the strategy's program on every quote and swap, so the bid is priced onchain from live Pendle/Curve/SY state at the moment of the trade.
-- The bid is **standing**, so it fills the block right after every manipulator trade — spot never sits low long enough to drag the oracle average down.
-- LPs earn by buying PT below fair value; PT redeems at par at maturity.
+A bid that's always there, funded by capital that's doing something else in the meantime. LPs ship SY to Aqua without locking it; SwapVM prices the bid onchain from live Pendle/Curve/SY state on every trade; it fills the block right after a push, before the oracle average can drag down. LPs earn by buying PT below fair value, which redeems at par at maturity.
 
 ```
 LP wallet (SY) --ship--> Aqua --> AquaSwapVMRouter
@@ -41,7 +34,7 @@ Searcher --> WamiaArb.arb():  sell PT to Wamia via the router
                               -> keep the leftover PT as profit (zero capital, reverts if not profitable)
 ```
 
-`WamiaQuoter` prices every PT sale and refuses it outright in any of these cases:
+`WamiaQuoter` refuses a PT sale outright in any of these cases, otherwise pays fair value minus a discount:
 
 | Check | Refuses when |
 |---|---|
@@ -49,9 +42,8 @@ Searcher --> WamiaArb.arb():  sell PT to Wamia via the router
 | Vault loss | SY's exchange rate (reUSD's NAV) is below the LP's floor |
 | Run on the peg | reUSD trades >1% below NAV on Curve, by the pool's EMA |
 | News vs. push | Pendle's spot is >4.5% below fair value (Aug 25 was ~2.45%) |
-| _(otherwise)_ | pays fair value `1/(1+y)^t` minus a discount that deepens from 10bp to `discountMaxBps` as the backstop is used |
 
-Two v2 guards add further Extruction steps an LP can opt into: `WamiaRateGuard` (refuses if the SY rate drops below its own high-water mark, or if reUSD's realized yield runs far above reference) and `WamiaSpendLimit` (caps spend per 12s block, growing toward maturity, so a bug or an undetected real collapse can't drain a strategy in one block). Both key their state by order hash and only the router can write it, so quoting never burns budget. Full parameter details: [`contracts/README.md`](contracts/README.md).
+Two optional v2 guards (`WamiaRateGuard`, `WamiaSpendLimit`) add a high-water-mark check and a per-block spend cap. Details: [`contracts/README.md`](contracts/README.md).
 
 ---
 
@@ -68,28 +60,27 @@ Two v2 guards add further Extruction steps an LP can opt into: `WamiaRateGuard` 
 
 ## Results
 
-Fork replay at block 25829822, real 12s blocks, the Aug 25 attack replayed with an **adaptive** attacker (same SY per trade as on the day, fresh slippage bounds — it doesn't give up just because Wamia moved the price). Full tables: [`results/maker-results.md`](results/maker-results.md).
+Fork replay at block 25829822, real Aug 25 attack, adaptive attacker. Full tables: [`results/maker-results.md`](results/maker-results.md).
 
 | Setup | Capital | Debt eligible for liquidation | Oracle min |
 |---|---|---|---|
 | No backstop | 0 | $37.35M (20 positions) | 0.9472 |
-| Reactive taker bot (buys after the drop) | 5M SY budget | $11.23M | 0.9629 |
+| Reactive taker bot | 5M SY budget | $11.23M | 0.9629 |
 | Wamia | 3M SY shipped | $13.02M (8) | 0.9615 |
-| Wamia | 4M SY shipped | $0.20M (1) | 0.9650 |
-| Wamia | 5M SY shipped (4.60M used) | $0 | 0.9671 |
-| Wamia + v2 guards | 5M SY shipped (4.54M used) | $0 | 0.9669 |
+| Wamia | 5M SY shipped | $0 | 0.9671 |
+| Wamia + v2 guards | 5M SY shipped | $0 | 0.9669 |
 
-At 5M SY: LP's average buy price was 0.9691 USD/PT against a fair value of ~0.971 — 3.18% over 107 days, 11.3% annualized, above the 10.58% a buyer at fair value would get. The searcher made ~8,900 PT with zero capital. Result holds with the arb landing in the same block as each push, and with the attacker's exact historical calldata.
+At 5M SY, LPs earned 11.3% annualized (vs. 10.58% at fair value); the searcher made ~8,900 PT with zero capital.
 
-**Genuine collapses — Wamia has to step aside**, or a backstop that buys into a real collapse is just a loss (`npm run scenario:collapse`):
+**Genuine collapses** — a backstop that buys into a real collapse is a loss, so Wamia has to refuse (`npm run scenario:collapse`):
 
-| Case | What happens | Wamia |
-|---|---|---|
-| Control (the Aug 25 push) | — | buys |
-| Switch-off attempt | 60k reUSD dumped on Curve, one block, EMA barely moves | buys (one block can't fake it) |
-| Run on reUSD | 80k reUSD sold, held 19 min, EMA 0.9899 of NAV | refuses (`UnderlyingDepegged`) |
-| Vault loss | SY rate 1.0968 → 1.0420 | refuses (`SyBelowFloor`) |
-| News repricing | Pendle's rate moved 6% below fair | refuses (`SpotTooFarBelowFair`) |
+| Case | Wamia |
+|---|---|
+| Control (the Aug 25 push) | buys |
+| Switch-off attempt (fake dump, one block) | buys (can't fake it in one block) |
+| Run on reUSD (real depeg, 19 min) | refuses (`UnderlyingDepegged`) |
+| Vault loss (SY rate drops) | refuses (`SyBelowFloor`) |
+| News repricing (real 6% move) | refuses (`SpotTooFarBelowFair`) |
 
 ---
 
