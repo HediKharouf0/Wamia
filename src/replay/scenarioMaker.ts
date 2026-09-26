@@ -156,7 +156,30 @@ export async function runMakerScenario(config: MakerRunConfig) {
   const t0 = await measurePoint(fork, "t0", block, positions);
   points.push(t0);
   let lastTs: number = t0.timestamp;
-  console.log(`[${config.label}] t0: PT ${t0.ptSpotPrice.toFixed(4)}, oracle ${t0.oraclePrice.toFixed(4)}`);
+  let lastSpot = t0.ptSpotPrice;
+  console.log(`[${config.label}] #${block}  t0   PT spot ${t0.ptSpotPrice.toFixed(4)}, oracle ${t0.oraclePrice.toFixed(4)}  (replay starts here)`);
+
+  /**
+   * Block-by-block log. Every block that carries a decision (a push landing, an arb buying or
+   * refusing, the spend limit pausing the searcher) gets its own line, printed at the moment it
+   * happens. Blocks that carry no decision (empty ticks mined only to advance time) are silent as
+   * they occur and collapsed into one summary line, flushed the moment something real follows.
+   */
+  let idle: { fromBlock: bigint; toBlock: bigint; seconds: number } | null = null;
+  function noteIdleTick(b: bigint, seconds: number) {
+    if (!idle) idle = { fromBlock: b, toBlock: b, seconds };
+    else {
+      idle.toBlock = b;
+      idle.seconds += seconds;
+    }
+  }
+  function flushIdle(reason = "waiting for the next scheduled event") {
+    if (!idle) return;
+    const span = idle.toBlock === idle.fromBlock ? `#${idle.fromBlock}` : `#${idle.fromBlock}..${idle.toBlock}`;
+    const n = Number(idle.toBlock - idle.fromBlock) + 1;
+    console.log(`${span}  (${n} empty block${n > 1 ? "s" : ""}, ${idle.seconds}s)  idle: ${reason}`);
+    idle = null;
+  }
 
   // 3. The searcher's backrun.
   const delay = config.latencyBlocks === 0 ? 1 : 12;
@@ -191,8 +214,10 @@ export async function runMakerScenario(config: MakerRunConfig) {
     }
     // The spend limit stopped the searcher for this block: it comes back in the next one.
     if (stopReason.startsWith("SpendLimitExceeded") && !pending) {
+      flushIdle();
       const next = (Math.floor(lastTs / SPEND_WINDOW_SEC) + 1) * SPEND_WINDOW_SEC;
-      console.log(`    [spend limit reached after ${after}] searcher retries next block (t+${next - lastTs} s)`);
+      console.log(`#${block} spend-limit  DEFER   P1nch pauses arbing for this block`);
+      console.log(`         why: this block's spend cap is used up; retries once the next ${SPEND_WINDOW_SEC}s window opens (t+${next - lastTs}s)`);
       pending = { dueTs: next, after, newWindow: true };
     }
   }
@@ -201,7 +226,12 @@ export async function runMakerScenario(config: MakerRunConfig) {
   async function arbRound(ts: number, after: string, round: number): Promise<boolean> {
     const sources = await Promise.all(lps.map(async (lp) => ({ lp, order: lp.order, balanceSy: await aquaSyBalance(fork, lp) })));
     const syLeft = sources.reduce((s, x) => s + x.balanceSy, 0n);
-    if (syLeft === 0n) return false;
+    if (syLeft === 0n) {
+      flushIdle();
+      console.log(`#${block} arb #${round}  SKIP    no trade sent`);
+      console.log(`         why: this strategy has no SY left to sell`);
+      return false;
+    }
     const rate = await syExchangeRate(fork);
     // Upper bound on PT P1nch could buy: all its SY at a price no lower than 0.9 USD per PT.
     const maxPt = (syLeft * rate * 10n) / 10n ** 18n / 9n;
@@ -209,7 +239,9 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const plan = await planArb(fork, p1nch.arb, p1nch.arbAbi, p1nch.errorAbi, searcher, sources, { ...ARB, maxPt });
     if (plan.ptAmount === 0n) {
       stopReason = plan.reason;
-      if (round === 1) console.log(`    [no arb after ${after}] ${plan.reason} (${plan.evals} sims, ${plan.ms} ms)`);
+      flushIdle();
+      console.log(`#${block} arb #${round}  SKIP    no trade sent`);
+      console.log(`         why: ${plan.reason} (${plan.evals} sims, ${plan.ms} ms)`);
       return false;
     }
 
@@ -224,7 +256,8 @@ export async function runMakerScenario(config: MakerRunConfig) {
     block = receipt.blockNumber;
     lastTs = ts;
     if (receipt.status !== "success") {
-      console.log(`    [arb after ${after} REVERTED] simulated ${fmt(plan.ptAmount, 6)} PT`);
+      flushIdle();
+      console.log(`#${block} arb #${round}  REVERTED   simulated ${fmt(plan.ptAmount, 6)} PT, but the transaction failed on-chain`);
       arbs.push({ after, round, block: block.toString(), status: "reverted", ptAmount: plan.ptAmount.toString() });
       return false;
     }
@@ -236,10 +269,11 @@ export async function runMakerScenario(config: MakerRunConfig) {
     const bid = await p1nchBid(fork, p1nch.quoter, p1nch.quoterAbi, lps[0]!, balancesAfter[0]!);
     const paidUsdPerPt = Number(syPaid * rate) / 1e18 / 1e6 / (Number(plan.ptAmount) / 1e6);
 
+    flushIdle();
+    console.log(`#${block} arb #${round}  BUY     ${fmt(syPaid, 18)} SY -> ${fmt(plan.ptAmount, 6)} PT @ ${paidUsdPerPt.toFixed(4)}/PT (searcher +${fmt(profitPt, 6)} PT)`);
     console.log(
-      `  [arb ${round} after ${after}] P1nch bought ${fmt(plan.ptAmount, 6)} PT for ${fmt(syPaid, 18)} SY (${paidUsdPerPt.toFixed(4)} USD/PT), ` +
-        `searcher +${fmt(profitPt, 6)} PT, spot ${spotBefore.toFixed(4)} -> ${spotAfter.toFixed(4)}, ` +
-        `bid now ${bid ? bid.bid.toFixed(4) : "refused"} (${plan.evals} sims, ${plan.ms} ms, gas ${receipt.gasUsed})`
+      `         why: quoter's bid ${bid ? bid.bid.toFixed(4) : "n/a"} clears the ${fmt(ARB.minProfitPt, 6)} PT profit floor; ` +
+        `spot ${spotBefore.toFixed(4)} -> ${spotAfter.toFixed(4)} (${plan.evals} sims, ${plan.ms} ms, gas ${receipt.gasUsed.toLocaleString()})`
     );
     arbs.push({
       after,
@@ -275,6 +309,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
         block = await mineEmptyBlockAt(fork, nextTick);
         lastTs = nextTick;
         points.push(await measurePoint(fork, "tick", block, positions));
+        noteIdleTick(block, TICK_SECONDS);
       } else {
         return;
       }
@@ -306,11 +341,30 @@ export async function runMakerScenario(config: MakerRunConfig) {
     counters[role] = (counters[role] ?? 0) + 1;
     if (ev.kind === "morpho-other") positions = await readAllPositions(fork, block);
 
-    const tag = receipt.status === "success" ? "ok" : "REV";
-    const label = `${role.slice(0, 5)}-${counters[role]} ${tag}`;
+    const ok = receipt.status === "success";
+    const label = `${role.slice(0, 5)}-${counters[role]} ${ok ? "ok" : "REV"}`;
     if (ev.role === "manipulator") pushes.push({ label, extra: !!ev.extra, status: receipt.status });
-    points.push({ ...(await measurePoint(fork, label, block, positions)), txHash: ev.hash, txStatus: receipt.status });
-    if (ev.role === "manipulator") console.log(`  ${label}: spot ${points[points.length - 1].ptSpotPrice.toFixed(4)}`);
+    const point = { ...(await measurePoint(fork, label, block, positions)), txHash: ev.hash, txStatus: receipt.status };
+    points.push(point);
+
+    flushIdle();
+    let headline: string;
+    if (!ok) {
+      headline =
+        role === "manipulator"
+          ? `historical push ${counters.manipulator}/11 did not land`
+          : role === "extra"
+            ? `extra push ${counters.extra} (persistent attacker) did not land`
+            : `background tx replayed for state did not land`;
+    } else if (role === "manipulator") {
+      headline = `historical push ${counters.manipulator}/11: spot ${lastSpot.toFixed(4)} -> ${point.ptSpotPrice.toFixed(4)}`;
+    } else if (role === "extra") {
+      headline = `extra push ${counters.extra} (persistent attacker): spot ${lastSpot.toFixed(4)} -> ${point.ptSpotPrice.toFixed(4)}`;
+    } else {
+      headline = `background tx, replayed for state only (not a P1nch decision)`;
+    }
+    console.log(`#${block} ${role.slice(0, 5)}-${counters[role]}  ${ok ? "OK" : "REVERTED"}   ${headline}`);
+    if (ok && (role === "manipulator" || role === "extra")) lastSpot = point.ptSpotPrice;
 
     if ((ev.kind === "attack" || ev.kind === "pendle-trade") && receipt.status === "success" && !pending) {
       pending = { dueTs: ts + delay, after: label };
@@ -326,7 +380,9 @@ export async function runMakerScenario(config: MakerRunConfig) {
     lastTs += TICK_SECONDS;
     block = await mineEmptyBlockAt(fork, lastTs);
     points.push(await measurePoint(fork, "post-tick", block, positions));
+    noteIdleTick(block, TICK_SECONDS);
   }
+  flushIdle("settling period after the replay, no more scheduled events");
 
   // 4. Summary.
   const rateEnd = await syExchangeRate(fork);
