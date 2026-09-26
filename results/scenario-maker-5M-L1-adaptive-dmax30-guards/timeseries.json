@@ -1,0 +1,1900 @@
+[
+  {
+    "label": "t0",
+    "block": "25829828",
+    "timestamp": 1787632121,
+    "ptSpotPrice": 0.970990991621261,
+    "impliedYield": 0.10582876043473588,
+    "oraclePrice": 0.9709909916212611,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0078512982284586
+      }
+    }
+  },
+  {
+    "label": "manip-1 ok",
+    "block": "25829829",
+    "timestamp": 1787632127,
+    "ptSpotPrice": 0.9700793880356671,
+    "impliedYield": 0.10938389483358568,
+    "oraclePrice": 0.9709910102051464,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0078513175798711
+      }
+    },
+    "txHash": "0x3bb3f1f0f3912ec95307baf193cda638bed9df0030a8cdc0ab2dda03ba5d6a28",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-2 ok",
+    "block": "25829830",
+    "timestamp": 1787632163,
+    "ptSpotPrice": 0.9695265485370437,
+    "impliedYield": 0.11154750937224689,
+    "oraclePrice": 0.9709546405167582,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.007813567205801
+      }
+    },
+    "txHash": "0x600cd3a39cdbbfbbdee0a9614f4e79c6f810b2befd711577589d70edd93bdbc9",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-3 ok",
+    "block": "25829831",
+    "timestamp": 1787632211,
+    "ptSpotPrice": 0.9674883478028411,
+    "impliedYield": 0.11957055667251604,
+    "oraclePrice": 0.9708766263131716,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0077325914528592
+      }
+    },
+    "txHash": "0x80ce7e24ca52ebf4f48c593d773eafe6006d9b816c4cd5c2ca7110bafddcc8e3",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-1 REV",
+    "block": "25829832",
+    "timestamp": 1787632223,
+    "ptSpotPrice": 0.9674883893831866,
+    "impliedYield": 0.11957055667251604,
+    "oraclePrice": 0.9708298802517995,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0076840708567079
+      }
+    },
+    "txHash": "0xb97df1bae065ccdc598ef7e4da9e7d9ee80115ec1df8aaf1cb0a5589be94ba2c",
+    "txStatus": "reverted"
+  },
+  {
+    "label": "arb 1 after manip-3 ok",
+    "block": "25829833",
+    "timestamp": 1787632224,
+    "ptSpotPrice": 0.9684439094860262,
+    "impliedYield": 0.11580031480445774,
+    "oraclePrice": 0.9708259848537744,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0076800275984044
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-3 ok",
+    "block": "25829834",
+    "timestamp": 1787632225,
+    "ptSpotPrice": 0.9688874329154067,
+    "impliedYield": 0.11405586651738342,
+    "oraclePrice": 0.9708231542903841,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0076770895895693
+      }
+    }
+  },
+  {
+    "label": "backg-2 ok",
+    "block": "25829835",
+    "timestamp": 1787632235,
+    "ptSpotPrice": 0.9688874660987234,
+    "impliedYield": 0.11405586651738342,
+    "oraclePrice": 0.9707997879841702,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0076528362322
+      }
+    },
+    "txHash": "0x2ae1dd91675b1e48446761e6c6db0b5ba8ba3ff2ba2dd761390450c30ca2e8ae",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-3 ok",
+    "block": "25829836",
+    "timestamp": 1787632283,
+    "ptSpotPrice": 0.9688876253786592,
+    "impliedYield": 0.11405586651738342,
+    "oraclePrice": 0.9706876382483623,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0075364291268456
+      }
+    },
+    "txHash": "0x5b19424842da77896c2a655498551ac7b41a8e854d073074566faede67afaa8e",
+    "txStatus": "success"
+  },
+  {
+    "label": "tick",
+    "block": "25829837",
+    "timestamp": 1787632343,
+    "ptSpotPrice": 0.9688878244786159,
+    "impliedYield": 0.11405586651738342,
+    "oraclePrice": 0.9705474709400769,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0073909408737585
+      }
+    }
+  },
+  {
+    "label": "manip-4 ok",
+    "block": "25829838",
+    "timestamp": 1787632367,
+    "ptSpotPrice": 0.9677482789068923,
+    "impliedYield": 0.11854542140940838,
+    "oraclePrice": 0.9704914101951255,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0073327519507491
+      }
+    },
+    "txHash": "0x11e7d92c69151322e9b25bbf096788377cb37238e25a6e1c77a677934a12a55e",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-4 ok",
+    "block": "25829839",
+    "timestamp": 1787632379,
+    "ptSpotPrice": 0.9684714529409599,
+    "impliedYield": 0.11569392987200788,
+    "oraclePrice": 0.970448152616943,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.007287852287677
+      }
+    }
+  },
+  {
+    "label": "backg-4 ok",
+    "block": "25829840",
+    "timestamp": 1787632403,
+    "ptSpotPrice": 0.9684715336296488,
+    "impliedYield": 0.11569392987200788,
+    "oraclePrice": 0.9703809721187039,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0072181215114675
+      }
+    },
+    "txHash": "0xb69875e45a557b1020d79f95a9e3d7a8259a9aa73e60a52446dbc626af7f5451",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-5 ok",
+    "block": "25829841",
+    "timestamp": 1787632403,
+    "ptSpotPrice": 0.9663248719241229,
+    "impliedYield": 0.12418635210121676,
+    "oraclePrice": 0.9703809721187039,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0072181215114675
+      }
+    },
+    "txHash": "0xd8cbca080f3347ab5a5d1577e16ed91f0245bc7113a44099449dd7a62eaf8c9b",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-5 ok",
+    "block": "25829842",
+    "timestamp": 1787632415,
+    "ptSpotPrice": 0.9677447584556221,
+    "impliedYield": 0.11855997829075426,
+    "oraclePrice": 0.9703186747823148,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0071534592571918
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-5 ok",
+    "block": "25829843",
+    "timestamp": 1787632416,
+    "ptSpotPrice": 0.9683266765741322,
+    "impliedYield": 0.1162645582131927,
+    "oraclePrice": 0.9703150664794734,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0071497139590355
+      }
+    }
+  },
+  {
+    "label": "backg-5 ok",
+    "block": "25829844",
+    "timestamp": 1787632463,
+    "ptSpotPrice": 0.9683268353037879,
+    "impliedYield": 0.1162645582131927,
+    "oraclePrice": 0.97017594769565,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.007005314029381
+      }
+    },
+    "txHash": "0x041b59caed73992c8389e433cc708dd6a81fea489504bae992ec60967d7840ed",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-6 ok",
+    "block": "25829845",
+    "timestamp": 1787632463,
+    "ptSpotPrice": 0.9661931300939481,
+    "impliedYield": 0.12471111339968255,
+    "oraclePrice": 0.97017594769565,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.007005314029381
+      }
+    },
+    "txHash": "0x30e73a50102bc873bc086c85be692acbf3d9392f0b9143b0397ac355904b8eb6",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-6 ok",
+    "block": "25829846",
+    "timestamp": 1787632475,
+    "ptSpotPrice": 0.9674256327384604,
+    "impliedYield": 0.11982221592828379,
+    "oraclePrice": 0.9701118977515752,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.006938832639133
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-6 ok",
+    "block": "25829847",
+    "timestamp": 1787632476,
+    "ptSpotPrice": 0.9681482166447256,
+    "impliedYield": 0.11696866654611404,
+    "oraclePrice": 0.9701079345251455,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0069347189932922
+      }
+    }
+  },
+  {
+    "label": "manip-7 ok",
+    "block": "25829848",
+    "timestamp": 1787632487,
+    "ptSpotPrice": 0.964723235308099,
+    "impliedYield": 0.13057835518328154,
+    "oraclePrice": 0.9700731925111814,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0068986580749297
+      }
+    },
+    "txHash": "0xa65cf8e9af00f3cc51f8440bc446fe06349e753b4b2a87cbb6e0d4a357e99c4b",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-7 ok",
+    "block": "25829849",
+    "timestamp": 1787632499,
+    "ptSpotPrice": 0.9666972919853608,
+    "impliedYield": 0.12270839461501426,
+    "oraclePrice": 0.9699894577353264,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.006811744586213
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-7 ok",
+    "block": "25829850",
+    "timestamp": 1787632500,
+    "ptSpotPrice": 0.9676052913476455,
+    "impliedYield": 0.11911218624405873,
+    "oraclePrice": 0.9699846832258335,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0068067888701124
+      }
+    }
+  },
+  {
+    "label": "arb 3 after manip-7 ok",
+    "block": "25829851",
+    "timestamp": 1787632501,
+    "ptSpotPrice": 0.9680001740595153,
+    "impliedYield": 0.11755287316676233,
+    "oraclePrice": 0.969980920576279,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0068028833938651
+      }
+    }
+  },
+  {
+    "label": "manip-8 ok",
+    "block": "25829852",
+    "timestamp": 1787632535,
+    "ptSpotPrice": 0.9644767233040916,
+    "impliedYield": 0.131566874523789,
+    "oraclePrice": 0.9698679489849167,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0066856232266488
+      }
+    },
+    "txHash": "0xd4b38b7898105b4153f38f1097a15cc2fc28756ed6724d65954ce147345d4327",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-9 ok",
+    "block": "25829853",
+    "timestamp": 1787632547,
+    "ptSpotPrice": 0.9611558981107066,
+    "impliedYield": 0.14498334423970594,
+    "oraclePrice": 0.969780925730605,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0065952964068048
+      }
+    },
+    "txHash": "0x975ae935159e23042913be2515649f87226e0e5e59d7240473011f2b5cb0e476",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-8 ok",
+    "block": "25829854",
+    "timestamp": 1787632548,
+    "ptSpotPrice": 0.9646478021579765,
+    "impliedYield": 0.13088142243919187,
+    "oraclePrice": 0.9697699576400858,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.006583911996696
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-8 ok",
+    "block": "25829855",
+    "timestamp": 1787632549,
+    "ptSpotPrice": 0.9650300974384591,
+    "impliedYield": 0.1293512156361174,
+    "oraclePrice": 0.969762897206475,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0065765834878133
+      }
+    }
+  },
+  {
+    "label": "tick",
+    "block": "25829856",
+    "timestamp": 1787632560,
+    "ptSpotPrice": 0.9650301383848117,
+    "impliedYield": 0.1293512156361174,
+    "oraclePrice": 0.9696899318573011,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.006500848252159
+      }
+    }
+  },
+  {
+    "label": "arb 1 after manip-8 ok",
+    "block": "25829857",
+    "timestamp": 1787632561,
+    "ptSpotPrice": 0.9664453682934921,
+    "impliedYield": 0.12370969053026726,
+    "oraclePrice": 0.9696832989246039,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0064939635356671
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-8 ok",
+    "block": "25829858",
+    "timestamp": 1787632562,
+    "ptSpotPrice": 0.9672118536571651,
+    "impliedYield": 0.12066946253209698,
+    "oraclePrice": 0.9696782449272298,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0064887177031918
+      }
+    }
+  },
+  {
+    "label": "backg-6 ok",
+    "block": "25829859",
+    "timestamp": 1787632595,
+    "ptSpotPrice": 0.9672119689633857,
+    "impliedYield": 0.12066946253209698,
+    "oraclePrice": 0.969539661035066,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0063395109566378
+      }
+    },
+    "txHash": "0xb6db2846caa0f9ce25ded081f3b24dd7f5b5f6cc9ddf14f023c2246059284bbf",
+    "txStatus": "success"
+  },
+  {
+    "label": "manip-10 ok",
+    "block": "25829860",
+    "timestamp": 1787632595,
+    "ptSpotPrice": 0.9661552030813712,
+    "impliedYield": 0.12486389170358625,
+    "oraclePrice": 0.969539661035066,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0063395109566378
+      }
+    },
+    "txHash": "0x7be75a450522dcd19d0d0a0532951fcf52b42b6ea77ad3ab11775071237713bc",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-10 ok",
+    "block": "25829861",
+    "timestamp": 1787632607,
+    "ptSpotPrice": 0.9668755824375448,
+    "impliedYield": 0.12200259174514483,
+    "oraclePrice": 0.9694751410621014,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0062725420612053
+      }
+    }
+  },
+  {
+    "label": "arb 2 after manip-10 ok",
+    "block": "25829862",
+    "timestamp": 1787632608,
+    "ptSpotPrice": 0.9672697029522744,
+    "impliedYield": 0.12044107185664887,
+    "oraclePrice": 0.9694705674193086,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0062677948496148
+      }
+    }
+  },
+  {
+    "label": "manip-11 ok",
+    "block": "25829863",
+    "timestamp": 1787632655,
+    "ptSpotPrice": 0.9662108585870339,
+    "impliedYield": 0.12464334160805324,
+    "oraclePrice": 0.969276259902431,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0060661122016175
+      }
+    },
+    "txHash": "0x77efe63b0600b63a3c8b9462fcccd2762a26b81626f903d10fb754448ef329a4",
+    "txStatus": "success"
+  },
+  {
+    "label": "arb 1 after manip-11 ok",
+    "block": "25829864",
+    "timestamp": 1787632668,
+    "ptSpotPrice": 0.9669768366588127,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.969207186575159,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0059944170972157
+      }
+    }
+  },
+  {
+    "label": "backg-7 ok",
+    "block": "25829865",
+    "timestamp": 1787632811,
+    "ptSpotPrice": 0.9669773398449352,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.968569654785703,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0053326871557897
+      }
+    },
+    "txHash": "0x41a588e83dc39b3c8179199d4596071b53d04728e6462f58e395344c3bd7e9a1",
+    "txStatus": "success"
+  },
+  {
+    "label": "tick",
+    "block": "25829866",
+    "timestamp": 1787632955,
+    "ptSpotPrice": 0.9669778465501061,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9679281084619867,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0046667902840345
+      }
+    }
+  },
+  {
+    "label": "backg-8 ok",
+    "block": "25829867",
+    "timestamp": 1787633015,
+    "ptSpotPrice": 0.966978057677339,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9676609288358441,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0043894696120623
+      }
+    },
+    "txHash": "0x48cdd4b79b86b1c6a3047ad87974ed2e30d3fc63ddcb870692eccfb94a3c9334",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-9 ok",
+    "block": "25829868",
+    "timestamp": 1787633039,
+    "ptSpotPrice": 0.966978142128245,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9675661951159871,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0042911401396122
+      }
+    },
+    "txHash": "0xea24ab63bed01cb596371c0f6ec17172ade5c6c9a74d957ef5113f214b0ee088",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-10 REV",
+    "block": "25829869",
+    "timestamp": 1787633111,
+    "ptSpotPrice": 0.9669783954810075,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9673478048021984,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.00406446065716
+      }
+    },
+    "txHash": "0x1359df4fbd2dfc1e5dea1c957089ff5f73d5be34ddc5c70ed95fd8d3d39bb223",
+    "txStatus": "reverted"
+  },
+  {
+    "label": "backg-11 ok",
+    "block": "25829870",
+    "timestamp": 1787633171,
+    "ptSpotPrice": 0.9669786066083603,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.967241313121126,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0039539269589872
+      }
+    },
+    "txHash": "0xd7501d2fee96bc6124927808a9582651805a6953f4891530acf0c79f7ba0787e",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-12 REV",
+    "block": "25829871",
+    "timestamp": 1787633219,
+    "ptSpotPrice": 0.9669787755102758,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9671395880941868,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0038483408487622
+      }
+    },
+    "txHash": "0x7e26ba5131403a821cbf8eaf6a75cae9a47304f9f4569a3d5d71d88c94820e0c",
+    "txStatus": "reverted"
+  },
+  {
+    "label": "tick",
+    "block": "25829872",
+    "timestamp": 1787633303,
+    "ptSpotPrice": 0.9669790710886987,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669878557431878,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003690849366684
+      }
+    }
+  },
+  {
+    "label": "backg-13 ok",
+    "block": "25829873",
+    "timestamp": 1787633387,
+    "ptSpotPrice": 0.9669793666672122,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669211287327538,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036215896890603
+      }
+    },
+    "txHash": "0x4eaf7e22585a57d14f071041cef92a7fdb89bc40f00a39282539c7279a589266",
+    "txStatus": "success"
+  },
+  {
+    "label": "backg-14 ok",
+    "block": "25829874",
+    "timestamp": 1787633387,
+    "ptSpotPrice": 0.9669793666672122,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669211287327538,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036215896890603
+      }
+    },
+    "txHash": "0x4cf041cf4cf8b30b72cc5e403cc659ff0b8c7adb472893f359e0a2972cc2f576",
+    "txStatus": "success"
+  },
+  {
+    "label": "post-tick",
+    "block": "25829875",
+    "timestamp": 1787633447,
+    "ptSpotPrice": 0.966979577794777,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.966945733183732,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036471279989507
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829876",
+    "timestamp": 1787633507,
+    "ptSpotPrice": 0.9669797889223879,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669839112008662,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036867550940707
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829877",
+    "timestamp": 1787633567,
+    "ptSpotPrice": 0.9669800000500449,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.966979148758588,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036818118924198
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829878",
+    "timestamp": 1787633627,
+    "ptSpotPrice": 0.966980211177748,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669802111777481,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036829146590316
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829879",
+    "timestamp": 1787633687,
+    "ptSpotPrice": 0.9669804223054972,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669804223054973,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036831337674563
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829880",
+    "timestamp": 1787633747,
+    "ptSpotPrice": 0.9669806334332928,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669806334332927,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036833529274845
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829881",
+    "timestamp": 1787633807,
+    "ptSpotPrice": 0.9669808445611341,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669808445611341,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003683572035909
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829882",
+    "timestamp": 1787633867,
+    "ptSpotPrice": 0.9669810556890216,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669810556890215,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003683791195937
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829883",
+    "timestamp": 1787633927,
+    "ptSpotPrice": 0.9669812668169553,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669812668169551,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036840103043616
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829884",
+    "timestamp": 1787633987,
+    "ptSpotPrice": 0.9669814779449349,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669814779449349,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036842294643897
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829885",
+    "timestamp": 1787634047,
+    "ptSpotPrice": 0.9669816890729608,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669816890729607,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036844486244179
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829886",
+    "timestamp": 1787634107,
+    "ptSpotPrice": 0.9669819002010327,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669819002010326,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003684667784446
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829887",
+    "timestamp": 1787634167,
+    "ptSpotPrice": 0.9669821113291508,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669821113291507,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036848868928705
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829888",
+    "timestamp": 1787634227,
+    "ptSpotPrice": 0.9669823224573146,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669823224573146,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036851060528986
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829889",
+    "timestamp": 1787634287,
+    "ptSpotPrice": 0.9669825335855249,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669825335855249,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036853251613231
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829890",
+    "timestamp": 1787634347,
+    "ptSpotPrice": 0.9669827447137812,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669827447137812,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036855443213513
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829891",
+    "timestamp": 1787634407,
+    "ptSpotPrice": 0.9669829558420836,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669829558420837,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003685763429776
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829892",
+    "timestamp": 1787634467,
+    "ptSpotPrice": 0.9669831669704322,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669831669704322,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036859826414075
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829893",
+    "timestamp": 1787634527,
+    "ptSpotPrice": 0.9669833780988268,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669833780988266,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003686201749832
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829894",
+    "timestamp": 1787634587,
+    "ptSpotPrice": 0.9669835892272673,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669835892272673,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036864209098602
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829895",
+    "timestamp": 1787634647,
+    "ptSpotPrice": 0.9669838003557542,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669838003557543,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003686640018285
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829896",
+    "timestamp": 1787634707,
+    "ptSpotPrice": 0.9669840114842871,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.966984011484287,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003686859178313
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829897",
+    "timestamp": 1787634767,
+    "ptSpotPrice": 0.9669842226128661,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.966984222612866,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036870782867375
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829898",
+    "timestamp": 1787634827,
+    "ptSpotPrice": 0.9669844337414911,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669844337414911,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003687297498369
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829899",
+    "timestamp": 1787634887,
+    "ptSpotPrice": 0.9669846448701623,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669846448701622,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036875166067938
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829900",
+    "timestamp": 1787634947,
+    "ptSpotPrice": 0.9669848559988796,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669848559988795,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003687735766822
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829901",
+    "timestamp": 1787635007,
+    "ptSpotPrice": 0.9669850671276429,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669850671276429,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036879548752464
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829902",
+    "timestamp": 1787635067,
+    "ptSpotPrice": 0.9669852782564524,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669852782564524,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036881740352745
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829903",
+    "timestamp": 1787635127,
+    "ptSpotPrice": 0.9669854893853079,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669854893853079,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.003688393143699
+      }
+    }
+  },
+  {
+    "label": "post-tick",
+    "block": "25829904",
+    "timestamp": 1787635187,
+    "ptSpotPrice": 0.9669857005142096,
+    "impliedYield": 0.12160199770225777,
+    "oraclePrice": 0.9669857005142096,
+    "markets": {
+      "usdc": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1
+      },
+      "usdt": {
+        "liquidatableCount": 0,
+        "liquidatableDebt": "0",
+        "liquidatableCollateral": "0",
+        "liquidatableUsers": [],
+        "minHealthFactor": 1.0036886123037272
+      }
+    }
+  }
+]

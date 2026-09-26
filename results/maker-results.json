@@ -15,7 +15,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": null,
     "lpAvgPaidUsdPerPt": null,
-    "searcherProfitPt": 0
+    "searcherProfitPt": 0,
+    "guards": false
   },
   {
     "run": "3M-L1-adaptive-dmax30",
@@ -33,7 +34,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1134,
     "lpAvgPaidUsdPerPt": 0.9691,
-    "searcherProfitPt": 6890
+    "searcherProfitPt": 6890,
+    "guards": false
   },
   {
     "run": "4M-L1-adaptive-dmax30",
@@ -51,7 +53,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1134,
     "lpAvgPaidUsdPerPt": 0.969,
-    "searcherProfitPt": 8050
+    "searcherProfitPt": 8050,
+    "guards": false
   },
   {
     "run": "5M-L1-adaptive-dmax30",
@@ -69,7 +72,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1131,
     "lpAvgPaidUsdPerPt": 0.9691,
-    "searcherProfitPt": 8904
+    "searcherProfitPt": 8904,
+    "guards": false
   },
   {
     "run": "6M-L1-adaptive-dmax30",
@@ -87,7 +91,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1125,
     "lpAvgPaidUsdPerPt": 0.9693,
-    "searcherProfitPt": 8935
+    "searcherProfitPt": 8935,
+    "guards": false
   },
   {
     "run": "5M-L0-adaptive-dmax30",
@@ -105,7 +110,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1132,
     "lpAvgPaidUsdPerPt": 0.9691,
-    "searcherProfitPt": 6839
+    "searcherProfitPt": 6839,
+    "guards": false
   },
   {
     "run": "5M-L1-historical-dmax30",
@@ -123,7 +129,27 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1131,
     "lpAvgPaidUsdPerPt": 0.9691,
-    "searcherProfitPt": 8906
+    "searcherProfitPt": 8906,
+    "guards": false
+  },
+  {
+    "run": "5M-L1-adaptive-dmax30-guards",
+    "shippedSy": 5000000,
+    "syUsed": 4542611,
+    "discountMaxBps": 30,
+    "latencyBlocks": 1,
+    "attacker": "adaptive",
+    "extraAttackSy": 0,
+    "fills": 17,
+    "spotMin": 0.9612,
+    "oracleMin": 0.9669,
+    "eligibleDebtUsd": 0,
+    "eligiblePositions": 0,
+    "manipulatorPushesOk": "11/11",
+    "lpHoldToMaturityAnnualized": 0.1131,
+    "lpAvgPaidUsdPerPt": 0.9691,
+    "searcherProfitPt": 8910,
+    "guards": true
   },
   {
     "run": "5M-L1-adaptive-extra1M-dmax30",
@@ -141,7 +167,8 @@
     "manipulatorPushesOk": "11/11 +4 extra (16 reverted)",
     "lpHoldToMaturityAnnualized": 0.1134,
     "lpAvgPaidUsdPerPt": 0.969,
-    "searcherProfitPt": 11583
+    "searcherProfitPt": 11583,
+    "guards": false
   },
   {
     "run": "5M-L1-adaptive-extra2M-dmax30",
@@ -159,7 +186,8 @@
     "manipulatorPushesOk": "11/11 +4 extra (36 reverted)",
     "lpHoldToMaturityAnnualized": 0.1134,
     "lpAvgPaidUsdPerPt": 0.969,
-    "searcherProfitPt": 11583
+    "searcherProfitPt": 11583,
+    "guards": false
   },
   {
     "run": "6M-L1-adaptive",
@@ -177,7 +205,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.116,
     "lpAvgPaidUsdPerPt": 0.9684,
-    "searcherProfitPt": 8024
+    "searcherProfitPt": 8024,
+    "guards": false
   },
   {
     "run": "8M-L1-adaptive",
@@ -195,7 +224,8 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1147,
     "lpAvgPaidUsdPerPt": 0.9687,
-    "searcherProfitPt": 8467
+    "searcherProfitPt": 8467,
+    "guards": false
   },
   {
     "run": "10M-L1-adaptive",
@@ -213,6 +243,7 @@
     "manipulatorPushesOk": "11/11",
     "lpHoldToMaturityAnnualized": 0.1138,
     "lpAvgPaidUsdPerPt": 0.969,
-    "searcherProfitPt": 8476
+    "searcherProfitPt": 8476,
+    "guards": false
   }
 ]
