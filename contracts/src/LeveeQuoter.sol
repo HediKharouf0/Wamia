@@ -20,8 +20,11 @@ import { IPMarketLike, IStandardizedYieldLike, ICurveStableSwapNGLike } from "./
 ///        2. Maturity: refuse at or after the market's expiry.
 ///        3. SY exchange-rate floor: catches a loss in reUSD's internal accounting (NAV).
 ///        4. Market depeg stop: refuse if the underlying trades more than `maxDepegBps` below its
-///           NAV on the Curve pool, by the EMA or by the last trade. Catches a run, where the
-///           market price falls while the NAV (and so the exchange rate) does not move.
+///           NAV on the Curve pool, by the pool's EMA price. Catches a run, where the market price
+///           falls while the NAV (and so the exchange rate) does not move. The EMA only, not the
+///           last trade: on a thin pool one dump moves the last price, so an attacker could switch
+///           Levee off for the cost of that dump right before pushing Pendle (60k reUSD did it on
+///           the fork). Holding the EMA down takes a depeg sustained for minutes.
 ///        5. Max deviation: refuse if Pendle's spot is more than `maxDeviationBps` below fair
 ///           value. A gap that large suggests real news rather than a push.
 ///        6. Price: fair value 1/(1+refYield)^tau minus a discount that deepens linearly with the
@@ -134,17 +137,12 @@ contract LeveeQuoter is IExtruction {
         require(spotWad * BPS >= fairWad * (BPS - p.maxDeviationBps), SpotTooFarBelowFair(spotWad, fairWad));
     }
 
-    /// @notice The underlying's market price divided by its NAV (wad), the worse of EMA and last trade.
+    /// @notice The underlying's market price divided by its NAV (wad), from the pool's EMA price.
     function marketToNav(Params memory p) public view returns (uint256) {
-        ICurveStableSwapNGLike pool = ICurveStableSwapNGLike(p.curvePool);
-        uint256 ema = pool.price_oracle(0);
-        uint256 last = pool.last_price(0);
-        if (p.flags & FLAG_UNDERLYING_IS_COIN1 != 0) {
-            // Prices are the underlying in USD-coin units: lower means cheaper underlying.
-            return FPM.min(ema, last);
-        }
-        // Prices are the USD coin in underlying units: higher means cheaper underlying.
-        return WAD * WAD / FPM.max(ema, last);
+        uint256 ema = ICurveStableSwapNGLike(p.curvePool).price_oracle(0);
+        // coins[1] underlying: the price is the underlying in USD-coin units (lower = cheaper).
+        // coins[0] underlying: the price is the USD coin in underlying units (higher = cheaper).
+        return p.flags & FLAG_UNDERLYING_IS_COIN1 != 0 ? ema : WAD * WAD / ema;
     }
 
     /// @notice Current marginal bid (USD per PT, wad) given the SY still in the strategy.

@@ -30,9 +30,12 @@ All from maker parameters, onchain reads and block time, never from taker data:
 3. SY exchange-rate floor (`minSyRate`): catches a loss in reUSD's NAV.
 4. Market depeg stop (`maxDepegBps`): refuse if reUSD trades more than this
    below its NAV on the Curve reUSD/USDC pool
-   (`0xf74c91b36C26543A0Aa820bEf407A577e5498BF0`), by the EMA price or by the
-   last trade, whichever is worse. The pool is NAV-adjusted, so 1e18 means
-   "at NAV". Catches a run, where the market price falls but the NAV does not.
+   (`0xf74c91b36C26543A0Aa820bEf407A577e5498BF0`), by the pool's EMA price
+   (half-life ~20 min). The pool is NAV-adjusted, so 1e18 means "at NAV".
+   Catches a run, where the market price falls but the NAV does not. Not the
+   last trade price: the pool is thin, and on the fork 60k reUSD dumped in one
+   block was enough to move it past 1%, which would let an attacker switch
+   Levee off right before pushing Pendle.
 5. Max deviation (`maxDeviationBps`): refuse if Pendle's spot is more than
    this below fair value. A gap that large suggests real news, not a push.
 6. Price: fair value at `refYieldWad`, minus a discount that deepens linearly

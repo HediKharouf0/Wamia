@@ -140,7 +140,7 @@ contract LeveeForkTest is Test {
     /// reUSD's market price on Curve against its NAV, read by the depeg stop.
     function test_CurvePoolPricesReusdAgainstNav() public view {
         uint256 ratio = quoter.marketToNav(_params(1e18));
-        console2.log("reUSD market / NAV (Curve EMA and last):", ratio);
+        console2.log("reUSD market / NAV (Curve EMA):", ratio);
         assertApproxEqRel(ratio, 0.99997e18, 0.00005e18, "at NAV on Aug 25");
         assertGe(ratio, 0.99e18, "passes the 1% depeg stop");
     }

@@ -160,10 +160,11 @@ contract LeveeQuoterTest is Test {
         quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
     }
 
-    function test_RevertWhen_MarketDepegOnLastPriceOnly() public {
-        curve.set(1.0e18, 1.02e18); // the EMA has not caught up yet, the last trade has
-        vm.expectPartialRevert(LeveeQuoter.UnderlyingDepegged.selector);
-        quoter.extruction(false, 0, _query(address(pt), address(sy), true), _regs(1e6, 0, SHIPPED), args, "");
+    /// One dump on a thin pool moves the last price but not the EMA: that must not switch Levee off.
+    function test_LastPriceAloneDoesNotStopLevee() public {
+        curve.set(1.0e18, 1.02e18); // last trade 2% below NAV, EMA still at NAV
+        assertEq(quoter.marketToNav(params), 1e18);
+        assertGt(_sell(1e6, SHIPPED).amountOut, 0);
     }
 
     function test_DepegCheckWhenUnderlyingIsCoin1() public {
