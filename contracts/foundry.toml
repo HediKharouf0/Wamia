@@ -1,0 +1,27 @@
+# Levee contracts. Compiled with the same compiler as the deployed 1inch
+# AquaSwapVMRouter (swap-vm v1.0.2) so the official sources can be deployed
+# in local tests.
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 700
+via_ir = true
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@1inch/solidity-utils/=lib/solidity-utils/",
+    "@1inch/aqua/=lib/aqua/",
+    "@1inch/swap-vm/=lib/swap-vm/",
+    "solady/=lib/solady/src/",
+]
+
+[rpc_endpoints]
+mainnet = "${ARCHIVE_RPC_URL}"
+
+[fmt]
+line_length = 120
