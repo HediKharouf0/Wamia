@@ -14,6 +14,9 @@ is fine), tests or a UI, and a real commit history.
   local end-to-end test on the official sources.
 - Old step 6: fork test written, not run yet.
 - Old step 10 (better taker sizing): done as part of step 2.
+- TypeScript side on the official SDKs (`src/aqua/levee.ts`), checked byte for
+  byte against the Solidity side, with a local end-to-end demo
+  (`npm run demo:local`). `scenarioMaker` should reuse these helpers.
 
 ## Order from here
 

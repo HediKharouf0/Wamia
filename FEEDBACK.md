@@ -68,3 +68,23 @@ have helped. We add to this file as we go.
    Aqua README links to it.
    Suggestion: link the two READMEs, and show the Aqua + SwapVM router flow in
    the Aqua SDK examples.
+
+9. `AquaProgramBuilder` has no `extruction()` method.
+   The Aqua opcode table in the SDK does include Extruction (index 32, matching
+   the router), but the Aqua builder exposes no method for it. We had to call
+   `new AquaProgramBuilder().add(instructions.extruction.extruction.createIx(args))`.
+   `RegularProgramBuilder.extruction()` exists, but it encodes opcode `0x21`
+   (its own table); on the Aqua router `0x21` is
+   `OnlyTxOriginTokenBalanceNonZero`, so reaching for the builder that has the
+   method silently produces the wrong program. Also, Extruction with empty
+   args throws "Invalid bytes" in the SDK, though the contract accepts it.
+   Suggestion: add `extruction()` to `AquaProgramBuilder`.
+
+10. The two SDKs pin different `@1inch/sdk-core` versions.
+    `@1inch/aqua-sdk` 0.3.4 pins sdk-core 0.1.5 and `@1inch/swap-vm-sdk` 0.4.4
+    pins 0.1.6, so npm installs two copies and an `Address` from one package
+    is not assignable to the other in TypeScript ("separate declarations of a
+    private property"). The swap-vm-sdk README quick start, which passes its
+    `Address` into `aqua.ship`, does not typecheck with the latest versions.
+    We import `Address` from each SDK separately. Suggestion: a shared
+    sdk-core range, or re-export one copy.

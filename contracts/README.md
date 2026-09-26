@@ -49,3 +49,11 @@ forge test --mc LeveeForkTest -vv         # against mainnet at block 25829822
   their release tags and runs ship, quote, swap, dock with real transfers.
 - `fork/LeveeFork.t.sol`: the same flow on the deployed contracts with real
   PT/SY, plus unit checks against Pendle's own state.
+- `SdkParity.t.sol`: the TypeScript side builds orders with `@1inch/swap-vm-sdk`
+  and `@1inch/aqua-sdk` (`src/aqua/levee.ts`). This test requires the SDK output
+  (`test/fixtures/sdk-vectors.json`, regenerated with `npm run sdk:vectors`)
+  to match LeveeQuoter/LeveeOrders byte for byte, including the strategy hash.
+
+From the repo root, `npm run demo:local` runs the whole flow with SDK-built
+transactions on a local Anvil chain: deploy, ship, quote, swap, depeg refusal,
+dock. It needs `forge build` first, and no RPC key.
