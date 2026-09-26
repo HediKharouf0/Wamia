@@ -14,8 +14,8 @@ import { getAddress, keccak256, toBytes, encodeFunctionData } from "viem";
 const SY_BALANCE_SLOT = 2;
 const FORK_BLOCK = 25829822n;
 const TICK_SECONDS = 60;
-const TWAP_WINDOW_SEC = 900; // estimated from the replay, not yet confirmed against the oracle contract
-const REACTION_SEC = 12; // one block
+const TWAP_WINDOW_SEC = 900;
+const REACTION_SEC = 12;
 
 function gasLimitFor(mainnetGas: bigint) {
   return mainnetGas * 2n > 1_000_000n ? mainnetGas * 2n : 1_000_000n;
@@ -144,6 +144,8 @@ export async function runTakerScenario(config: TakerRunConfig) {
       afterLabel,
       block: receipt.blockNumber.toString(),
       syAmount: sizing.syAmount.toString(),
+      netPtOut: sizing.netPtOut.toString(),
+      effectivePrice: sizing.effectivePrice,
       targetSpot: risk.targetSpot,
       earliestDeadlineSec: risk.earliestDeadlineSec,
       priceBeforeBuy: snap.ptSpotPrice,

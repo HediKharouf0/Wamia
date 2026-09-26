@@ -51,3 +51,10 @@ export async function explainRevert(client: Client, hash: `0x${string}`): Promis
     return `trace unavailable: ${e?.shortMessage ?? e?.message}`;
   }
 }
+
+export async function resetFork(client: Client, blockNumber: bigint) {
+  await client.request({
+    method: "anvil_reset" as any,
+    params: [{ forking: { jsonRpcUrl: process.env.ARCHIVE_RPC_URL, blockNumber: Number(blockNumber) } }],
+  });
+}

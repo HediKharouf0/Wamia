@@ -4,7 +4,21 @@ import { encodeAbiParameters, decodeAbiParameters, concatHex, encodeFunctionData
 // Confirmed by hashing the canonical signature and checking it against the sibling
 // swapExactSyForYt selector (0x7b8b4b95), which matched a real transaction exactly.
 const SWAP_EXACT_SY_FOR_PT_SELECTOR = "0x2a50917c" as const;
+const decimalsAbi = [
+  { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },
+] as const;
 
+let cachedDecimals: { sy: number; pt: number } | null = null;
+
+export async function getTokenDecimals(client: Client, syToken: `0x${string}`, ptToken: `0x${string}`) {
+  if (cachedDecimals) return cachedDecimals;
+  const [sy, pt] = await Promise.all([
+    client.readContract({ address: syToken, abi: decimalsAbi, functionName: "decimals" }),
+    client.readContract({ address: ptToken, abi: decimalsAbi, functionName: "decimals" }),
+  ]);
+  cachedDecimals = { sy, pt };
+  return cachedDecimals;
+}
 const approxParamsType = {
   type: "tuple",
   components: [
