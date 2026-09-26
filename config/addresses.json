@@ -39,5 +39,14 @@
     "registry": "0x1111113CCf1426A8E30e2bfF5E005d929bF6a90a",
     "swapVmRouter": "0x111111338c5091E8440b67B168bAe16a668AC0De",
     "note": "Verified at fork block 25829822 by contracts/test/fork/LeveeFork.t.sol: aqua v1.0.0, router EIP-712 domain '1inch SwapVM v1.0' version 1.0.2 (deployed block 25618917)"
+  },
+  "reusdMarketPrice": {
+    "curvePool": "0xf74c91b36c26543a0aa820bef407a577e5498bf0",
+    "type": "Curve StableSwap-NG, created block 22576804",
+    "coins": [
+      "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72 (reUSD, index 0)",
+      "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 (USDC, index 1)"
+    ],
+    "note": "At fork block 25829822: price_oracle(0)=1.0000312e18 (USDC in NAV-adjusted reUSD, so reUSD market/NAV = 1e36/price_oracle = 0.99997), stored_rates[0]=1.096798580680906e18 (reUSD NAV, equals SY.exchangeRate 1096798), ma_exp_time=1732 s (EMA half-life ~20 min), balances 205,752 reUSD / 225,396 USDC (~$451K TVL, thin)."
   }
 }
