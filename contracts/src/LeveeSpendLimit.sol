@@ -81,6 +81,7 @@ contract LeveeSpendLimit is IExtruction {
         // forge-lint: disable-next-line(block-timestamp)
         if (block.timestamp >= p.expiry) return BPS;
         uint256 left = p.expiry - block.timestamp;
+        // forge-lint: disable-next-line(block-timestamp)
         if (left >= p.horizonSec) return p.minCapBps;
         return p.minCapBps + (BPS - p.minCapBps) * (p.horizonSec - left) / p.horizonSec;
     }
@@ -93,6 +94,7 @@ contract LeveeSpendLimit is IExtruction {
     /// @notice SY already paid by `orderHash` in the current window.
     function spentInWindow(bytes32 orderHash, Params memory p) public view returns (uint256) {
         Window memory w = windows[orderHash];
+        // forge-lint: disable-next-line(block-timestamp)
         return w.id == block.timestamp / p.windowSec ? w.spent : 0;
     }
 

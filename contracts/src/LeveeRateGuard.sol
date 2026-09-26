@@ -89,6 +89,7 @@ contract LeveeRateGuard is IExtruction {
     /// @notice Annualized yield of the SY rate since ship: (rate / rateAtShip)^(1 year / elapsed) - 1.
     function realizedApy(Params memory p, uint256 rate) public view returns (uint256) {
         uint256 elapsed = block.timestamp - p.shipTimestamp;
+        // forge-lint: disable-next-line(block-timestamp)
         if (elapsed == 0 || rate <= p.rateAtShip) return 0;
         // Safe: rate / rateAtShip > 1 and both are exchange rates far below 2^128.
         // forge-lint: disable-next-line(unsafe-typecast)
