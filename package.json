@@ -12,7 +12,8 @@
     "app:data": "tsx src/app/buildReplayData.ts",
     "app": "vite --config app/vite.config.ts",
     "app:build": "vite build --config app/vite.config.ts",
-    "app:hosted": "P1NCH_HOSTED=1 vite build --config app/vite.config.ts"
+    "app:hosted": "P1NCH_HOSTED=1 vite build --config app/vite.config.ts",
+    "app:server": "tsx src/app/server.ts"
   },
   "repository": {
     "type": "git",

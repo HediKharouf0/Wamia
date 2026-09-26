@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTween } from "../ui";
 import { PriceChart } from "./PriceChart";
 import { clock, fmtInt, replay, runByKey, shortAddr, stateAt, usdM, type Run, type ReplayEvent } from "./data";
 
@@ -6,28 +7,6 @@ const SIZES = ["3M", "4M", "5M", "5M-guards"] as const;
 const SPEEDS = [30, 60, 120];
 const DUR = replay.meta.duration;
 const maxDebt = Math.max(...replay.positions.map((p) => p.debtUsd));
-
-/** Eases a displayed number toward its target so counters roll instead of jumping. */
-function useTween(target: number, ms = 450) {
-  const [v, setV] = useState(target);
-  const from = useRef(target);
-  const start = useRef(0);
-  useEffect(() => {
-    from.current = v;
-    start.current = performance.now();
-    let raf = 0;
-    const step = (now: number) => {
-      const k = Math.min(1, (now - start.current) / ms);
-      const e = 1 - Math.pow(1 - k, 3);
-      setV(from.current + (target - from.current) * e);
-      if (k < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
-  return v;
-}
 
 function Counter({ value, label }: { value: number; label: string }) {
   const shown = useTween(value);

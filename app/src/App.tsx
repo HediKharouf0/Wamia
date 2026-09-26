@@ -28,9 +28,15 @@ function HostedNote() {
 
 export function App() {
   const [tab, setTab] = useState<TabId>(initialTab);
+  const [inspectHash, setInspectHash] = useState<string | null>(null);
   useEffect(() => {
     history.replaceState(null, "", `#${tab}`);
   }, [tab]);
+  useEffect(() => {
+    const onHash = () => setTab(initialTab());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   return (
     <div className="shell">
@@ -51,9 +57,9 @@ export function App() {
       </header>
       <main>
         {tab === "replay" && <Replay />}
-        {tab === "protect" && (__HOSTED__ ? <HostedNote /> : <LpConsole />)}
+        {tab === "protect" && (__HOSTED__ ? <HostedNote /> : <LpConsole onInspect={(h) => { setInspectHash(h); setTab("inspect"); }} />)}
         {tab === "monitor" && (__HOSTED__ ? <HostedNote /> : <Monitor />)}
-        {tab === "inspect" && (__HOSTED__ ? <HostedNote /> : <Inspector />)}
+        {tab === "inspect" && (__HOSTED__ ? <HostedNote /> : <Inspector initialHash={inspectHash} />)}
       </main>
     </div>
   );
