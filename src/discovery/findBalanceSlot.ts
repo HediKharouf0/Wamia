@@ -29,9 +29,9 @@ async function main() {
   console.log("Checking mapping-derived keys for a change (this is the reliable indicator, not sequential slots):");
   let found = false;
   for (let i = 0; i < candidateKeys.length; i++) {
-    const after = await fork.request({ method: "eth_getStorageAt" as any, params: [syToken, candidateKeys[i].key, "latest"] });
+    const after = await fork.request({ method: "eth_getStorageAt" as any, params: [syToken, candidateKeys[i]!.key, "latest"] });
     if (after !== before[i]) {
-      console.log(`  MATCH at base slot ${candidateKeys[i].base}: ${before[i]} -> ${after}`);
+      console.log(`  MATCH at base slot ${candidateKeys[i]!.base}: ${before[i]} -> ${after}`);
       found = true;
     }
   }

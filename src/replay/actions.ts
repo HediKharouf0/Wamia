@@ -13,7 +13,7 @@ export async function sendHistoricalTx(client: Client, tx: HistoricalTx, gasLimi
   await client.request({ method: "anvil_impersonateAccount" as any, params: [tx.from] });
   await client.request({ method: "anvil_setBalance" as any, params: [tx.from, "0x56BC75E2D63100000"] });
   try {
-    await client.request({ method: "evm_setNextBlockTimestamp" as any, params: [Number(tx.timeStamp)] });
+    await client.request({ method: "evm_setNextBlockTimestamp" as any, params: [Number(tx.timeStamp)] as any });
   } catch (e: any) {
     console.log(`  [timestamp warning ${tx.hash.slice(0, 10)}]: ${e?.shortMessage ?? e?.message}`);
   }
@@ -29,7 +29,7 @@ export async function sendHistoricalTx(client: Client, tx: HistoricalTx, gasLimi
 }
 
 export async function mineEmptyBlockAt(client: Client, timestamp: number): Promise<bigint> {
-  await client.request({ method: "evm_mine" as any, params: [timestamp] });
+  await client.request({ method: "evm_mine" as any, params: [timestamp] as any });
   return client.getBlockNumber({ cacheTime: 0 });
 }
 
@@ -37,7 +37,7 @@ export async function explainRevert(client: Client, hash: `0x${string}`): Promis
   try {
     const trace: any = await client.request({
       method: "debug_traceTransaction" as any,
-      params: [hash, { tracer: "callTracer" }],
+      params: [hash, { tracer: "callTracer" }] as any,
     });
     let deepest = trace;
     const walk = (c: any) => {
@@ -55,6 +55,6 @@ export async function explainRevert(client: Client, hash: `0x${string}`): Promis
 export async function resetFork(client: Client, blockNumber: bigint) {
   await client.request({
     method: "anvil_reset" as any,
-    params: [{ forking: { jsonRpcUrl: process.env.ARCHIVE_RPC_URL, blockNumber: Number(blockNumber) } }],
+    params: [{ forking: { jsonRpcUrl: process.env.ARCHIVE_RPC_URL, blockNumber: Number(blockNumber) } }] as any,
   });
 }

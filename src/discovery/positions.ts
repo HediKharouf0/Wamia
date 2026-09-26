@@ -1,6 +1,7 @@
 import { writeFileSync } from "fs";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { readMorphoSnapshot } from "../snapshot/morpho.js";
+import { archive } from "../chain/client.js";
 
 const ENDPOINT = "https://api.morpho.org/graphql";
 const PAGE_SIZE = 200;
@@ -67,7 +68,7 @@ async function main() {
     const sumBorrowShares = marketPositions.reduce((sum, p) => sum + BigInt(p.state.borrowShares ?? 0), 0n);
     const borrowerCount = marketPositions.filter((p) => BigInt(p.state.borrowShares ?? 0) > 0n).length;
 
-    const snap = await readMorphoSnapshot(morphoBlue, mkt.id, mkt.oracle, forkBlock);
+    const snap = await readMorphoSnapshot(archive, morphoBlue, mkt.id, mkt.oracle, forkBlock);
 
     console.log(`\n${name.toUpperCase()} market:`);
     console.log(`  positions returned by API: ${marketPositions.length} (${borrowerCount} with debt)`);

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { readPosition } from "../snapshot/position.js";
 import { readMorphoSnapshot } from "../snapshot/morpho.js";
+import { archive } from "../chain/client.js";
 
 const forkBlock = 25829822n;
 const DELAY_MS = 150; // spread requests out to stay under rate limits
@@ -30,7 +31,7 @@ async function main() {
 
     for (let i = 0; i < uniqueUsers.length; i++) {
       const user = uniqueUsers[i] as `0x${string}`;
-      const pos = await readPosition(morphoBlue, mkt.id as `0x${string}`, user, forkBlock);
+      const pos = await readPosition(archive, morphoBlue, mkt.id as `0x${string}`, user, forkBlock);
       if (pos.borrowShares > 0n || pos.collateral > 0n) {
         results.push(pos);
         sumBorrowShares += pos.borrowShares;
@@ -39,7 +40,7 @@ async function main() {
       await sleep(DELAY_MS);
     }
 
-    const snap = await readMorphoSnapshot(morphoBlue, mkt.id, mkt.oracle, forkBlock);
+    const snap = await readMorphoSnapshot(archive, morphoBlue, mkt.id, mkt.oracle, forkBlock);
 
     console.log(`\n${name.toUpperCase()} market at fork block:`);
     console.log(`  active positions found: ${results.length}`);

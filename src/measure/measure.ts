@@ -39,7 +39,7 @@ export async function measurePoint(client: Client, label: string, blockNumber: b
     const snap = await readMorphoSnapshot(client, morphoBlue, m.id, m.oracle, blockNumber);
     oraclePrice = snap.oraclePriceScaled; // same oracle for both markets
 
-    const healths = positions[name].map((p) =>
+    const healths = (positions[name] ?? []).map((p) =>
       computePositionHealth(p, {
         totalBorrowAssets: snap.totalBorrowAssets,
         totalBorrowShares: snap.totalBorrowShares,

@@ -22,7 +22,7 @@ async function main() {
     await fork.request({ method: "anvil_impersonateAccount" as any, params: [tx.from] });
     await fork.request({ method: "anvil_setBalance" as any, params: [tx.from, "0x56BC75E2D63100000"] });
     try {
-      await fork.request({ method: "evm_setNextBlockTimestamp" as any, params: [Number(tx.timeStamp)] });
+      await fork.request({ method: "evm_setNextBlockTimestamp" as any, params: [Number(tx.timeStamp)] as any });
     } catch (e: any) {
       console.log(`  [timestamp warning tx ${i + 1}]: ${e?.shortMessage ?? e?.message}`);
     }
@@ -44,7 +44,7 @@ async function main() {
       try {
         const trace: any = await fork.request({
           method: "debug_traceTransaction" as any,
-          params: [hash, { disableStorage: true, disableMemory: true }],
+          params: [hash, { disableStorage: true, disableMemory: true }] as any,
         });
         console.log(`    trace.failed=${trace.failed}, gas=${trace.gas}`);
         console.log(`    returnValue (raw revert data): ${trace.returnValue}`);

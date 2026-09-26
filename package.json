@@ -1,14 +1,10 @@
 {
   "name": "p1nch",
   "version": "1.0.0",
-  "description": "**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**",
-  "main": "index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
+  "description": "Levee: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx src/pricing/fairValue.test.ts && tsx src/pricing/units.test.ts && tsx src/strategies/sizing.test.ts"
   },
   "repository": {
     "type": "git",
@@ -29,5 +25,6 @@
     "@types/node": "^26.6.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
-  }
+  },
+  "type": "module"
 }
