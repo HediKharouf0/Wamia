@@ -95,13 +95,20 @@ function Side({ run, t, withP1nch }: { run: Run; t: number; withP1nch: boolean }
 type FeedItem = { key: string; t: number; side: "none" | "p1nch" | "both"; ev: ReplayEvent };
 
 function Feed({ items, t }: { items: FeedItem[]; t: number }) {
-  const shown = items.filter((i) => i.t <= t).slice(-60).reverse();
+  // Borrowers that cross the line between the same two measurements share one line.
+  const grouped: (FeedItem & { group: number[] })[] = [];
+  for (const i of items.filter((x) => x.t <= t)) {
+    const prev = grouped[grouped.length - 1];
+    if (i.ev.kind === "liquidatable" && prev && prev.ev.kind === "liquidatable" && prev.t === i.t && prev.side === i.side) prev.group.push(i.ev.position);
+    else grouped.push({ ...i, group: i.ev.kind === "liquidatable" ? [i.ev.position] : [] });
+  }
+  const shown = grouped.slice(-60).reverse();
   return (
     <section className="panel feed" aria-label="Event feed">
       <div className="eyebrow">Block by block</div>
       <ol>
         {shown.length === 0 && <li><span className="when">{clock(0)}</span><span /><span className="what">Waiting for the first push…</span></li>}
-        {shown.map(({ key, t: et, side, ev }) => (
+        {shown.map(({ key, t: et, side, ev, group }) => (
           <li key={key}>
             <span className="when">{clock(et)}</span>
             <span
@@ -125,8 +132,17 @@ function Feed({ items, t }: { items: FeedItem[]; t: number }) {
               )}
               {ev.kind === "liquidatable" && (
                 <>
-                  <b style={{ color: "#ff9a9a" }}>{side === "p1nch" ? "With P1nch" : "No backstop"}</b>: {shortAddr(replay.positions[ev.position]!.user)} became liquidatable, $
-                  {fmtInt(ev.debtUsd)} of {replay.positions[ev.position]!.market} debt
+                  <b style={{ color: "#ff9a9a" }}>{side === "p1nch" ? "With P1nch" : "Without P1nch (left)"}</b>:{" "}
+                  {group.length === 1 ? (
+                    <>
+                      {shortAddr(replay.positions[ev.position]!.user)} became liquidatable, ${fmtInt(ev.debtUsd)} of {replay.positions[ev.position]!.market} debt
+                    </>
+                  ) : (
+                    <>
+                      {group.length} borrowers became liquidatable, ${fmtInt(group.reduce((a, i) => a + replay.positions[i]!.debtUsd, 0))} of debt (
+                      {group.map((i) => shortAddr(replay.positions[i]!.user)).join(", ")})
+                    </>
+                  )}
                 </>
               )}
             </span>
