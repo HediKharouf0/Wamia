@@ -57,11 +57,14 @@ have helped. We add to this file as we go.
    sentence in the README so LPs and takers know a shipped balance is an
    allowance, not a reservation.
 
-## TypeScript SDK (`@1inch/aqua-sdk`)
+## TypeScript SDKs
 
-8. The SDK covers `ship`, `dock` and event parsing only.
-   Building a SwapVM order (maker traits, program), taker traits, and calling
-   `quote` / `swap` on the router is where the encoding work is, and there is
-   no helper for it. Its examples also use the standalone `XYCSwap` Aqua app
-   rather than the SwapVM router. We built orders and taker data in Solidity
-   with `MakerTraitsLib` / `TakerTraitsLib` instead, and skipped the SDK.
+8. The Aqua SDK does not point to the SwapVM SDK.
+   `@1inch/aqua-sdk` only covers `ship`, `dock` and events, and its examples use
+   the standalone `XYCSwap` Aqua app. Orders, traits, programs and
+   `quote` / `swap` on the router live in a separate package,
+   `@1inch/swap-vm-sdk` (whose instruction table does match the deployed
+   v1.0.2 router). We missed it at first because nothing in the Aqua SDK or the
+   Aqua README links to it.
+   Suggestion: link the two READMEs, and show the Aqua + SwapVM router flow in
+   the Aqua SDK examples.
