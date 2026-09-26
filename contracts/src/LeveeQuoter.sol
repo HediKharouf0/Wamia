@@ -127,6 +127,8 @@ contract LeveeQuoter is IExtruction {
         }
 
         fairWad = LeveeMath.ptPriceFromYield(p.refYieldWad, secondsLeft);
+        // Only the implied rate is needed from the market's storage tuple.
+        // forge-lint: disable-next-line(unused-return)
         (,, uint96 lastLnImpliedRate,,,) = IPMarketLike(p.market)._storage();
         spotWad = LeveeMath.ptPriceFromLnRate(lastLnImpliedRate, secondsLeft);
         require(spotWad * BPS >= fairWad * (BPS - p.maxDeviationBps), SpotTooFarBelowFair(spotWad, fairWad));

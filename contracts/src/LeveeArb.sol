@@ -44,6 +44,8 @@ contract LeveeArb is ITakerCallbacks {
 
     event Arbitraged(address indexed caller, uint256 legs, uint256 ptSoldToLevee, uint256 profitPt);
 
+    // A zero market only makes every Pendle buy revert; this contract holds no funds between calls.
+    // forge-lint: disable-next-line(missing-zero-check)
     constructor(ISwapVM router, IPendleRouterV4 pendleRouter, address market, IERC20 pt, IERC20 sy) {
         ROUTER = router;
         PENDLE_ROUTER = pendleRouter;
@@ -61,8 +63,11 @@ contract LeveeArb is ITakerCallbacks {
     function arb(Leg[] calldata legs, uint256 minProfitPt, address profitTo) external returns (uint256 profitPt) {
         _inArb = true;
         bytes memory takerData = LeveeOrders.takerData(address(this), true, 0, true, true, "");
-        uint256 sold;
+        uint256 sold = 0;
         for (uint256 i = 0; i < legs.length; i++) {
+            // One swap per LP by design; any failing leg reverts the whole arb. The amounts are
+            // settled by balance checks below, so the swap's return values are not needed.
+            // forge-lint: disable-next-line(calls-loop, unused-return)
             ROUTER.swap(legs[i].order, address(PT), address(SY), legs[i].ptAmount, takerData);
             sold += legs[i].ptAmount;
         }
@@ -74,6 +79,9 @@ contract LeveeArb is ITakerCallbacks {
         uint256 syDust = SY.balanceOf(address(this));
         if (syDust > 0) SY.safeTransfer(profitTo, syDust);
 
+        // Emitted last on purpose: it reports the settled result. Reentry is blocked by the router
+        // check and _inArb in the callback.
+        // forge-lint: disable-next-line(reentrancy-events)
         emit Arbitraged(msg.sender, legs.length, sold, profitPt);
     }
 
@@ -95,7 +103,9 @@ contract LeveeArb is ITakerCallbacks {
         uint256 ptHeld = PT.balanceOf(address(this));
         if (ptHeld >= amountIn) return; // leftover from an earlier leg already covers it
 
-        // Spend all SY on PT. minPtOut makes Pendle revert if the arb cannot cover this leg.
+        // Spend all SY on PT. minPtOut makes Pendle revert if the arb cannot cover this leg; the PT
+        // received is read from the balance afterwards, so the return values are not needed.
+        // forge-lint: disable-next-item(unused-return)
         PENDLE_ROUTER.swapExactSyForPt(
             address(this),
             MARKET,
