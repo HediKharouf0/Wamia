@@ -11,7 +11,7 @@ evm_version = "cancun"
 optimizer = true
 optimizer_runs = 700
 via_ir = true
-fs_permissions = [{ access = "read", path = "./test/fixtures" }]
+fs_permissions = [{ access = "read", path = "./test/fixtures" }, { access = "read", path = "../fixtures" }]
 remappings = [
     "forge-std/=lib/forge-std/src/",
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
