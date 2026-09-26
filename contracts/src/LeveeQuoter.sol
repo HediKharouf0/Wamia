@@ -1,59 +1,84 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
+import { FixedPointMathLib as FPM } from "solady/utils/FixedPointMathLib.sol";
 import { IExtruction } from "@1inch/swap-vm/src/instructions/Extruction.sol";
 import { SwapQuery, SwapRegisters } from "@1inch/swap-vm/src/libs/VM.sol";
 
 import { LeveeMath } from "./LeveeMath.sol";
-import { IPMarketLike, IStandardizedYieldLike } from "./interfaces/IPendle.sol";
+import { IPMarketLike, IStandardizedYieldLike, ICurveStableSwapNGLike } from "./interfaces/IPendle.sol";
 
 /// @title LeveeQuoter
 /// @notice Pricing and risk rules for Levee strategies, called by SwapVM's `Extruction`
 ///         instruction on the deployed AquaSwapVMRouter (swap-vm v1.0.2).
 /// @dev A Levee strategy is an Aqua-shipped SwapVM order whose program is a single Extruction
-///      pointing here. The LP ships SY (and PT with amount 0), and this contract decides on every
-///      trade whether to buy PT for SY and at what price. The shipped SY is the hard spending cap.
+///      pointing here. The LP ships SY (and PT with amount 0); this contract decides on every trade
+///      whether to buy PT for SY and at what price. The shipped SY is the hard spending cap.
 ///
-///      v1 rules, all from maker parameters, onchain reads and block time (never taker data):
+///      Rules, all from maker parameters, onchain reads and block time (never taker data):
 ///        1. Direction: only PT in, SY out.
 ///        2. Maturity: refuse at or after the market's expiry.
-///        3. Depeg stop: refuse if SY.exchangeRate() is below the maker's floor.
-///        4. Price: fair value 1/(1+refYield)^tau minus a fixed discount, never above fair.
-///        5. Size: refuse trades above maxPtPerTrade, or paying more SY than the strategy holds.
+///        3. SY exchange-rate floor: catches a loss in reUSD's internal accounting (NAV).
+///        4. Market depeg stop: refuse if the underlying trades more than `maxDepegBps` below its
+///           NAV on the Curve pool, by the EMA or by the last trade. Catches a run, where the
+///           market price falls while the NAV (and so the exchange rate) does not move.
+///        5. Max deviation: refuse if Pendle's spot is more than `maxDeviationBps` below fair
+///           value. A gap that large suggests real news rather than a push.
+///        6. Price: fair value 1/(1+refYield)^tau minus a discount that deepens linearly with the
+///           share of the backstop already used, from `discountMinBps` to `discountMaxBps`. A trade
+///           is priced at the average discount over the usage range it covers, so splitting a
+///           trade into smaller ones never pays the taker more in total.
+///        7. Never pay more SY than the strategy holds. No per-trade cap: trades can be split,
+///           so the only meaningful cap is the shipped SY.
 ///
-///      The contract is stateless, so the same view function serves quote() and swap(), which
-///      keeps quotes and swaps identical as SwapVM requires.
+///      Stateless, so the same view function serves quote() and swap().
 contract LeveeQuoter is IExtruction {
     /// @notice Index of `Extruction._extruction` in the AquaOpcodes table of swap-vm v1.0.2.
-    /// @dev The deployed router uses a jump table, not the banked OpcodeList of swap-vm `main`.
     uint8 public constant EXTRUCTION_OPCODE = 0x20;
-
     /// @notice Byte length of the packed parameters (see `encodeParams`).
-    uint256 public constant PARAMS_LENGTH = 102;
+    uint256 public constant PARAMS_LENGTH = 129;
+    /// @notice `flags` bit: the underlying is coins[1] of the Curve pool (default: coins[0]).
+    uint8 public constant FLAG_UNDERLYING_IS_COIN1 = 1;
+
+    uint256 private constant WAD = 1e18;
+    uint256 private constant BPS = 10_000;
 
     /// @notice Strategy parameters, packed into the Extruction args at ship time (immutable per strategy).
-    /// @param pt            PT token (tokenIn)
-    /// @param sy            SY token (tokenOut)
-    /// @param market        Pendle market of this PT, read for the expiry
-    /// @param refYieldWad   Reference implied APY for fair value, e.g. 0.10583e18
-    /// @param discountBps   Bid discount below fair value, e.g. 10 = 0.10%
-    /// @param maxPtPerTrade Largest PT amount accepted in one trade (PT raw units)
-    /// @param minSyRate     Depeg floor for SY.exchangeRate(); below it every trade is refused
+    /// @param pt              PT token (tokenIn)
+    /// @param sy              SY token (tokenOut)
+    /// @param market          Pendle market of this PT: expiry and current implied rate
+    /// @param curvePool       Curve StableSwap-NG pool pricing the underlying against USD, NAV-adjusted;
+    ///                        address(0) disables the depeg stop (only for markets without a feed)
+    /// @param refYieldWad     Reference implied APY for fair value, e.g. 0.10583e18
+    /// @param discountMinBps  Discount below fair when the backstop is untouched, e.g. 10
+    /// @param discountMaxBps  Discount when the backstop is fully used, e.g. 60
+    /// @param shippedSy       SY shipped to Aqua for this strategy (to measure usage)
+    /// @param minSyRate       Floor for SY.exchangeRate(), just below the rate at ship time
+    /// @param maxDepegBps     Largest accepted discount of the underlying's market price to its NAV, e.g. 100
+    /// @param maxDeviationBps Largest accepted gap of Pendle spot below fair, e.g. 450
+    /// @param flags           FLAG_UNDERLYING_IS_COIN1 if the underlying is coins[1] in `curvePool`
     struct Params {
         address pt;
         address sy;
         address market;
+        address curvePool;
         uint64 refYieldWad;
-        uint16 discountBps;
-        uint128 maxPtPerTrade;
+        uint16 discountMinBps;
+        uint16 discountMaxBps;
+        uint128 shippedSy;
         uint128 minSyRate;
+        uint16 maxDepegBps;
+        uint16 maxDeviationBps;
+        uint8 flags;
     }
 
     error BadParamsLength(uint256 length);
+    error BadParams();
     error OnlyPtToSy(address tokenIn, address tokenOut);
     error MarketExpired(uint256 expiry);
     error SyBelowFloor(uint256 rate, uint256 minRate);
-    error TradeTooLarge(uint256 ptIn, uint256 maxPtPerTrade);
+    error UnderlyingDepegged(uint256 marketToNavWad, uint256 minWad);
+    error SpotTooFarBelowFair(uint256 spotWad, uint256 fairWad);
     error InsufficientLiquidity(uint256 syOut, uint256 syAvailable);
 
     /// @inheritdoc IExtruction
@@ -68,50 +93,115 @@ contract LeveeQuoter is IExtruction {
         Params memory p = decodeParams(args);
         require(query.tokenIn == p.pt && query.tokenOut == p.sy, OnlyPtToSy(query.tokenIn, query.tokenOut));
 
-        (, uint256 bid, uint256 syRate) = bidPrice(p);
+        (uint256 fair,, uint256 syRate) = checkMarket(p);
 
         updatedSwap = swap;
         if (query.isExactIn) {
-            updatedSwap.amountOut = LeveeMath.ptToSyDown(swap.amountIn, bid, syRate);
+            updatedSwap.amountOut = syOutForPtIn(p, fair, syRate, swap.balanceOut, swap.amountIn);
         } else {
-            updatedSwap.amountIn = LeveeMath.syToPtUp(swap.amountOut, bid, syRate);
+            updatedSwap.amountIn = ptInForSyOut(p, fair, syRate, swap.balanceOut, swap.amountOut);
         }
-
-        require(updatedSwap.amountIn <= p.maxPtPerTrade, TradeTooLarge(updatedSwap.amountIn, p.maxPtPerTrade));
         require(updatedSwap.amountOut <= swap.balanceOut, InsufficientLiquidity(updatedSwap.amountOut, swap.balanceOut));
 
         return (nextPC, 0, updatedSwap);
     }
 
-    /// @notice Current fair value and bid for a strategy, with the maturity and depeg checks applied.
-    /// @return fairWad Fair PT price in asset terms (wad)
-    /// @return bidWad  Price Levee pays, fair minus discount (wad)
-    /// @return syRate  SY.exchangeRate() used for the conversion
-    function bidPrice(Params memory p) public view returns (uint256 fairWad, uint256 bidWad, uint256 syRate) {
+    /// @notice Runs rules 2 to 5 and returns the inputs to pricing.
+    /// @return fairWad Fair PT price in asset terms (USD per PT, wad)
+    /// @return spotWad Pendle's current PT price in asset terms (wad)
+    /// @return syRate  SY.exchangeRate() used for conversions
+    function checkMarket(Params memory p) public view returns (uint256 fairWad, uint256 spotWad, uint256 syRate) {
         uint256 expiry = IPMarketLike(p.market).expiry();
         // A validator can shift the timestamp by seconds; irrelevant against a maturity date.
         // forge-lint: disable-next-line(block-timestamp)
         require(block.timestamp < expiry, MarketExpired(expiry));
+        uint256 secondsLeft = expiry - block.timestamp;
 
         syRate = IStandardizedYieldLike(p.sy).exchangeRate();
         require(syRate >= p.minSyRate, SyBelowFloor(syRate, p.minSyRate));
 
-        fairWad = LeveeMath.ptPriceFromYield(p.refYieldWad, expiry - block.timestamp);
-        bidWad = LeveeMath.applyDiscount(fairWad, p.discountBps);
+        if (p.curvePool != address(0)) {
+            uint256 ratio = marketToNav(p);
+            uint256 minRatio = (BPS - p.maxDepegBps) * WAD / BPS;
+            require(ratio >= minRatio, UnderlyingDepegged(ratio, minRatio));
+        }
+
+        fairWad = LeveeMath.ptPriceFromYield(p.refYieldWad, secondsLeft);
+        (,, uint96 lastLnImpliedRate,,,) = IPMarketLike(p.market)._storage();
+        spotWad = LeveeMath.ptPriceFromLnRate(lastLnImpliedRate, secondsLeft);
+        require(spotWad * BPS >= fairWad * (BPS - p.maxDeviationBps), SpotTooFarBelowFair(spotWad, fairWad));
+    }
+
+    /// @notice The underlying's market price divided by its NAV (wad), the worse of EMA and last trade.
+    function marketToNav(Params memory p) public view returns (uint256) {
+        ICurveStableSwapNGLike pool = ICurveStableSwapNGLike(p.curvePool);
+        uint256 ema = pool.price_oracle(0);
+        uint256 last = pool.last_price(0);
+        if (p.flags & FLAG_UNDERLYING_IS_COIN1 != 0) {
+            // Prices are the underlying in USD-coin units: lower means cheaper underlying.
+            return FPM.min(ema, last);
+        }
+        // Prices are the USD coin in underlying units: higher means cheaper underlying.
+        return WAD * WAD / FPM.max(ema, last);
+    }
+
+    /// @notice Current marginal bid (USD per PT, wad) given the SY still in the strategy.
+    function marginalBid(Params memory p, uint256 fairWad, uint256 balanceOut) public pure returns (uint256) {
+        return fairWad * _discountFactor(p, _used(p, balanceOut)) / WAD;
+    }
+
+    /// @notice SY paid for `ptIn` PT, priced at the average discount over the usage range covered.
+    /// @dev Solves y = A * (1 - dMin - k * (u0 + y / 2)) with A the SY value at zero discount,
+    ///      u0 the SY already used and k the discount slope per SY: y = A * f(u0) / (1 + A * k / 2).
+    ///      Rounded down (maker-favoring).
+    function syOutForPtIn(Params memory p, uint256 fairWad, uint256 syRate, uint256 balanceOut, uint256 ptIn)
+        public
+        pure
+        returns (uint256)
+    {
+        uint256 a = LeveeMath.ptToSyDown(ptIn, fairWad, syRate);
+        uint256 spanWad = uint256(p.discountMaxBps - p.discountMinBps) * WAD / BPS;
+        uint256 den = WAD + FPM.mulDivUp(spanWad, a, 2 * uint256(p.shippedSy));
+        return FPM.fullMulDiv(a, _discountFactor(p, _used(p, balanceOut)), den);
+    }
+
+    /// @notice PT needed to receive `syOut` SY, priced at the discount at the middle of the usage
+    ///         range the trade covers. Rounded up (maker-favoring).
+    function ptInForSyOut(Params memory p, uint256 fairWad, uint256 syRate, uint256 balanceOut, uint256 syOut)
+        public
+        pure
+        returns (uint256)
+    {
+        uint256 mid = _used(p, balanceOut) + (syOut + 1) / 2;
+        uint256 bid = fairWad * _discountFactor(p, mid) / WAD;
+        return LeveeMath.syToPtUp(syOut, bid, syRate);
     }
 
     /// @notice The SwapVM program for a Levee strategy: one Extruction instruction calling this contract.
-    /// @dev Layout: [opcode 1 byte][args length 1 byte][this contract 20 bytes][params 102 bytes].
+    /// @dev Layout: [opcode 1 byte][args length 1 byte][this contract 20 bytes][params 129 bytes].
     function program(Params memory p) external view returns (bytes memory) {
         bytes memory params = encodeParams(p);
-        // Safe: params are always PARAMS_LENGTH (102) bytes, so the length is 122.
+        // Safe: params are always PARAMS_LENGTH (129) bytes, so the length is 149.
         // forge-lint: disable-next-line(unsafe-typecast)
         return abi.encodePacked(EXTRUCTION_OPCODE, uint8(20 + params.length), address(this), params);
     }
 
-    /// @notice Pack parameters into 102 bytes (the Extruction args limit is 255 bytes including the target).
+    /// @notice Pack parameters into 129 bytes (an instruction's args are limited to 255 bytes).
     function encodeParams(Params memory p) public pure returns (bytes memory) {
-        return abi.encodePacked(p.pt, p.sy, p.market, p.refYieldWad, p.discountBps, p.maxPtPerTrade, p.minSyRate);
+        return abi.encodePacked(
+            p.pt,
+            p.sy,
+            p.market,
+            p.curvePool,
+            p.refYieldWad,
+            p.discountMinBps,
+            p.discountMaxBps,
+            p.shippedSy,
+            p.minSyRate,
+            p.maxDepegBps,
+            p.maxDeviationBps,
+            p.flags
+        );
     }
 
     function decodeParams(bytes calldata args) public pure returns (Params memory p) {
@@ -119,9 +209,32 @@ contract LeveeQuoter is IExtruction {
         p.pt = address(bytes20(args[0:20]));
         p.sy = address(bytes20(args[20:40]));
         p.market = address(bytes20(args[40:60]));
-        p.refYieldWad = uint64(bytes8(args[60:68]));
-        p.discountBps = uint16(bytes2(args[68:70]));
-        p.maxPtPerTrade = uint128(bytes16(args[70:86]));
-        p.minSyRate = uint128(bytes16(args[86:102]));
+        p.curvePool = address(bytes20(args[60:80]));
+        p.refYieldWad = uint64(bytes8(args[80:88]));
+        p.discountMinBps = uint16(bytes2(args[88:90]));
+        p.discountMaxBps = uint16(bytes2(args[90:92]));
+        p.shippedSy = uint128(bytes16(args[92:108]));
+        p.minSyRate = uint128(bytes16(args[108:124]));
+        p.maxDepegBps = uint16(bytes2(args[124:126]));
+        p.maxDeviationBps = uint16(bytes2(args[126:128]));
+        p.flags = uint8(args[128]);
+        require(
+            p.discountMinBps <= p.discountMaxBps && p.discountMaxBps < BPS && p.shippedSy > 0
+                && p.maxDepegBps < BPS && p.maxDeviationBps < BPS,
+            BadParams()
+        );
+    }
+
+    /// @dev SY already paid out by this strategy, capped at the shipped amount.
+    function _used(Params memory p, uint256 balanceOut) private pure returns (uint256) {
+        return balanceOut >= p.shippedSy ? 0 : p.shippedSy - balanceOut;
+    }
+
+    /// @dev 1 - discount(used), in wad. The discount term rounds up (maker-favoring).
+    function _discountFactor(Params memory p, uint256 used) private pure returns (uint256) {
+        if (used > p.shippedSy) used = p.shippedSy;
+        uint256 minWad = uint256(p.discountMinBps) * WAD / BPS;
+        uint256 spanWad = uint256(p.discountMaxBps - p.discountMinBps) * WAD / BPS;
+        return WAD - minWad - FPM.mulDivUp(spanWad, used, p.shippedSy);
     }
 }
