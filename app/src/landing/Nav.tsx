@@ -1,9 +1,11 @@
 import { repoBase } from "./data";
+import logo from "../assets/wamia-logo.png";
 
 export function Nav() {
   return (
     <header className="topbar">
       <div className="brand">
+        <img src={logo} alt="" className="brand-mark" />
         <h1>WAMIA</h1>
       </div>
       <nav className="nav-links" aria-label="Sections">

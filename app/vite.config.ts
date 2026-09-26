@@ -10,7 +10,9 @@ export default defineConfig({
   root: "app",
   plugins: hosted ? [react(), viteSingleFile()] : [react()],
   define: { __HOSTED__: JSON.stringify(hosted) },
-  build: { outDir: hosted ? "dist-hosted" : "dist", emptyOutDir: true },
+  // Large enough that the logo (~44KB) inlines as base64 too, so the single-file hosted
+  // build (vite-plugin-singlefile) stays one self-contained HTML file with no external image.
+  build: { outDir: hosted ? "dist-hosted" : "dist", emptyOutDir: true, assetsInlineLimit: 200_000 },
   server: {
     port: 5173,
     proxy: { "/api": "http://127.0.0.1:8787" },

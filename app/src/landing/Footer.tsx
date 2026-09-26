@@ -1,11 +1,15 @@
 import { repoBase } from "./data";
+import logo from "../assets/wamia-logo.png";
 
 export function Footer() {
   return (
     <footer className="site-footer">
       <div className="top">
         <div>
-          <div className="brand">WAMIA</div>
+          <div className="brand">
+            <img src={logo} alt="" className="brand-mark" />
+            WAMIA
+          </div>
           <div className="tagline">1INCH SWAPVM STANDING LIQUIDITY BACKSTOP :: ZERO-CAPITAL SEARCHER ROUTING</div>
         </div>
         <div className="links">
