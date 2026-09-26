@@ -9,7 +9,7 @@ import type { Order } from "@1inch/swap-vm-sdk";
 import type { Client } from "../chain/client.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { dealErc20AtSlot } from "../replay/dealErc20.js";
-import { buildLeveeOrder, shipTx, strategyHash, type LeveeParams } from "./levee.js";
+import { buildLeveeOrder, shipTx, strategyHash, type LeveeGuards, type LeveeParams } from "./levee.js";
 
 type Hex = `0x${string}`;
 
@@ -66,9 +66,11 @@ export async function sendAs(
 }
 
 /** `nextTs` gives each setup transaction an explicit timestamp, so setup never runs into the replay. */
-export async function deployLevee(client: Client, deployer: Hex, nextTs?: () => number) {
+export async function deployLevee(client: Client, deployer: Hex, nextTs?: () => number, withGuards = false) {
   const quoterArt = artifact("LeveeQuoter.sol", "LeveeQuoter");
   const arbArt = artifact("LeveeArb.sol", "LeveeArb");
+  const rateGuardArt = artifact("LeveeRateGuard.sol", "LeveeRateGuard");
+  const spendLimitArt = artifact("LeveeSpendLimit.sol", "LeveeSpendLimit");
   const deploy = async (art: { abi: Abi; bytecode: Hex }, args: unknown[]) => {
     const receipt = await sendAs(client, deployer, { data: encodeDeployData({ abi: art.abi, bytecode: art.bytecode, args }) }, { gas: 8_000_000n, timestamp: nextTs?.() });
     if (receipt.status !== "success" || !receipt.contractAddress) throw new Error("deployment failed");
@@ -76,9 +78,12 @@ export async function deployLevee(client: Client, deployer: Hex, nextTs?: () => 
   };
   const quoter = await deploy(quoterArt, []);
   const arb = await deploy(arbArt, [ROUTER, PENDLE_ROUTER, MARKET, PT, SY]);
-  // Custom errors from both contracts, to name reverts seen by the searcher.
-  const errorAbi = [...quoterArt.abi, ...arbArt.abi].filter((x: any) => x.type === "error") as Abi;
-  return { quoter, arb, quoterAbi: quoterArt.abi, arbAbi: arbArt.abi, errorAbi };
+  // The v2 rules as separate Extruction steps; they only accept state writes from the router.
+  const rateGuard = withGuards ? await deploy(rateGuardArt, [ROUTER]) : null;
+  const spendLimit = withGuards ? await deploy(spendLimitArt, [ROUTER]) : null;
+  // Custom errors from all Levee contracts, to name reverts seen by the searcher.
+  const errorAbi = [...quoterArt.abi, ...arbArt.abi, ...rateGuardArt.abi, ...spendLimitArt.abi].filter((x: any) => x.type === "error") as Abi;
+  return { quoter, arb, rateGuard, spendLimit, quoterAbi: quoterArt.abi, arbAbi: arbArt.abi, errorAbi };
 }
 
 /** Spec 7.3 defaults, the same as contracts/test/utils/LeveeTestParams.sol. */
@@ -108,7 +113,7 @@ export async function shipLevee(
   wallet: Hex,
   shippedSy: bigint,
   minSyRate: bigint,
-  opts: { discountMaxBps?: number | undefined; nextTs?: () => number } = {}
+  opts: { discountMaxBps?: number | undefined; nextTs?: () => number; guards?: { rateGuard: Hex; spendLimit: Hex } | undefined } = {}
 ): Promise<LeveeLp> {
   const ok = await dealErc20AtSlot(client, SY, wallet, shippedSy, SY_BALANCE_SLOT);
   if (!ok) throw new Error("SY funding failed");
@@ -121,10 +126,41 @@ export async function shipLevee(
 
   const params = defaultParams(shippedSy, minSyRate);
   if (opts.discountMaxBps !== undefined) params.discountMaxBps = opts.discountMaxBps;
-  const order = buildLeveeOrder(wallet, quoter, params);
-  const receipt = await sendAs(client, wallet, shipTx(AQUA, ROUTER, order, SY, PT, shippedSy), { timestamp: opts.nextTs?.() });
+  const shipTs = opts.nextTs?.();
+  const guards = opts.guards ? await demoGuards(client, opts.guards, params, shipTs) : undefined;
+  const order = buildLeveeOrder(wallet, quoter, params, guards);
+  const receipt = await sendAs(client, wallet, shipTx(AQUA, ROUTER, order, SY, PT, shippedSy), { timestamp: shipTs });
   if (receipt.status !== "success") throw new Error(`ship failed for ${wallet}`);
   return { wallet, params, order, hash: strategyHash(order), shippedSy };
+}
+
+/**
+ * The v2 guard settings for the demo: at most 20% of the shipped SY per 12 s block, growing over
+ * the last 30 days to maturity; any drop of the SY rate below its high-water mark refused; after
+ * 3 days, refuse if reUSD's realized yield exceeds the reference by more than 10 points.
+ */
+async function demoGuards(client: Client, at: { rateGuard: Hex; spendLimit: Hex }, params: LeveeParams, shipTs?: number): Promise<LeveeGuards> {
+  const ts = shipTs ?? Number((await client.getBlock({ blockTag: "latest" })).timestamp);
+  return {
+    rateGuard: at.rateGuard,
+    rateGuardParams: {
+      sy: params.sy,
+      rateAtShip: await syExchangeRate(client),
+      shipTimestamp: BigInt(ts),
+      maxDropBps: 0,
+      minElapsed: 3 * 86_400,
+      refYieldWad: params.refYieldWad,
+      maxYieldGapBps: 1000,
+    },
+    spendLimit: at.spendLimit,
+    spendLimitParams: {
+      shippedSy: params.shippedSy,
+      windowSec: 12,
+      minCapBps: 2000,
+      horizonSec: 30 * 86_400,
+      expiry: BigInt(Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000)),
+    },
+  };
 }
 
 /** SY still available to the strategy in Aqua (its virtual balance). */

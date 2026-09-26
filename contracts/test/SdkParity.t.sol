@@ -9,6 +9,8 @@ import { MakerTraits } from "@1inch/swap-vm/src/libs/MakerTraits.sol";
 
 import { LeveeQuoter } from "../src/LeveeQuoter.sol";
 import { LeveeOrders } from "../src/LeveeOrders.sol";
+import { LeveeRateGuard } from "../src/LeveeRateGuard.sol";
+import { LeveeSpendLimit } from "../src/LeveeSpendLimit.sol";
 
 /// The TypeScript side builds orders with the 1inch swap-vm SDK (src/aqua/levee.ts); the contracts
 /// build them with swap-vm's Solidity libraries (LeveeOrders.sol). Both must produce the same
@@ -62,6 +64,39 @@ contract SdkParityTest is Test {
         Aqua aqua = new Aqua();
         AquaSwapVMRouter router = new AquaSwapVMRouter(address(aqua), address(1), address(this), "AquaSwapVMRouter", "1.0.2");
         assertEq(router.hash(order), sdkHash, "router.hash");
+    }
+
+    /// The three-step program [RateGuard][Quoter][SpendLimit] and its strategy hash.
+    function test_GuardedProgramAndHashMatchSdk() public {
+        address rateGuard = vm.parseJsonAddress(json, ".guarded.rateGuard");
+        address spendLimit = vm.parseJsonAddress(json, ".guarded.spendLimit");
+        // The guards' program bytes depend on their address and params, not on the router they trust.
+        deployCodeTo("LeveeRateGuard.sol:LeveeRateGuard", abi.encode(address(1)), rateGuard);
+        deployCodeTo("LeveeSpendLimit.sol:LeveeSpendLimit", abi.encode(address(1)), spendLimit);
+
+        LeveeRateGuard.Params memory rp = LeveeRateGuard.Params({
+            sy: vm.parseJsonAddress(json, ".guarded.rateGuardParams.sy"),
+            rateAtShip: uint128(vm.parseJsonUint(json, ".guarded.rateGuardParams.rateAtShip")),
+            shipTimestamp: uint64(vm.parseJsonUint(json, ".guarded.rateGuardParams.shipTimestamp")),
+            maxDropBps: uint16(vm.parseJsonUint(json, ".guarded.rateGuardParams.maxDropBps")),
+            minElapsed: uint32(vm.parseJsonUint(json, ".guarded.rateGuardParams.minElapsed")),
+            refYieldWad: uint64(vm.parseJsonUint(json, ".guarded.rateGuardParams.refYieldWad")),
+            maxYieldGapBps: uint16(vm.parseJsonUint(json, ".guarded.rateGuardParams.maxYieldGapBps"))
+        });
+        LeveeSpendLimit.Params memory sp = LeveeSpendLimit.Params({
+            shippedSy: uint128(vm.parseJsonUint(json, ".guarded.spendLimitParams.shippedSy")),
+            windowSec: uint32(vm.parseJsonUint(json, ".guarded.spendLimitParams.windowSec")),
+            minCapBps: uint16(vm.parseJsonUint(json, ".guarded.spendLimitParams.minCapBps")),
+            horizonSec: uint32(vm.parseJsonUint(json, ".guarded.spendLimitParams.horizonSec")),
+            expiry: uint64(vm.parseJsonUint(json, ".guarded.spendLimitParams.expiry"))
+        });
+        bytes memory prog = bytes.concat(
+            LeveeRateGuard(rateGuard).program(rp), LeveeQuoter(quoter).program(params), LeveeSpendLimit(spendLimit).program(sp)
+        );
+        assertEq(prog, vm.parseJsonBytes(json, ".guarded.program"), "program");
+
+        ISwapVM.Order memory order = LeveeOrders.makerOrder(maker, prog);
+        assertEq(keccak256(abi.encode(order)), vm.parseJsonBytes32(json, ".guarded.strategyHash"), "strategy hash");
     }
 
     function test_TakerDataMatchesSdk() public view {

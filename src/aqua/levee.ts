@@ -57,17 +57,60 @@ export function encodeLeveeParams(p: LeveeParams): Hex {
   );
 }
 
-/** One Extruction instruction calling the quoter, on the Aqua opcode table of the deployed router. */
-export function buildLeveeProgram(quoter: Hex, params: LeveeParams) {
-  const ix = instructions.extruction.extruction.createIx(
-    new instructions.extruction.ExtructionArgs(new Address(quoter), new HexString(encodeLeveeParams(params)))
+/** Same fields and packing as LeveeSpendLimit.Params (34 bytes). */
+export type SpendLimitParams = {
+  shippedSy: bigint; // SY shipped with the strategy
+  windowSec: number; // spending window, 12 = one mainnet block
+  minCapBps: number; // share of shippedSy per window far from maturity, e.g. 2000
+  horizonSec: number; // the cap grows linearly to 100% over the last horizonSec before expiry
+  expiry: bigint; // PT maturity (unix seconds)
+};
+
+/** Same fields and packing as LeveeRateGuard.Params (60 bytes). */
+export type RateGuardParams = {
+  sy: Hex;
+  rateAtShip: bigint; // SY.exchangeRate() at ship
+  shipTimestamp: bigint;
+  maxDropBps: number; // tolerated dip below the high-water mark, e.g. 0
+  minElapsed: number; // seconds before the underlying-yield check starts, e.g. 3 days
+  refYieldWad: bigint; // reference implied APY
+  maxYieldGapBps: number; // refuse if the underlying earns more than reference + this, e.g. 1000
+};
+
+/** The v2 rules as extra Extruction steps: the rate guard before the quoter, the spend limit after. */
+export type LeveeGuards = { rateGuard: Hex; rateGuardParams: RateGuardParams; spendLimit: Hex; spendLimitParams: SpendLimitParams };
+
+export function encodeSpendLimitParams(p: SpendLimitParams): Hex {
+  return encodePacked(["uint128", "uint32", "uint16", "uint32", "uint64"], [p.shippedSy, p.windowSec, p.minCapBps, p.horizonSec, p.expiry]);
+}
+
+export function encodeRateGuardParams(p: RateGuardParams): Hex {
+  return encodePacked(
+    ["address", "uint128", "uint64", "uint16", "uint32", "uint64", "uint16"],
+    [p.sy, p.rateAtShip, p.shipTimestamp, p.maxDropBps, p.minElapsed, p.refYieldWad, p.maxYieldGapBps]
   );
-  return new AquaProgramBuilder().add(ix).build();
+}
+
+function extructionIx(target: Hex, args: Hex) {
+  return instructions.extruction.extruction.createIx(new instructions.extruction.ExtructionArgs(new Address(target), new HexString(args)));
+}
+
+/**
+ * The strategy program on the Aqua opcode table of the deployed router: one Extruction calling the
+ * quoter, or with guards [RateGuard][Quoter][SpendLimit]. The spend limit must come after the
+ * quoter, since it checks the SY the quoter priced.
+ */
+export function buildLeveeProgram(quoter: Hex, params: LeveeParams, guards?: LeveeGuards) {
+  const builder = new AquaProgramBuilder();
+  if (guards) builder.add(extructionIx(guards.rateGuard, encodeRateGuardParams(guards.rateGuardParams)));
+  builder.add(extructionIx(quoter, encodeLeveeParams(params)));
+  if (guards) builder.add(extructionIx(guards.spendLimit, encodeSpendLimitParams(guards.spendLimitParams)));
+  return builder.build();
 }
 
 /** Aqua-mode order: no signature, receiver = maker, no hooks (MakerTraits.default()). */
-export function buildLeveeOrder(maker: Hex, quoter: Hex, params: LeveeParams): Order {
-  return Order.new({ maker: new Address(maker), traits: MakerTraits.default(), program: buildLeveeProgram(quoter, params) });
+export function buildLeveeOrder(maker: Hex, quoter: Hex, params: LeveeParams, guards?: LeveeGuards): Order {
+  return Order.new({ maker: new Address(maker), traits: MakerTraits.default(), program: buildLeveeProgram(quoter, params, guards) });
 }
 
 /** Aqua strategy hash = router.hash(order) for Aqua orders = keccak256(abi.encode(order)). */

@@ -8,7 +8,15 @@
 import { writeFileSync, mkdirSync } from "fs";
 import { getAddress, keccak256, toBytes } from "viem";
 import addresses from "../../config/addresses.json" with { type: "json" };
-import { buildLeveeOrder, buildLeveeProgram, encodeLeveeParams, sellPtTakerTraits, strategyHash, type LeveeParams } from "./levee.js";
+import {
+  buildLeveeOrder,
+  buildLeveeProgram,
+  encodeLeveeParams,
+  sellPtTakerTraits,
+  strategyHash,
+  type LeveeGuards,
+  type LeveeParams,
+} from "./levee.js";
 
 const label = (s: string) => getAddress(`0x${keccak256(toBytes(s)).slice(-40)}`);
 
@@ -33,6 +41,22 @@ const params: LeveeParams = {
 const order = buildLeveeOrder(maker, quoter, params);
 const built = order.build();
 
+const guards: LeveeGuards = {
+  rateGuard: label("levee-sdk-vector-rate-guard"),
+  rateGuardParams: {
+    sy: params.sy,
+    rateAtShip: 1_096_798n,
+    shipTimestamp: 1_787_632_115n,
+    maxDropBps: 0,
+    minElapsed: 3 * 86_400,
+    refYieldWad: params.refYieldWad,
+    maxYieldGapBps: 1000,
+  },
+  spendLimit: label("levee-sdk-vector-spend-limit"),
+  spendLimitParams: { shippedSy: params.shippedSy, windowSec: 12, minCapBps: 2000, horizonSec: 30 * 86_400, expiry: 1_796_860_800n },
+};
+const guardedOrder = buildLeveeOrder(maker, quoter, params, guards);
+
 const takerCases = [
   { name: "exactInMinOut", exactIn: true, threshold: 88_000n * 10n ** 18n, pullPtFromTaker: true },
   { name: "exactOutMaxIn", exactIn: false, threshold: 60_000n * 10n ** 6n, pullPtFromTaker: true },
@@ -54,6 +78,23 @@ const vectors = {
   orderTraits: `0x${built.traits.toString(16).padStart(64, "0")}`,
   orderData: built.data,
   strategyHash: strategyHash(order),
+  guarded: {
+    rateGuard: guards.rateGuard,
+    rateGuardParams: {
+      ...guards.rateGuardParams,
+      rateAtShip: guards.rateGuardParams.rateAtShip.toString(),
+      shipTimestamp: guards.rateGuardParams.shipTimestamp.toString(),
+      refYieldWad: guards.rateGuardParams.refYieldWad.toString(),
+    },
+    spendLimit: guards.spendLimit,
+    spendLimitParams: {
+      ...guards.spendLimitParams,
+      shippedSy: guards.spendLimitParams.shippedSy.toString(),
+      expiry: guards.spendLimitParams.expiry.toString(),
+    },
+    program: buildLeveeProgram(quoter, params, guards).toString(),
+    strategyHash: strategyHash(guardedOrder),
+  },
   taker: takerCases.map((c) => ({
     ...c,
     threshold: c.threshold.toString(),
