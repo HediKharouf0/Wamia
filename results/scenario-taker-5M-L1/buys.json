@@ -2,12 +2,43 @@
   {
     "afterLabel": "manip-11 ok",
     "block": "25829854",
-    "syAmount": "5000000000000000000000000",
-    "netPtOut": "5637901189471",
-    "effectivePrice": 0.8868548475694634,
+    "syAmount": "3346722290332126463131648",
+    "netPtOut": "3798675508681",
+    "effectivePriceSy": 0.881023473230067,
+    "effectivePriceAsset": 0.966304783391791,
+    "syRate": "1096798",
+    "sizingReason": "partial",
     "targetSpot": 0.9663083913706629,
     "earliestDeadlineSec": 9.187835466891665,
     "priceBeforeBuy": 0.9471957288355908,
-    "priceAfterBuy": 0.9718771120922112
+    "priceAfterBuy": 0.9654558478715938
+  },
+  {
+    "afterLabel": "backg-9 ok",
+    "block": "25829861",
+    "syAmount": "41809093177924997087232",
+    "netPtOut": "47459693388",
+    "effectivePriceSy": 0.8809389651155282,
+    "effectivePriceAsset": 0.9662120950607811,
+    "syRate": "1096798",
+    "sizingReason": "partial",
+    "targetSpot": 0.9663083913706629,
+    "earliestDeadlineSec": 0,
+    "priceBeforeBuy": 0.9654572418106248,
+    "priceAfterBuy": 0.9656135328387777
+  },
+  {
+    "afterLabel": "backg-10 REV",
+    "block": "25829865",
+    "syAmount": "1644897888890194493440",
+    "netPtOut": "1867180810",
+    "effectivePriceSy": 0.880952653369544,
+    "effectivePriceAsset": 0.9662271083104091,
+    "syRate": "1096798",
+    "sizingReason": "partial",
+    "targetSpot": 0.9663083913706629,
+    "earliestDeadlineSec": 0,
+    "priceBeforeBuy": 0.9656137781660765,
+    "priceAfterBuy": 0.9656199406452289
   }
 ]

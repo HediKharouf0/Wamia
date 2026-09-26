@@ -4,10 +4,13 @@
     "block": "25829854",
     "syAmount": "100000000000000000000000",
     "netPtOut": "115568069307",
-    "effectivePrice": 0.8652909112321993,
+    "effectivePriceSy": 0.8652909112321993,
+    "effectivePriceAsset": 0.9490493408576536,
+    "syRate": "1096798",
+    "sizingReason": "full-budget",
     "targetSpot": 0.9663083913706629,
     "earliestDeadlineSec": 9.187835466891665,
     "priceBeforeBuy": 0.9471957288355908,
-    "priceAfterBuy": 0.9483944145618379
+    "priceAfterBuy": 0.9483944418197205
   }
 ]
