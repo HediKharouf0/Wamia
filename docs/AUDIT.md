@@ -85,3 +85,15 @@ numbers or the pitch. "Fixed" items are already committed.
 20. The per-trade cap is stateless, so splitting a trade bypasses it. The real
     cap is the shipped SY. A per-hour limit needs storage written only in swap
     mode (planned v2).
+
+## Found by the taker rerun
+
+21. The risk model's target is a spot price (highest threatened liquidation
+    price + 5 bp), but the Morpho oracle is a TWAP. With the corrected sizing the
+    5M SY run holds spot at 0.9656, yet the oracle keeps falling to 0.9629
+    because it still averages the minutes spent near 0.947, so 11.2M of debt
+    is liquidated anyway. The old all-in buy only saved everyone by overshooting
+    to 0.9719. A reactive buyer must push spot above the target to pull the
+    average back up, or act earlier. The maker design attacks this directly:
+    a standing bid fills after every manipulator trade, so spot never sits low
+    long enough to drag the average down.
