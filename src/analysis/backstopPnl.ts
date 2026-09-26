@@ -1,55 +1,70 @@
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync, existsSync } from "fs";
 import { archive } from "../chain/client.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { tauFromTimestamps } from "../pricing/fairValue.js";
+import { exchangeRateAbi, syToAsset } from "../pricing/units.js";
 
-const exchangeRateAbi = [
-  { type: "function", name: "exchangeRate", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
-] as const;
+// SY-reUSD: 18 decimals; reUSD and PT: 6 decimals. All profit is measured in reUSD.
+const SY_DECIMALS = 18;
+const ASSET_DECIMALS = 6;
+const FAIR_AT_T0 = 0.971; // PT spot at the fork block, reUSD per PT
+const ATTACK_TS = 1787632667; // first liquidation on mainnet, used for time to maturity
+
+const pct = (x: number) => `${x >= 0 ? "+" : ""}${(x * 100).toFixed(2)}%`;
+
+async function rateFor(buy: any): Promise<bigint> {
+  if (buy.syRate) return BigInt(buy.syRate);
+  // Older runs did not record the rate. Fork block numbers overlap mainnet, so this reads
+  // mainnet at the same height, which is within seconds of the fork state. Close enough for
+  // a rate that moves by ~1e-7 per minute, but new runs record the exact value.
+  const syToken = addresses.pendle.sy as `0x${string}`;
+  return archive.readContract({ address: syToken, abi: exchangeRateAbi, functionName: "exchangeRate", blockNumber: BigInt(buy.block) });
+}
 
 async function main() {
-  const scenarios = ["taker-100k-L1", "taker-2M-L1", "taker-5M-L1"];
-  const syToken = addresses.pendle.sy as `0x${string}`;
   const expirySeconds = Math.floor(new Date(addresses.pendle.expiry).getTime() / 1000);
+  const tau = tauFromTimestamps(ATTACK_TS, expirySeconds);
+  const annualize = (r: number) => Math.pow(1 + r, 1 / tau) - 1;
 
-  for (const label of scenarios) {
+  const labels = existsSync("results")
+    ? readdirSync("results").filter((d) => d.startsWith("scenario-taker-")).map((d) => d.slice("scenario-".length))
+    : [];
+
+  for (const label of labels) {
     const buys: any[] = JSON.parse(readFileSync(`results/scenario-${label}/buys.json`, "utf8"));
     if (buys.length === 0) {
-      console.log(`${label}: no buys, skipping`);
+      console.log(`\n=== ${label} === no buys`);
       continue;
     }
 
     console.log(`\n=== ${label} ===`);
-    let totalSySpent = 0n;
-    let totalPtReceived = 0n;
+    let totalCost = 0; // reUSD
+    let totalPt = 0;
 
     for (const b of buys) {
       const syAmount = BigInt(b.syAmount);
-      const netPtOut = BigInt(b.netPtOut);
-      totalSySpent += syAmount;
-      totalPtReceived += netPtOut;
-      
-      const rate = await archive.readContract({ address: syToken, abi: exchangeRateAbi, functionName: "exchangeRate", blockNumber: BigInt(b.block) });
-      const syInUnderlying = (Number(syAmount) / 1e18) * (Number(rate) / 1e6);
-      const ptReceived = Number(netPtOut) / 1e6;
+      const rate = await rateFor(b);
+      const cost = syToAsset(syAmount, rate, SY_DECIMALS, ASSET_DECIMALS);
+      const pt = Number(BigInt(b.netPtOut)) / 10 ** ASSET_DECIMALS;
+      totalCost += cost;
+      totalPt += pt;
 
-      console.log(`  buy at block ${b.block}: spent ${(Number(syAmount) / 1e18).toFixed(2)} SY (~${syInUnderlying.toFixed(2)} underlying), got ${ptReceived.toFixed(2)} PT`);
-      console.log(`    effective price paid: ${b.effectivePrice.toFixed(4)}, market fair value at t0: 0.9710`);
-
-      const holdToMaturityProfit = ptReceived - syInUnderlying;
-      console.log(`    hold-to-maturity profit: ${holdToMaturityProfit >= 0 ? "+" : ""}${holdToMaturityProfit.toFixed(2)} underlying (${((holdToMaturityProfit / syInUnderlying) * 100).toFixed(2)}%)`);
-
-      const markToMarketValue = ptReceived * 0.971;
-      const markToMarketProfit = markToMarketValue - syInUnderlying;
-      console.log(`    mark-to-market profit (PT priced at 0.9710): ${markToMarketProfit >= 0 ? "+" : ""}${markToMarketProfit.toFixed(2)} underlying (${((markToMarketProfit / syInUnderlying) * 100).toFixed(2)}%)`);
+      const hold = (pt - cost) / cost;
+      const mtm = (pt * FAIR_AT_T0 - cost) / cost;
+      console.log(
+        `  buy at block ${b.block}: ${(Number(syAmount) / 1e18).toFixed(2)} SY = ${cost.toFixed(2)} reUSD -> ${pt.toFixed(2)} PT ` +
+          `(paid ${(cost / pt).toFixed(4)} reUSD/PT, fair ${FAIR_AT_T0})`
+      );
+      console.log(`    hold to maturity: ${pct(hold)} (${pct(annualize(hold))} annualized), mark to market at fair: ${pct(mtm)}`);
     }
 
-    const tau = tauFromTimestamps(1787632667, expirySeconds); // approx attack-time timestamp
-    const totalSyInUnderlying = Number(totalSySpent) / 1e18;
-    const totalPt = Number(totalPtReceived) / 1e6;
-    const totalReturn = (totalPt - totalSyInUnderlying) / totalSyInUnderlying;
-    const annualized = Math.pow(1 + totalReturn, 1 / tau) - 1;
-    console.log(`  TOTAL: ${totalReturn >= 0 ? "+" : ""}${(totalReturn * 100).toFixed(2)}% over ${(tau * 365).toFixed(0)} days -> ${(annualized * 100).toFixed(1)}% annualized`);
+    const hold = (totalPt - totalCost) / totalCost;
+    const mtm = (totalPt * FAIR_AT_T0 - totalCost) / totalCost;
+    console.log(
+      `  TOTAL: ${totalCost.toFixed(2)} reUSD -> ${totalPt.toFixed(2)} PT | hold to maturity ${pct(hold)} over ` +
+        `${(tau * 365).toFixed(0)} days (${pct(annualize(hold))} annualized; fair-value buyers earn ~10.58%) | ` +
+        `mark to market ${pct(mtm)}`
+    );
   }
 }
 

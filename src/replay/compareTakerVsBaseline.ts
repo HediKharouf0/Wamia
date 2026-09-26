@@ -12,7 +12,7 @@ async function main() {
 
   const results = [];
   for (const { label, capital } of capitalLevels) {
-    console.log(`\n=== Running taker with $${capital.toLocaleString()}, latency 1 ===`);
+    console.log(`\n=== Running taker with ${capital.toLocaleString()} SY (~1.0968 reUSD each), latency 1 ===`);
     const result = await runTakerScenario({ latencyBlocks: 1, capitalSy: capital * 10n ** 18n, label });
     results.push({ label, capital, ...result });
   }
@@ -27,7 +27,7 @@ async function main() {
     const debtDeltaUsdc = baseline.peakDebtUsdc - r.peakDebtUsdc;
     const debtDeltaUsdt = baseline.peakDebtUsdt - r.peakDebtUsdt;
     console.log(
-      `${r.label}: spent $${(Number(r.totalSpent) / 1e18).toLocaleString()}, oracle min ${r.minOracle.toFixed(4)}, ` +
+      `${r.label}: spent ${(Number(r.totalSpent) / 1e18).toLocaleString()} SY, oracle min ${r.minOracle.toFixed(4)}, ` +
       `USDC ${r.peakLiqUsdc} pos / $${(r.peakDebtUsdc / 1e6).toLocaleString()} (saved $${(debtDeltaUsdc / 1e6).toLocaleString()}), ` +
       `USDT ${r.peakLiqUsdt} pos / $${(r.peakDebtUsdt / 1e6).toLocaleString()} (saved $${(debtDeltaUsdt / 1e6).toLocaleString()})`
     );

@@ -6,7 +6,7 @@ import { readPendleSnapshot } from "../snapshot/pendle.js";
 import { readMorphoSnapshot } from "../snapshot/morpho.js";
 import { dealErc20AtSlot } from "./dealErc20.js";
 import { buyPt, getTokenDecimals } from "../strategies/taker.js";
-import { decideAndSizeBuy } from "../strategies/binarySearch.js";
+import { decideAndSizeBuy } from "../strategies/sizing.js";
 import { assessRisk } from "../strategies/riskModel.js";
 import addresses from "../../config/addresses.json" with { type: "json" };
 import { getAddress, keccak256, toBytes, encodeFunctionData } from "viem";
@@ -121,11 +121,16 @@ export async function runTakerScenario(config: TakerRunConfig) {
     if (risk.earliestDeadlineSec > REACTION_SEC * 2 || remainingCapital <= 0n) return;
 
     const sizingStartMs = Date.now();
-    const sizing = await decideAndSizeBuy(fork, router, market, buyer, risk.targetSpot, remainingCapital, decimals);
-    console.log(`    [timing ${afterLabel}] sizing quote took ${Date.now() - sizingStartMs}ms`);
+    const sizing = await decideAndSizeBuy(
+      fork, router, market, syToken, buyer, risk.targetSpot, snap.ptSpotPrice, remainingCapital, decimals
+    );
+    console.log(`    [timing ${afterLabel}] sizing (${sizing.quotes} quotes) took ${Date.now() - sizingStartMs}ms`);
 
     if (sizing.syAmount === 0n) {
-      console.log(`    [skip ${afterLabel}] full-budget price ${sizing.effectivePrice.toFixed(6)} exceeds target ${risk.targetSpot.toFixed(6)} — not buying`);
+      console.log(
+        `    [skip ${afterLabel}] ${sizing.reason}: avg price ${sizing.effectivePriceAsset.toFixed(6)} reUSD/PT, ` +
+        `spot ${snap.ptSpotPrice.toFixed(6)}, target ${risk.targetSpot.toFixed(6)}`
+      );
       return;
     }
 
@@ -137,7 +142,8 @@ export async function runTakerScenario(config: TakerRunConfig) {
     const after = await readPendleSnapshot(fork, market, receipt.blockNumber);
 
     console.log(
-      `  [buy after ${afterLabel}] spent ${(Number(sizing.syAmount) / 10 ** decimals.sy).toFixed(2)} SY, ` +
+      `  [buy after ${afterLabel}] ${sizing.reason}: spent ${(Number(sizing.syAmount) / 10 ** decimals.sy).toFixed(2)} SY ` +
+      `at ${sizing.effectivePriceAsset.toFixed(4)} reUSD/PT (target ${risk.targetSpot.toFixed(4)}), ` +
       `PT spot ${snap.ptSpotPrice.toFixed(4)} -> ${after.ptSpotPrice.toFixed(4)}, remaining capital ${(Number(remainingCapital) / 10 ** decimals.sy).toFixed(2)} SY`
     );
     buys.push({
@@ -145,7 +151,10 @@ export async function runTakerScenario(config: TakerRunConfig) {
       block: receipt.blockNumber.toString(),
       syAmount: sizing.syAmount.toString(),
       netPtOut: sizing.netPtOut.toString(),
-      effectivePrice: sizing.effectivePrice,
+      effectivePriceSy: sizing.effectivePriceSy,
+      effectivePriceAsset: sizing.effectivePriceAsset,
+      syRate: sizing.syRate.toString(),
+      sizingReason: sizing.reason,
       targetSpot: risk.targetSpot,
       earliestDeadlineSec: risk.earliestDeadlineSec,
       priceBeforeBuy: snap.ptSpotPrice,
