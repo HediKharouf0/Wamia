@@ -53,6 +53,7 @@ const TICK_SECONDS = 60;
 const POST_TICKS = 30;
 const MAX_ARB_ROUNDS = 10;
 const SPEND_WINDOW_SEC = 12; // LeveeSpendLimit window in the demo guards (one mainnet block)
+const MAX_SPEND_RETRIES = 100; // safety stop for the loop after the last event
 const FAIR_AT_T0 = 0.971; // PT spot at the fork block, USD per PT
 const EXTRA_PUSH_CHUNK = 50_000n * 10n ** 18n; // the manipulator's largest trade
 const ARB = {
@@ -159,7 +160,8 @@ export async function runMakerScenario(config: MakerRunConfig) {
 
   // 3. The searcher's backrun.
   const delay = config.latencyBlocks === 0 ? 1 : 12;
-  let pending: { dueTs: number; after: string } | null = null;
+  /** `newWindow`: a retry after the spend limit, which must first reach the next spending window. */
+  let pending: { dueTs: number; after: string; newWindow?: boolean } | null = null;
   let stopReason = "";
 
   /**
@@ -169,9 +171,21 @@ export async function runMakerScenario(config: MakerRunConfig) {
    * the next scheduled transaction.
    */
   async function runArb(ts: number, limitTs: number) {
-    const after = pending!.after;
+    const { after, newWindow } = pending!;
     pending = null;
     stopReason = "";
+    if (newWindow) {
+      // The searcher simulates with eth_call on the latest block, so that block must already be in
+      // the new window, or it keeps seeing the old window's spending. Mine an empty one there first.
+      block = await mineEmptyBlockAt(fork, ts);
+      lastTs = ts;
+      points.push(await measurePoint(fork, "tick", block, positions));
+      ts++;
+      if (ts >= limitTs) {
+        pending = { dueTs: ts, after };
+        return;
+      }
+    }
     for (let round = 1; round <= MAX_ARB_ROUNDS && ts < limitTs; round++, ts++) {
       if (!(await arbRound(ts, after, round))) break;
     }
@@ -179,7 +193,7 @@ export async function runMakerScenario(config: MakerRunConfig) {
     if (stopReason.startsWith("SpendLimitExceeded") && !pending) {
       const next = (Math.floor(lastTs / SPEND_WINDOW_SEC) + 1) * SPEND_WINDOW_SEC;
       console.log(`    [spend limit reached after ${after}] searcher retries next block (t+${next - lastTs} s)`);
-      pending = { dueTs: next, after };
+      pending = { dueTs: next, after, newWindow: true };
     }
   }
 
@@ -302,7 +316,11 @@ export async function runMakerScenario(config: MakerRunConfig) {
       pending = { dueTs: ts + delay, after: label };
     }
   }
-  if (pending) await runArb(Math.max((pending as { dueTs: number }).dueTs, lastTs + 1), Infinity);
+  // After the last event, keep going while the spend limit sends the searcher to the next block.
+  const pendingArb = () => pending as { dueTs: number } | null;
+  for (let retries = 0; pendingArb() && retries < MAX_SPEND_RETRIES; retries++) {
+    await runArb(Math.max(pendingArb()!.dueTs, lastTs + 1), Infinity);
+  }
 
   for (let k = 0; k < POST_TICKS; k++) {
     lastTs += TICK_SECONDS;
