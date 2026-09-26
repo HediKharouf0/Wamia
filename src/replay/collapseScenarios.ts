@@ -283,7 +283,10 @@ async function main() {
   const expected = { control: true, switchoff: true, run: false, loss: false, jump: false } as Record<string, boolean>;
   const ok = results.every((r) => r.bought === expected[r.case]);
   mkdirSync("results", { recursive: true });
-  if (only.length === 0) writeFileSync("results/collapse-scenarios.json", JSON.stringify(results, null, 2));
+  if (only.length === 0) {
+    mkdirSync("results/collapse-scenarios", { recursive: true });
+    writeFileSync("results/collapse-scenarios/summary.json", JSON.stringify(results, null, 2));
+  }
   console.log(ok ? `\nAll ${results.length} case(s) behaved as designed.` : "\nUNEXPECTED: a case did not behave as designed.");
   if (!ok) process.exit(1);
 }

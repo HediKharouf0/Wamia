@@ -28,18 +28,18 @@ UI, real commit history.
   `results/maker-results.md`.
 - Genuine-collapse scenarios (spec 7.6 step 6): switch-off attempt, run on
   reUSD, vault loss, news repricing. All five cases behave as designed
-  (`results/collapse-scenarios.json`).
+  (`results/collapse-scenarios/summary.json`).
 - Root README with the numbers and the limitations.
+- Repo cleanup: removed `scenario-test-*`, raw replay logs, `fixtures/scratch/`,
+  the two legacy filtered-tx fixtures, and `scripts/replay.sh`; merged
+  `config/scenario.json` into `config/addresses.json`; dropped the unused
+  `decideTakerAction`/`TakerTrigger` from `strategies/taker.ts`.
 
 ## Left before submission
 
 1. Make the repo public; LICENSE.
-2. Clean `results/` (raw replay logs, `scenario-test-*`, untracked sweep dirs)
-   and legacy fixtures (`attacker_txs_filtered.json`,
-   `liquidator_txs_filtered.json`, `scripts/replay.sh`); merge
-   `config/scenario.json` into `config/addresses.json`.
-3. Finish `FEEDBACK.md`.
-4. Record the demo.
+2. Finish `FEEDBACK.md`.
+3. Record the demo.
 
 ## Future work (spec v2, not built)
 

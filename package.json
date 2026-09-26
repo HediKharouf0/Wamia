@@ -13,7 +13,8 @@
     "app": "vite --config app/vite.config.ts",
     "app:build": "vite build --config app/vite.config.ts",
     "app:hosted": "WAMIA_HOSTED=1 vite build --config app/vite.config.ts",
-    "app:server": "tsx src/app/server.ts"
+    "app:server": "tsx src/app/server.ts",
+    "results:readmes": "tsx src/replay/writeRunReadmes.ts"
   },
   "repository": {
     "type": "git",
