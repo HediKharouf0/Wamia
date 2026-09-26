@@ -19,10 +19,15 @@ const params: LeveeParams = {
   pt: getAddress(addresses.pendle.pt),
   sy: getAddress(addresses.pendle.sy),
   market: getAddress(addresses.pendle.market),
+  curvePool: getAddress(addresses.reusdMarketPrice.curvePool),
   refYieldWad: 105_830_000_000_000_000n,
-  discountBps: 10,
-  maxPtPerTrade: 5_000_000n * 10n ** 6n,
+  discountMinBps: 10,
+  discountMaxBps: 60,
+  shippedSy: 5_000_000n * 10n ** 18n,
   minSyRate: 1_085_832n,
+  maxDepegBps: 100,
+  maxDeviationBps: 450,
+  flags: 0,
 };
 
 const order = buildLeveeOrder(maker, quoter, params);
@@ -41,7 +46,7 @@ const vectors = {
   params: {
     ...params,
     refYieldWad: params.refYieldWad.toString(),
-    maxPtPerTrade: params.maxPtPerTrade.toString(),
+    shippedSy: params.shippedSy.toString(),
     minSyRate: params.minSyRate.toString(),
   },
   encodedParams: encodeLeveeParams(params),

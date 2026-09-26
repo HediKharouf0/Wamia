@@ -1,8 +1,8 @@
 /**
  * End-to-end Levee flow through the 1inch SDKs, on a local Anvil chain (no fork, no RPC key):
  * deploys Aqua v1.0.0, AquaSwapVMRouter v1.0.2, LeveeQuoter and mock PT/SY/market from the
- * Foundry build, then ships a strategy, quotes and swaps a PT sale, shows the depeg stop and
- * docks. Every step is a real transaction.
+ * Foundry build, then ships a strategy, quotes and swaps a PT sale, shows the exchange-rate and
+ * market-depeg stops, and docks. Every step is a real transaction.
  *
  *   (cd contracts && forge build) && npx tsx src/aqua/localDemo.ts
  *
@@ -43,6 +43,7 @@ const erc20 = parseAbi([
   "function balanceOf(address) view returns (uint256)",
   "function mint(address,uint256)",
   "function setExchangeRate(uint256)",
+  "function set(uint256,uint256)",
 ]);
 
 function artifact(file: string, name: string): { abi: Abi; bytecode: Hex } {
@@ -68,7 +69,7 @@ async function deploy(from: Hex, file: string, name: string, args: unknown[] = [
 const call = (from: Hex, c: CallInfo) => client.call({ account: from, to: c.to, data: c.data });
 const balance = (token: Hex, who: Hex) =>
   client.readContract({ address: token, abi: erc20, functionName: "balanceOf", args: [who] });
-const write = (from: Hex, to: Hex, functionName: "approve" | "mint" | "setExchangeRate", args: any[]) =>
+const write = (from: Hex, to: Hex, functionName: "approve" | "mint" | "setExchangeRate" | "set", args: any[]) =>
   send(from, { to, data: encodeFunctionData({ abi: erc20, functionName, args } as any) });
 
 async function startAnvil() {
@@ -98,6 +99,7 @@ async function main() {
     const pt = await deploy(deployer, "Mocks.sol", "MockToken", ["PT", 6]);
     const sy = await deploy(deployer, "Mocks.sol", "MockSY", [1_096_800n]);
     const market = await deploy(deployer, "Mocks.sol", "MockPendleMarket", [EXPIRY, sy, pt]);
+    const curve = await deploy(deployer, "Mocks.sol", "MockCurvePool");
     console.log(`deployed Aqua ${aqua}, router ${router}, quoter ${quoter}`);
 
     // LP: approve Aqua once, ship a strategy built with the SDK.
@@ -107,10 +109,15 @@ async function main() {
       pt,
       sy,
       market,
+      curvePool: curve,
       refYieldWad: 105_830_000_000_000_000n,
-      discountBps: 10,
-      maxPtPerTrade: 5_000_000n * 10n ** 6n,
+      discountMinBps: 10,
+      discountMaxBps: 60,
+      shippedSy: 500_000n * 10n ** 18n,
       minSyRate: 1_090_000n,
+      maxDepegBps: 100,
+      maxDeviationBps: 450,
+      flags: 0,
     };
     const order = buildLeveeOrder(lp, quoter, params);
     await send(lp, shipTx(aqua, router, order, sy, pt, 500_000n * 10n ** 18n));
@@ -143,12 +150,18 @@ async function main() {
     console.log(`after SY rate drop to 1.05: quote ${refused ? "refused" : "ACCEPTED (unexpected)"}`);
     await write(deployer, sy, "setExchangeRate", [1_096_800n]);
 
+    // Market depeg: reUSD trades 2% below NAV on Curve while the exchange rate stays put.
+    await write(deployer, curve, "set", [1_020_000_000_000_000_000n, 1_000_000_000_000_000_000n]);
+    const runRefused = await call(taker, quoteSellPtTx(router, order, pt, sy, 1_000n * 10n ** 6n)).then(() => false, () => true);
+    console.log(`after reUSD falls 2% below NAV on Curve: quote ${runRefused ? "refused" : "ACCEPTED (unexpected)"}`);
+    await write(deployer, curve, "set", [10n ** 18n, 10n ** 18n]);
+
     // Dock: the LP withdraws the strategy, no more fills.
     await send(lp, dockTx(aqua, router, order, sy, pt));
     const docked = await call(taker, quoteSellPtTx(router, order, pt, sy, 1_000n * 10n ** 6n)).then(() => false, () => true);
     console.log(`after dock: quote ${docked ? "refused" : "ACCEPTED (unexpected)"}`);
 
-    if (!refused || !docked) throw new Error("risk checks did not hold");
+    if (!refused || !runRefused || !docked) throw new Error("risk checks did not hold");
     console.log("\nLocal SDK end-to-end passed.");
   } finally {
     anvil.kill();

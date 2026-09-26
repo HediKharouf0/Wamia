@@ -21,21 +21,39 @@ import { AquaProtocolContract, Address as AquaAddress, HexString as AquaHexStrin
 
 type Hex = `0x${string}`;
 
-/** Same fields and packing as LeveeQuoter.Params (102 bytes). */
+/** Same fields and packing as LeveeQuoter.Params (129 bytes). */
 export type LeveeParams = {
   pt: Hex;
   sy: Hex;
   market: Hex;
+  curvePool: Hex; // Curve StableSwap-NG pool pricing the underlying vs its NAV; zero address disables the depeg stop
   refYieldWad: bigint; // e.g. 105830000000000000n for 10.583%
-  discountBps: number; // e.g. 10 = 0.10% below fair
-  maxPtPerTrade: bigint; // PT raw units
+  discountMinBps: number; // discount when the backstop is untouched, e.g. 10
+  discountMaxBps: number; // discount when it is fully used, e.g. 60
+  shippedSy: bigint; // SY shipped to Aqua for this strategy (raw)
   minSyRate: bigint; // SY.exchangeRate() floor
+  maxDepegBps: number; // underlying at most this far below NAV, e.g. 100
+  maxDeviationBps: number; // Pendle spot at most this far below fair, e.g. 450
+  flags: number; // 1 if the underlying is coins[1] in the Curve pool
 };
 
 export function encodeLeveeParams(p: LeveeParams): Hex {
   return encodePacked(
-    ["address", "address", "address", "uint64", "uint16", "uint128", "uint128"],
-    [p.pt, p.sy, p.market, p.refYieldWad, p.discountBps, p.maxPtPerTrade, p.minSyRate]
+    ["address", "address", "address", "address", "uint64", "uint16", "uint16", "uint128", "uint128", "uint16", "uint16", "uint8"],
+    [
+      p.pt,
+      p.sy,
+      p.market,
+      p.curvePool,
+      p.refYieldWad,
+      p.discountMinBps,
+      p.discountMaxBps,
+      p.shippedSy,
+      p.minSyRate,
+      p.maxDepegBps,
+      p.maxDeviationBps,
+      p.flags,
+    ]
   );
 }
 
