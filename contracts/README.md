@@ -17,6 +17,8 @@ Levee strategies are Aqua-shipped SwapVM orders whose program is a single
   enforces the rules below. Stateless, so quote and swap always agree.
 - `src/LeveeOrders.sol`: builds the maker order and taker data with
   swap-vm's own `MakerTraitsLib` / `TakerTraitsLib`.
+- `src/LeveeRateGuard.sol`, `src/LeveeSpendLimit.sol`: the v2 rules (spec 7.4) as
+  separate Extruction steps an LP can add around the quoter (see "Guards").
 - `src/LeveeArb.sol`: zero-capital arbitrage. Sells PT to Levee strategies
   and, inside the router's `preTransferInCallback`, buys that PT back on
   Pendle with the SY it just received. The searcher needs no inventory.
@@ -44,6 +46,30 @@ All from maker parameters, onchain reads and block time, never from taker data:
    never pays the taker more in total.
 7. Never pay more SY than the strategy holds. The shipped SY is the only cap;
    a per-trade cap would be pointless since trades can be split.
+
+## Guards (v2 rules, optional)
+
+Each is its own Extruction step, so an LP composes them in the program:
+
+```
+[Extruction → LeveeRateGuard] [Extruction → LeveeQuoter] [Extruction → LeveeSpendLimit]
+```
+
+- `LeveeRateGuard` (before pricing): refuses if SY's exchange rate drops below the
+  highest rate this strategy has seen (the rate should only grow), and, once
+  `minElapsed` has passed since ship, if reUSD's realized yield since then
+  exceeds the reference rate by more than `maxYieldGapBps` (PT would then be
+  worth less than Levee's fair value).
+- `LeveeSpendLimit` (after pricing, so it sees the SY paid): at most
+  `minCapBps` of the shipped SY per `windowSec` (12 s = one block), growing
+  linearly to 100% over the last `horizonSec` before maturity. A pricing bug or
+  an undetected real collapse cannot empty the strategy in one block.
+
+Both keep state keyed by the router-provided order hash and write it only in
+swap mode and only when called by the router: quotes never move it, and nobody
+can burn a strategy's budget or set its high-water mark from outside. The SDK
+builds the same program (`buildLeveeProgram(quoter, params, guards)`), checked
+byte for byte by `SdkParity.t.sol`.
 
 ## Program and order
 
@@ -76,6 +102,8 @@ forge test --mc LeveeArbForkTest -vv
 - `LeveeAquaLocal.t.sol`: deploys Aqua v1.0.0 and AquaSwapVMRouter v1.0.2 from
   their release tags and runs ship, quote, swap, dock with real transfers.
 - `LeveeArb.t.sol`: the zero-capital arbitrage against a mock Pendle router.
+- `LeveeGuards.t.sol`: each guard called the way the router calls it, and the
+  three-step program traded end to end through the official router.
 - `fork/LeveeFork.t.sol`: the same flow on the deployed contracts with real
   PT/SY, plus checks against Pendle's and Curve's own state (including a
   reUSD depeg on Curve making the quote refuse).
