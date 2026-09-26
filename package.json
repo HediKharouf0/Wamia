@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "P1nch: a liquidity backstop for Pendle PT markets on 1inch Aqua and SwapVM",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p app/tsconfig.json",
     "test": "tsx src/pricing/fairValue.test.ts && tsx src/pricing/units.test.ts && tsx src/strategies/sizing.test.ts && tsx src/strategies/searcher.test.ts",
     "sdk:vectors": "tsx src/aqua/exportSdkVectors.ts",
     "demo:local": "tsx src/aqua/localDemo.ts",
     "scenario:maker": "tsx src/replay/compareMaker.ts",
-    "scenario:collapse": "tsx src/replay/collapseScenarios.ts"
+    "scenario:collapse": "tsx src/replay/collapseScenarios.ts",
+    "app:data": "tsx src/app/buildReplayData.ts",
+    "app": "vite --config app/vite.config.ts",
+    "app:build": "vite build --config app/vite.config.ts",
+    "app:hosted": "P1NCH_HOSTED=1 vite build --config app/vite.config.ts"
   },
   "repository": {
     "type": "git",
@@ -29,8 +33,15 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vite-plugin-singlefile": "^2.3.3"
   },
   "type": "module"
 }

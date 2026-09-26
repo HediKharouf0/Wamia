@@ -7,3 +7,5 @@ raw-data/
 dist/
 # per-invocation sweep summaries (overwritten by each run); see results/maker-results.*
 results/maker-sweep-*.json
+app/dist/
+app/dist-hosted/
