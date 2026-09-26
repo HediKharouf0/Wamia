@@ -89,6 +89,8 @@ contract LeveeQuoter is IExtruction {
     /// @return syRate  SY.exchangeRate() used for the conversion
     function bidPrice(Params memory p) public view returns (uint256 fairWad, uint256 bidWad, uint256 syRate) {
         uint256 expiry = IPMarketLike(p.market).expiry();
+        // A validator can shift the timestamp by seconds; irrelevant against a maturity date.
+        // forge-lint: disable-next-line(block-timestamp)
         require(block.timestamp < expiry, MarketExpired(expiry));
 
         syRate = IStandardizedYieldLike(p.sy).exchangeRate();
@@ -102,6 +104,8 @@ contract LeveeQuoter is IExtruction {
     /// @dev Layout: [opcode 1 byte][args length 1 byte][this contract 20 bytes][params 102 bytes].
     function program(Params memory p) external view returns (bytes memory) {
         bytes memory params = encodeParams(p);
+        // Safe: params are always PARAMS_LENGTH (102) bytes, so the length is 122.
+        // forge-lint: disable-next-line(unsafe-typecast)
         return abi.encodePacked(EXTRUCTION_OPCODE, uint8(20 + params.length), address(this), params);
     }
 

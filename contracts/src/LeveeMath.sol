@@ -25,6 +25,8 @@ library LeveeMath {
 
     /// @notice ln(1 + y), the form Pendle stores as `lnImpliedRate`.
     function lnImpliedRate(uint256 yieldWad) internal pure returns (uint256) {
+        // Safe: yieldWad is a uint64 in practice, so WAD + yieldWad fits int256, and ln(x >= 1) >= 0.
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint256(FPM.lnWad(int256(WAD + yieldWad)));
     }
 
@@ -33,6 +35,8 @@ library LeveeMath {
     function ptPriceFromLnRate(uint256 lnRateWad, uint256 secondsToExpiry) internal pure returns (uint256) {
         if (secondsToExpiry == 0) return WAD;
         uint256 exponent = FPM.mulDivUp(lnRateWad, secondsToExpiry, ONE_YEAR);
+        // Safe: exponent = ln(1+y) * t / year is far below 2^255, and exp(-x) is always >= 0.
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint256(FPM.expWad(-int256(exponent)));
     }
 
