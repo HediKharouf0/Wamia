@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HediKharouf0/wamia.git"
+    "url": "git+https://github.com/HediKharouf0/p1nch.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/HediKharouf0/wamia/issues"
+    "url": "https://github.com/HediKharouf0/p1nch/issues"
   },
-  "homepage": "https://github.com/HediKharouf0/wamia#readme",
+  "homepage": "https://github.com/HediKharouf0/p1nch#readme",
   "dependencies": {
     "@1inch/aqua-sdk": "0.3.4",
     "@1inch/swap-vm-sdk": "0.4.4",

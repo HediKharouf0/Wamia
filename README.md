@@ -110,7 +110,7 @@ On the fork, ship, dock, the attacker's push and the searcher's arbs are real tr
 Requirements: Node 20+, Foundry, and a mainnet archive RPC for the fork parts.
 
 ```bash
-git clone --recurse-submodules https://github.com/HediKharouf0/wamia.git && cd wamia
+git clone --recurse-submodules https://github.com/HediKharouf0/p1nch.git && cd p1nch
 npm install
 cp .env.example .env            # set ARCHIVE_RPC_URL
 
